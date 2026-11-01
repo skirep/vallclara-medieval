@@ -21,6 +21,11 @@ export function createGraphics(renderer,scene,camera){
       composer=new EffectComposer(renderer);
       composer.addPass(new RenderPass(scene,camera));
       ao=new SSAOPass(scene,camera,size.x,size.y,16);
+      // A normal override material ignores a sprite's cutout and would create
+      // rectangular AO ghosts. Keep billboards out of the normal/depth prepass;
+      // they are already present in RenderPass with proper alpha and occlusion.
+      const overrideVisibility=ao._overrideVisibility.bind(ao);
+      ao._overrideVisibility=()=>{overrideVisibility();scene.traverse(o=>{if(o.userData.spriteBillboard&&o.visible){o.visible=false;ao._visibilityCache.push(o);}});};
       ao.kernelRadius=1.1;ao.minDistance=.0004;ao.maxDistance=.018;
       composer.addPass(ao);
       fxaa=new ShaderPass(FXAAShader);composer.addPass(fxaa);
