@@ -13,7 +13,7 @@ Poble medieval explorable de Dejoco Arts, construït amb Three.js r180. Primera 
 
 ## Executar
 
-Requisits: Node 22, Python 3, Bash i curl. No requereix npm install.
+Requisits: Node 22, Bash i curl. No requereix npm install.
 
 ```sh
 bash scripts/fetch-assets.sh

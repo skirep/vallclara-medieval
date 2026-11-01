@@ -21,10 +21,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify simulation
-        run: npm test
       - name: Fetch pinned Three.js and CC0 photographic materials
         run: bash scripts/fetch-assets.sh
+      - name: Verify simulation, geometry and navigation
+        run: npm test
       - name: Prepare clean static artifact
         run: |
           mkdir _site
