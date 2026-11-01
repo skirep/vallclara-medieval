@@ -1,9 +1,26 @@
+import {familiesOf,relationLabel} from './families.js';
 import * as T from 'three';
 export function createChronicles(population,social,{onOpen,onClose}){
   const $=s=>document.querySelector(s),dialog=$('#chronicles'),list=$('#resident-list'),bio=$('#biography'),byId=new Map(population.map(p=>[p.id,p])),projected=new T.Vector3(),bubbles=new Map();let selected=0,lastSpoken='',lastSpokenAt=0;
   const text=(tag,value,className='')=>{const el=document.createElement(tag);el.textContent=value;if(className)el.className=className;return el;};
-  function showBio(id){selected=id;const p=byId.get(id);bio.replaceChildren(text('span',p.job.toUpperCase(),'eyebrow'),text('h3',p.name),text('p',p.story.biography));const dl=document.createElement('dl');for(const [label,value]of [['Objectiu',p.story.wish],['Preocupació',p.story.worry],['Record estimat',p.story.keepsake],['Amistat',byId.get(p.story.friendId).name],['Vincle familiar',byId.get(p.story.kinId).name],['Trobades',String(p.social.meetings)]]){dl.append(text('dt',label),text('dd',value));}bio.append(dl);list.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.id)===id)));}
-  function renderPeople(){const query=$('#searchPerson').value.toLocaleLowerCase('ca');list.replaceChildren();const visible=population.filter(p=>[p.name,p.job,p.story.origin].join(' ').toLocaleLowerCase('ca').includes(query));for(const p of visible){const button=text('button','');button.type='button';button.dataset.id=p.id;button.setAttribute('aria-pressed',String(p.id===selected));button.append(text('strong',p.name),text('small',`${p.job} · ${p.age} anys`));button.onclick=()=>showBio(p.id);list.append(button);}if(!visible.length)list.append(text('p','No s’ha trobat cap habitant.'));}
+  const familyFilter=$('#familyFilter');
+  for(const family of familiesOf(population)){const option=text('option',`${family.surname} · casa ${family.household}`);option.value=family.id;familyFilter.append(option);}
+  familyFilter.onchange=()=>renderPeople();
+  function showBio(id){selected=id;const p=byId.get(id);bio.replaceChildren(text('span',p.job.toUpperCase(),'eyebrow'),text('h3',p.name),text('p',p.story.biography));const dl=document.createElement('dl');for(const [label,value]of [['Objectiu',p.story.wish],['Preocupació',p.story.worry],['Record estimat',p.story.keepsake],['Amistat',byId.get(p.story.friendId).name],['Vincle familiar',byId.get(p.story.kinId).name],['Trobades',String(p.social.meetings)]]){dl.append(text('dt',label),text('dd',value));}bio.append(dl);
+    const familyBox=document.createElement('section');familyBox.className='family-members';familyBox.append(text('h4',`Família ${p.surname} · casa ${p.family.household}`));
+    for(const memberId of p.family.memberIds){const member=byId.get(memberId);if(member===p)continue;const button=text('button',`${member.name} · ${relationLabel(p,member)} · ${member.age} anys`);button.type='button';button.onclick=()=>showBio(memberId);familyBox.append(button);}bio.append(familyBox);
+    list.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.id)===id)));}
+  function renderPeople(){
+    const query=$('#searchPerson').value.toLocaleLowerCase('ca');list.replaceChildren();
+    const visible=population.filter(p=>(familyFilter.value===''||p.familyId===Number(familyFilter.value))&&[p.name,p.job,p.story.origin,p.familyRole,`casa ${p.family.household}`].join(' ').toLocaleLowerCase('ca').includes(query));
+    let lastFamily=-1;
+    for(const p of visible){
+      if(p.familyId!==lastFamily){list.append(text('h4',`${p.surname} · casa ${p.family.household}`,'family-heading'));lastFamily=p.familyId;}
+      const button=text('button','');button.type='button';button.dataset.id=p.id;button.setAttribute('aria-pressed',String(p.id===selected));
+      button.append(text('strong',p.name),text('small',`${p.familyRole} · ${p.age} anys · ${p.job}`));button.onclick=()=>showBio(p.id);list.append(button);
+    }
+    if(!visible.length)list.append(text('p','No s’ha trobat cap habitant.'));
+  }
   function renderLog(){const el=$('#conversation-log');el.replaceChildren();if(!social.journal.length){el.append(text('p','Els veïns encara no han acabat cap conversa. Passeja una estona per la plaça.'));return;}for(const c of social.journal){const card=document.createElement('article');card.append(text('h3',`${byId.get(c.a).name} i ${byId.get(c.b).name}`));for(const turn of c.turns){const line=document.createElement('p');line.append(text('strong',byId.get(turn.speakerId).name+': '),document.createTextNode(turn.text));card.append(line);}el.append(card);}}
   $('#chroniclesBtn').onclick=()=>{onOpen();renderPeople();showBio(selected);renderLog();dialog.showModal();window.speechSynthesis?.cancel();};$('#closeChronicles').onclick=()=>dialog.close();dialog.addEventListener('close',onClose);$('#searchPerson').oninput=renderPeople;
   function tab(which){$('#peoplePanel').hidden=which!=='people';$('#talkPanel').hidden=which!=='talk';$('#peopleTab').setAttribute('aria-pressed',String(which==='people'));$('#talkTab').setAttribute('aria-pressed',String(which==='talk'));if(which==='talk')renderLog();}

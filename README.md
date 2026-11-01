@@ -2,15 +2,17 @@
 
 Poble medieval explorable de Dejoco Arts, construït amb Three.js r180. Primera versió funcional d'observació ambientada lliurement al segle XIV.
 
-## Actualització: habitants 2D estil Doom
+## Actualització: animació fluida, varietat i famílies
 
-- Personatges representats amb sprites retro modern en un poble 3D: front, dos perfils i esquena segons la posició del jugador, mantenint els peus a terra.
-- **150 homes, 150 dones, 100 nens i 100 nenes**. Els infants tenen entre 7 i 15 anys, proporcions més petites, històries i converses adaptades.
-- **500 variants visuals deterministes** de roba, cabell, to facial i amplada. L’art parteix de **quatre personatges base amb quatre vistes cadascun**, generats amb imagegen; no són 500 il·lustracions dibuixades individualment. Les cares i siluetes comparteixen aquesta base.
-- Animació procedural suau de caminar i repòs sobre el dibuix; no hi ha encara fotogrames de caminar dibuixats a mà ni sprites específics per a cada ofici.
-- Un atles compartit, filtre de píxel, un únic InstancedMesh per als habitants, alpha test i profunditat per quedar ocults darrere dels edificis. La càrrega espera l’atles i mostra un error si no es pot descarregar.
-- L’atles original transparent es distribueix a `assets/residents-directions-v1.png`. A la càrrega es reempaqueta per compensar l’espaiat irregular de la imatge generada i evitar retalls de caps o peus. El prompt i els crèdits són a `assets/residents-directions-v1.md`.
-- Les rutines, les memòries i les converses es mantenen. El món i els animals continuen en 3D. Les proves CPU no substitueixen la revisió visual WebGL en dispositius reals.
+- Sprites 2D retro modern dins del poble 3D, amb front, dos perfils i esquena. **Vuit figures base amb 32 vistes**, en dos atles transparents: adults, gent gran i infants amb siluetes, cabells, davantals, caputxes i vestits diferents. Les 500 aparences són variants de paletes i proporcions, no 500 il·lustracions independents.
+- Animació contínua de cames alternades, braços, tronc, respiració i gestos de conversa sobre una malla 2D subdividida. Transicions progressives entre caminar, parlar, treballar i repòs, cadència segons velocitat i edat, interpolació visual independent de la simulació a 30 Hz i girs pel camí curt. Una banda d’histèresi evita parpelleig entre vistes als límits de 45 graus.
+- Les animacions són una articulació procedural del dibuix: **no són fotogrames dibuixats a mà ni moviment capturat**. Només hi ha quatre orientacions discretes. Cal comprovar visualment possibles deformacions de roba i extremitats en dispositius reals.
+- **100 famílies de cinc membres**: dos infants, dos progenitors i un avi o àvia. Cognoms compartits i noms únics; parelles, filiació recíproca i edats coherents, amb 18 anys de diferència mínima entre pares i fills. No es fan servir vincles familiars arbitraris entre IDs consecutius.
+- Les famílies comencen agrupades, comparteixen punt de casa i tornen al seu node de carrer abans de les 8.15 h, entre les 12.30 i les 13.30 h i des de les 18 h, quan acaba el recorregut i la pausa que tinguin en curs. Durant el dia mantenen recorreguts individuals. Les 100 llars són unitats lògiques sobre la navegació existent; no s’han creat 100 interiors o edificis nous ni seguiment físic permanent d’un progenitor.
+- Cròniques agrupades per família, selector de les 100 llars i fitxa amb familiars clicables, parentiu i edats. Converses familiars diferenciades.
+- Un únic InstancedMesh amb textura compartida de 768 × 2048, filtre de píxel, alpha test i profunditat. Es corregeix el marge dels peus i s’exclouen els billboards del pas de normals SSAO per evitar halos rectangulars.
+- Art i prompts: `assets/residents-directions-v1.png`, `assets/residents-directions-v1.md`, `assets/residents-families-v2.png` i `assets/residents-families-v2.md`. Generats amb imagegen; els originals es reempaqueten al navegador perquè les files no són una graella exacta.
+- Les proves CPU validen identitats, filiació, retrobament, suavització, orientacions, simulació, geometria i materials. **La revisió visual WebGL continua pendent** perquè el navegador de la sessió no pot accedir al servidor local.
 
 ## Materials i vida social
 
