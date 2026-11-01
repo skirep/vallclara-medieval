@@ -1,0 +1,4 @@
+vendor/
+assets/*.jpg
+.openai/
+node_modules/
