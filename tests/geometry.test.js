@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as T from 'three';
-import {createWorld} from '../world.js';
+import {createWorld,roofVertices} from '../world.js';
 import {createPeople,createAnimals} from '../actors.js';
 import {createPopulation,nodes,blocked} from '../simulation.js';
 // CPU geometry validation. This does not substitute for a WebGL rendering check.
@@ -14,3 +14,5 @@ test('complete town geometry merges, citizen/animal animation matrices remain fi
   assert.equal(animals.count,74);
   for(const a of nodes)for(const j of a.links){const b=nodes[j];for(const offset of [-2.2,0,2.2])for(let step=0;step<=20;step++){const t=step/20,x=a.x+(b.x-a.x)*t+offset,z=a.z+(b.z-a.z)*t+offset;assert.equal(blocked(x,z,world.obstacles,.2),false,`street obstructed at ${x}, ${z}`);}}
 });
+
+test('gable roof faces point outwards so they remain visible with back-face culling',()=>{const v=roofVertices(8,10,3),center=new T.Vector3(0,1,0);for(let i=0;i<v.length;i+=9){const a=new T.Vector3().fromArray(v,i),b=new T.Vector3().fromArray(v,i+3),c=new T.Vector3().fromArray(v,i+6),normal=b.clone().sub(a).cross(c.clone().sub(a)),outward=a.clone().add(b).add(c).multiplyScalar(1/3).sub(center);assert.ok(normal.dot(outward)>0);}});

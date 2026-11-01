@@ -1,6 +1,15 @@
 import * as T from 'three';
 import {mergeGeometries} from './vendor/BufferGeometryUtils.js';
 import {random} from './simulation.js';
+import {applyPBR,worldUV} from './materials.js';
+import {createNature} from './nature.js';
+export function roofVertices(width,depth,rise){
+ const a=width/2+.65,b=depth/2+.6;
+ const vertices=new Float32Array([-a,0,-b,a,0,-b,0,rise,-b,-a,0,b,0,rise,b,a,0,b,-a,0,-b,0,rise,-b,0,rise,b,-a,0,-b,0,rise,b,-a,0,b,a,0,-b,a,0,b,0,rise,b,a,0,-b,0,rise,b,0,rise,-b]);
+ // Outward winding is essential: an inward roof vanishes with back-face culling.
+ for(let i=0;i<vertices.length;i+=9)for(let k=0;k<3;k++){const v=vertices[i+3+k];vertices[i+3+k]=vertices[i+6+k];vertices[i+6+k]=v;}
+ return vertices;
+}
 export function createWorld(scene){
 const rng=random(324),r=(a,b)=>a+rng()*(b-a),batches=new Map(),obstacles=[],buildings=[],smoke=[],waterMeshes=[],windThings=[];
 const box=new T.BoxGeometry(1,1,1),cyl=new T.CylinderGeometry(1,1,1,10),sphere=new T.SphereGeometry(1,10,7),cone=new T.ConeGeometry(1,1,8);
@@ -8,21 +17,34 @@ function canvasTexture(type){const c=document.createElement('canvas');c.width=c.
 const stoneTex=canvasTexture('stone'),plasterTex=canvasTexture('plaster'),woodTex=canvasTexture('wood'),roofTex=canvasTexture('roof'),grassTex=canvasTexture('grass');
 function mat(color,map,roughness=1){return new T.MeshStandardMaterial({color,...(map?{map,bumpMap:map,bumpScale:.055}:{}),roughness});}
 const mats={stone:mat('#afa58d',stoneTex),plaster:mat('#e1d3b4',plasterTex),wood:mat('#77604a',woodTex),darkwood:mat('#54422e',woodTex),roof:mat('#82634b',roofTex),roof2:mat('#786e58',roofTex),grass:mat('#8c985f',grassTex),road:mat('#a9a592',stoneTex),black:mat('#282b20'),leaf:mat('#66753b'),leaf2:mat('#8b8c44'),leaf3:mat('#9b8040'),iron:mat('#46473c'),red:mat('#91594a'),linen:mat('#e4d7b4'),gold:mat('#bd9850'),hay:mat('#b6a16b'),water:mat('#608c82')};
-// Photographic CC0 textures progressively replace self-contained procedural fallbacks.
-const loader=new T.TextureLoader();for(const[name,file]of [['stone','cobblestone_floor_08'],['plaster','plastered_wall_02'],['wood','wood_planks_grey']])loader.load(`./assets/${file}.jpg`,t=>{t.colorSpace=T.SRGBColorSpace;t.wrapS=t.wrapT=T.RepeatWrapping;t.anisotropy=4;mats[name].map=t;mats[name].needsUpdate=true;},undefined,()=>{});
-function add(g,m,x,y,z,sx=1,sy=1,sz=1,rx=0,ry=0,rz=0){const o=new T.Mesh(g,m);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.rotation.set(rx,ry,rz);o.updateMatrix();const geo=(g.index?g.toNonIndexed():g.clone()).applyMatrix4(o.matrix);if(!batches.has(m))batches.set(m,[]);batches.get(m).push(geo);return o;}
+// Photographic, metre-scaled PBR surfaces, including dedicated road/roof/ground maps.
+for(const [key,asset,meters,tint,strength] of [
+ ['stone','medieval_blocks_03',2,'#e7e3d9',.8],['road','cobblestone_floor_08',2,'#d1ccba',.85],
+ ['plaster','plastered_wall_02',2,'#e0d5bd',.5],['wood','wood_planks_grey',2,'#ad9780',.6],
+ ['darkwood','wood_planks_grey',2,'#75614d',.6],['roof','clay_roof_tiles',2,'#b79e88',.7],
+ ['roof2','clay_roof_tiles',2,'#969186',.7],['grass','sparse_grass',3,'#b4b396',.8],
+ ['linen','rough_linen',1,'#d9cfb6',.35],['red','rough_linen',1,'#8b5546',.35]
+])applyPBR(mats[key],asset,{meters,tint,strength});
+mats.bark=applyPBR(mat('#ffffff'), 'bark_brown_02',{meters:2,tint:'#a99c82',strength:.9});
+mats.glass=new T.MeshPhysicalMaterial({color:'#1d261e',roughness:.24,metalness:0,clearcoat:.4,envMapIntensity:1});
+mats.moss=mat('#535b3c');mats.dirt=mat('#75674e');
+function add(g,m,x,y,z,sx=1,sy=1,sz=1,rx=0,ry=0,rz=0){const o=new T.Mesh(g,m);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.rotation.set(rx,ry,rz);o.updateMatrix();const geo=(g.index?g.toNonIndexed():g.clone()).applyMatrix4(o.matrix);if(m.userData.textureMeters)worldUV(geo,m.userData.textureMeters);if(!batches.has(m))batches.set(m,[]);batches.get(m).push(geo);return o;}
 function B(m,x,y,z,w,h,d,ry=0,rz=0){return add(box,m,x,y,z,w,h,d,0,ry,rz);}function C(m,x,y,z,a,h,b=a,rx=0,rz=0){return add(cyl,m,x,y,z,a,h,b,rx,0,rz);}function S(m,x,y,z,a,b=a,c=a){return add(sphere,m,x,y,z,a,b,c);}
 // A broad, softly rolling landscape, flat beneath the walkable settlement.
-const terrain=new T.PlaneGeometry(1100,1100,100,100);terrain.rotateX(-Math.PI/2);const pos=terrain.attributes.position;for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),fade=T.MathUtils.smoothstep(Math.max(Math.abs(x),Math.abs(z)),105,280);pos.setY(i,-.1+fade*(Math.sin(x*.018)*Math.cos(z*.022)*12+Math.sin(z*.008)*21));}terrain.computeVertexNormals();const ground=new T.Mesh(terrain,mats.grass);ground.receiveShadow=true;scene.add(ground);
+const terrain=new T.PlaneGeometry(1100,1100,100,100);terrain.rotateX(-Math.PI/2);const pos=terrain.attributes.position;for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),fade=T.MathUtils.smoothstep(Math.max(Math.abs(x),Math.abs(z)),105,280);pos.setY(i,-.1+fade*(Math.sin(x*.018)*Math.cos(z*.022)*12+Math.sin(z*.008)*21));}terrain.computeVertexNormals();worldUV(terrain,3);const ground=new T.Mesh(terrain,mats.grass);ground.receiveShadow=true;scene.add(ground);
 B(mats.road,0,-.025,0,39,.13,39);
 for(const k of [-78,-52,-28,0,28,52,78]){B(mats.road,k,-.018,0,k===0?8:5,.08,179);B(mats.road,0,-.02,k,179,.08,k===0?8:5);}
 // Houses occupy blocks, leaving a connected pedestrian street grid.
 function house(x,z,w,d,h,variant){buildings.push({x,z,w,d});obstacles.push({x,z,w,d});const wall=variant%4===0?mats.stone:mats.plaster;B(mats.stone,x,.38,z,w+.2,.76,d+.2);B(wall,x,h/2+.4,z,w,h,d);B(mats.wood,x,h*.52,z,w+.12,.2,d+.12);for(const dx of [-w/2,w/2])for(const dz of [-d/2,d/2])B(mats.darkwood,x+dx,h/2+.4,z+dz,.22,h+.2,.22);
 for(const dx of [-w/4,w/4]){B(mats.wood,x+dx,h*.73,z+d/2+.04,.16,h*.52,.18);B(mats.wood,x+dx,h*.73,z-d/2-.04,.16,h*.52,.18);}
-const roofHeight=w*.4;const roofGeo=new T.BufferGeometry();const a=w/2+.65,b=d/2+.6;const vertices=new Float32Array([-a,0,-b,a,0,-b,0,roofHeight,-b,-a,0,b,0,roofHeight,b,a,0,b,-a,0,-b,0,roofHeight,-b,0,roofHeight,b,-a,0,-b,0,roofHeight,b,-a,0,b,a,0,-b,a,0,b,0,roofHeight,b,a,0,-b,0,roofHeight,b,0,roofHeight,-b]);roofGeo.setAttribute('position',new T.BufferAttribute(vertices,3));const uv=[];for(let i=0;i<vertices.length;i+=3)uv.push(vertices[i]/4,vertices[i+2]/4+vertices[i+1]/3);roofGeo.setAttribute('uv',new T.Float32BufferAttribute(uv,2));roofGeo.computeVertexNormals();add(roofGeo,variant%3===0?mats.roof2:mats.roof,x,h+.35,z);roofGeo.dispose();
+const roofHeight=w*.4;const roofGeo=new T.BufferGeometry();const a=w/2+.65,b=d/2+.6;const vertices=roofVertices(w,d,roofHeight);roofGeo.setAttribute('position',new T.BufferAttribute(vertices.slice(18),3));const uv=[];for(let i=18;i<vertices.length;i+=3)uv.push(vertices[i]/2,vertices[i+2]/2+vertices[i+1]/2);roofGeo.setAttribute('uv',new T.Float32BufferAttribute(uv,2));roofGeo.computeVertexNormals();add(roofGeo,variant%3===0?mats.roof2:mats.roof,x,h+.35,z);roofGeo.dispose();
+const gable=new T.BufferGeometry();gable.setAttribute('position',new T.BufferAttribute(vertices.slice(0,18),3));gable.computeVertexNormals();worldUV(gable,2);add(gable,wall,x,h+.35,z);gable.dispose();
+C(mats.roof,x,h+roofHeight+.35,z,.13,d+1.2,.13,Math.PI/2);
+for(const side of [-1,1]){B(mats.darkwood,x+side*(w/2+.4),h+.3,z,.18,.22,d+1.3);B(mats.moss,x,.13,z+side*(d/2+.12),w,.18,.09);}
+for(let k=0;k<3;k++){const xx=x+r(-w*.45,w*.45),zz=z+d/2+.22;B(mats.stone,xx,.28,zz,r(.25,.65),r(.2,.38),.18);}
 B(mats.stone,x+w*.27,h+roofHeight*.65,z-d*.2,.75,2.4,.8);smoke.push(new T.Vector3(x+w*.27,h+roofHeight*.65+1.2,z-d*.2));
 // Real depth to door recesses, shutters, transoms and window frames.
-for(const side of [-1,1]){const zz=z+side*(d/2+.05);for(const xx of [-w*.27,w*.27]){B(mats.darkwood,x+xx,h*.71,zz,1.05,1.45,.13);B(mats.black,x+xx,h*.71,zz+side*.08,.8,1.2,.05);B(mats.wood,x+xx,h*.71,zz+side*.12,.07,1.2,.07);B(mats.wood,x+xx,h*.71,zz+side*.12,.85,.07,.07);for(const shutter of [-1,1])B(mats.wood,x+xx+shutter*.65,h*.71,zz,.32,1.4,.1);B(mats.stone,x+xx,h*.71-.76,zz,.95,.13,.4);}
+for(const side of [-1,1]){const zz=z+side*(d/2+.05);for(const xx of [-w*.27,w*.27]){B(mats.darkwood,x+xx,h*.71,zz,1.05,1.45,.13);B(mats.glass,x+xx,h*.71,zz+side*.08,.8,1.2,.05);B(mats.wood,x+xx,h*.71,zz+side*.12,.07,1.2,.07);B(mats.wood,x+xx,h*.71,zz+side*.12,.85,.07,.07);for(const shutter of [-1,1])B(mats.wood,x+xx+shutter*.65,h*.71,zz,.32,1.4,.1);B(mats.stone,x+xx,h*.71-.76,zz,.95,.13,.4);}
 B(mats.darkwood,x,1.05,zz,1.35,2.1,.16);B(mats.wood,x,.98,zz+side*.1,1.1,1.95,.12);B(mats.iron,x,1.45,zz+side*.18,1.1,.09,.05);B(mats.iron,x,.5,zz+side*.18,1.1,.09,.05);S(mats.iron,x+.34,1.02,zz+side*.2,.07);}
 // Flower pots and barrels outside the threshold.
 C(mats.red,x+w*.4,.3,z+d/2+.7,.26,.6);for(let j=0;j<5;j++)S(mats.leaf,x+w*.4+r(-.2,.2),.65+r(0,.2),z+d/2+.7+r(-.2,.2),.16);barrel(x-w*.4,z+d/2+.7);}
@@ -44,9 +66,8 @@ for(const[x,z]of [[-22,13],[56,1],[-30,-56]]){B(mats.wood,x,.85,z,1.5,.2,2.5);B(
 for(let i=0;i<1100;i++){const x=r(-90,-35),z=r(99,129);B(mats.hay,x,.6,z,.045,r(.7,1.5),.045);add(cone,mats.gold,x,1.15,z,.12,.4,.12);}for(let i=0;i<8;i++)S(mats.hay,-80+i*6,1.1,-102,2.1,1.8,2.1);
 function fence(x,z,w,d){for(let a=-w/2;a<=w/2;a+=3)for(const s of [-1,1])B(mats.wood,x+a,.7,z+s*d/2,.13,1.4,.13);for(let a=-d/2;a<=d/2;a+=3)for(const s of [-1,1])B(mats.wood,x+s*w/2,.7,z+a,.13,1.4,.13);for(const h of [.45,1]){B(mats.wood,x,h,z-d/2,w,.13,.13);B(mats.wood,x,h,z+d/2,w,.13,.13);B(mats.wood,x-w/2,h,z,.13,.13,d);B(mats.wood,x+w/2,h,z,.13,.13,d);}}
 fence(-108,-55,22,28);fence(106,42,23,28);
-// Oaks, poplars, stones and a ring of autumn woodland.
-for(let i=0;i<270;i++){const angle=r(0,Math.PI*2),radius=r(112,310),x=Math.cos(angle)*radius,z=Math.sin(angle)*radius;if(Math.abs(x)<7||Math.abs(z)<7)continue;const h=r(5,12);C(mats.wood,x,h*.4,z,.3,h*.8);const leaf=[mats.leaf,mats.leaf2,mats.leaf3][i%3];for(let j=0;j<4;j++)S(leaf,x+r(-2,2),h+r(-1,2),z+r(-2,2),r(2,4),r(2,4),r(2,4));}
-for(const[x,z]of [[-20,22],[20,-21],[-50,22],[24,58],[56,-21]]){C(mats.wood,x,3,z,.35,6);for(let j=0;j<5;j++)S(mats.leaf2,x+r(-2,2),6+r(-1,2),z+r(-2,2),2.4);}
+// Branch geometry and alpha-cutout foliage replace solid spherical tree crowns.
+const nature=createNature(scene,mats,buildings);windThings.push(nature);
 for(let i=0;i<160;i++){const a=r(0,6.28),rad=r(97,250);S(mats.stone,Math.cos(a)*rad,.2,Math.sin(a)*rad,r(.3,1.5),r(.3,.8),r(.3,1.4));}
 // Distant hills frame the settlement rather than ending at a visible plane.
 for(let i=0;i<24;i++){const a=i/24*Math.PI*2;S(mat(i%2?'#6d7960':'#7d896d'),Math.cos(a)*450,-15,Math.sin(a)*450,r(80,140),r(65,120),r(90,170));}

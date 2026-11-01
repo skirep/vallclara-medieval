@@ -2,3 +2,4 @@ vendor/
 assets/*.jpg
 .openai/
 node_modules/
+assets/*.hdr

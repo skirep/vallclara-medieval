@@ -2,6 +2,16 @@
 
 Poble medieval explorable de Dejoco Arts, construït amb Three.js r180. Primera versió funcional d'observació ambientada lliurement al segle XIV.
 
+## Actualització: materials i vida social
+
+- Materials PBR fotogràfics CC0 amb color, normals OpenGL i rugositat per a pedra medieval, llambordes, arrebossat, teules de fang, fusta, escorça, terra, lli i cuir. Escala de textura en metres i mapes compartits per reduir memòria.
+- Il·luminació d’entorn HDRI de tardor i llum solar recalibrada. Mode Alta amb oclusió ambiental SSAO i antialiàsing FXAA. Mode Baixa sense aquesta postproducció ni herba geomètrica.
+- Arbres amb troncs, branques i fulles geomètriques mogudes suaument pel vent. Detall de fonaments, careners i frontons; braços articulats i teixit als personatges.
+- **500 biografies úniques i reproduïbles**, amb nom, origen, passat, record, temperament, preocupació, aspiració i vincles familiars i d’amistat.
+- Converses autònomes per proximitat, amb pauses, gestos, torns de paraula i referències a les històries. Bafarades visibles a prop del jugador. Fins a 18 converses simultànies; sense crides a una IA remota.
+- Panell **Cròniques** per consultar els 500 habitants i les últimes 80 converses. Memòries de trobades desades en aquest navegador amb localStorage; no són compartides entre dispositius. Les històries provenen de combinacions de fragments escrits, no d’una biografia redactada a mà per a cadascú.
+- Veus opcionals via SpeechSynthesis del navegador. La disponibilitat i la qualitat de la veu catalana depenen del navegador i del sistema.
+
 ## Què hi ha
 
 - Vila de pedra i entramat de fusta, plaça amb pou i vuit parades, parròquia, carros, horts, camps de cereal, corrals i bosc de tardor.
@@ -33,7 +43,7 @@ A Settings → Pages seleccionar **GitHub Actions** com a font. El workflow `pag
 
 ## Rendiment i limitacions
 
-Geometria estàtica agrupada per material i personatges amb InstancedMesh. Tots els habitants continuen simulats a 30 Hz; els llunyans deixen de dibuixar-se i el detall facial només s'aplica a prop. Els nodes de navegació connecten els carrers; els oficis són animacions ambientals, sense economia persistent. L'hora es pausa al menú i continua durant la pantalla inicial. Les bèsties comparteixen perfils per espècie. La vila no té interiors explorables. No s'han fet proves de rendiment en tots els dispositius físics.
+Geometria estàtica agrupada per material i personatges amb InstancedMesh. Tots els habitants continuen simulats a 30 Hz; els llunyans deixen de dibuixar-se i el detall facial només s'aplica a prop. Els nodes de navegació connecten els carrers; els oficis són animacions ambientals, sense economia persistent. L'hora es pausa al menú i continua durant la pantalla inicial. Les bèsties comparteixen perfils per espècie. La vila no té interiors explorables. No s'han fet proves de rendiment en tots els dispositius físics. Les proves automàtiques validen geometria, materials, imports, navegació, biografies, converses i memòria. La comprovació visual WebGL no s'ha pogut fer en el navegador de la sessió de desenvolupament.
 
 ## Crèdits
 
@@ -42,5 +52,12 @@ Geometria estàtica agrupada per material i personatges amb InstancedMesh. Tots 
   - https://polyhaven.com/a/cobblestone_floor_08
   - https://polyhaven.com/a/plastered_wall_02
   - https://polyhaven.com/a/wood_planks_grey
+  - https://polyhaven.com/a/medieval_blocks_03
+  - https://polyhaven.com/a/clay_roof_tiles
+  - https://polyhaven.com/a/sparse_grass
+  - https://polyhaven.com/a/bark_brown_02
+  - https://polyhaven.com/a/rough_linen
+  - https://polyhaven.com/a/brown_leather
+  - https://polyhaven.com/a/autumn_field_puresky
 - Tipografies Cormorant Garamond i Manrope, Google Fonts, amb alternatives Georgia i Arial.
 - Geometria, textures de reserva i codi de la simulació creats per a aquest projecte.

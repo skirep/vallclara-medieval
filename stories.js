@@ -1,0 +1,19 @@
+import {random} from './simulation.js';
+const firstNames=['Arnau','Elisenda','Bernat','Agnès','Guillem','Sança','Pere','Blanca','Ramon','Eulàlia','Ferrer','Joana','Berenguer','Margarida','Jaume','Isabel'];
+const surnames=['Rovira','Vidal','Ferrer','Serra','Bosch','Soler','Puig','Fuster','Oliver','Riera','Font','Pujol','Vila','Mas','Garriga','Roig','Costa','Torres','Prat','Vall','Casals','Clot','Sastre','Teixidor','Carbonell','Amat','Guasch','Roure','Pons','Alzina','Mir','Sala'];
+const origins=['Vallclara','el mas del Roure','la vall del riu','el veïnat de l’Om','la vila de Montclar','el camí del coll','les bordes del nord','el mas de la Font'];
+const pasts=['va haver de refer el taller després d’un aiguat','va passar tres hiverns aprenent un ofici lluny de casa','va ajudar a aixecar la teulada de la parròquia','va perdre la collita en una pedregada','va acompanyar una caravana fins a la costa','va cuidar un parent durant una llarga malaltia','va tornar al poble després d’anys treballant en un mas','va salvar un animal que havia caigut al torrent','va aprendre a llegir gràcies a un escrivent','va acollir una família quan el camí va quedar tallat','va fer de missatger entre els masos','va heretar un petit deute i les eines d’un parent'];
+const wishes=['reparar la casa abans que arribi el fred','estalviar per tenir un taller propi','aconseguir eines millors sense endeutar-se','aprendre a llegir els comptes del mercat','trobar algú amb qui compartir la feina','comprar una cabra per a la família','ensenyar l’ofici a un aprenent','fer les paus amb un vell amic','tornar a visitar el lloc on va créixer','recuperar un petit hort abandonat','preparar un bon àpat per a la festa de la vila','arreglar el pont del camí del riu','conservar les llavors de la millor collita','aconseguir llenya seca per a l’hivern','convèncer el consell que repari la font','acabar una feina promesa abans de diumenge'];
+const keepsakes=['una cullera de boix','un tros de cinta tenyida','un petit flabiol','una pedra del riu','un pany vell','una agulla de bronze','una bossa de llavors','una tauleta de comptes'];
+const temperaments=['prudent','curiós','rialler','reservat','pacient','obstinat','generós','somniador'];
+const worries=['la humitat del magatzem','el preu del gra','la falta de fusta seca','el mal estat del camí','una promesa que encara no ha complert','la salut d’un veí','les eines massa gastades','l’aigua escassa de l’hort'];
+export function createHistories(population){
+  for(const p of population){
+    const rng=random(134800+p.id*97),choose=a=>a[Math.floor(rng()*a.length)];
+    p.name=firstNames[p.id%firstNames.length]+' '+surnames[Math.floor(p.id/firstNames.length)%surnames.length];
+    p.story={origin:choose(origins),past:choose(pasts),wish:choose(wishes),keepsake:choose(keepsakes),temperament:choose(temperaments),worry:choose(worries),year:1348-Math.min(p.age-9,4+Math.floor(rng()*23)),friendId:(p.id+17)%population.length,kinId:(p.id+1)%population.length,household:Math.floor(p.id/5)+1};
+    p.social={cooldown:rng()*14,conversation:null,met:{},meetings:0};
+  }
+  for(const p of population){const f=population[p.story.friendId],k=population[p.story.kinId];p.story.biography=`${p.name}, de ${p.age} anys, treballa de ${p.job} i viu a la casa ${p.story.household}. Ve ${('de '+p.story.origin).replace(/^de el /,'del ')}. L’any ${p.story.year}, ${p.story.past}. Conserva ${p.story.keepsake} d’aquella etapa. Manté una amistat amb ${f.name} i un vincle familiar amb ${k.name}. Té un tarannà ${p.story.temperament}; ara vol ${p.story.wish}, i té una preocupació: ${p.story.worry}.`;}
+  return population;
+}
