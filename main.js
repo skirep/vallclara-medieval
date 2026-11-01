@@ -15,6 +15,7 @@ const sky=new T.Mesh(new T.SphereGeometry(800,32,20),new T.ShaderMaterial({side:
 function puffTexture(){const c=document.createElement('canvas');c.width=c.height=128;const ctx=c.getContext('2d'),g=ctx.createRadialGradient(64,64,2,64,64,64);g.addColorStop(0,'rgba(239,233,212,.55)');g.addColorStop(.4,'rgba(239,233,212,.25)');g.addColorStop(1,'rgba(239,233,212,0)');ctx.fillStyle=g;ctx.fillRect(0,0,128,128);return new T.CanvasTexture(c);}
 const puff=puffTexture(),cloudMaterial=new T.SpriteMaterial({map:puff,transparent:true,depthWrite:false,opacity:.75});const rng=random(871);for(let i=0;i<22;i++){const cloud=new T.Sprite(cloudMaterial);cloud.position.set((rng()-.5)*650,75+rng()*60,(rng()-.5)*650);cloud.scale.set(70+rng()*110,15+rng()*25,1);scene.add(cloud);}
 $('#loadText').textContent='Construint carrers i cases…';await new Promise(requestAnimationFrame);const world=createWorld(scene),population=createHistories(createPopulation(500)),people=createPeople(scene,population),animals=createAnimals(scene,world.obstacles);
+$('#loadText').textContent='Preparant els habitants 2D…';await people.ready;
 const graphics=createGraphics(renderer,scene,camera),social=createSocialSystem(population);
 try{social.restore(JSON.parse(localStorage.getItem('vallclara-social-v1')||'null'));}catch{}
 let lastSocialSave=0;

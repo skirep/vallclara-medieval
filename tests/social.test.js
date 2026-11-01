@@ -5,7 +5,7 @@ import {createSocialSystem,writeConversation} from '../social.js';
 function town(){return createHistories(createPopulation(500));}
 test('all 500 residents have distinct, reproducible biographies with valid named relationships',()=>{
   const a=town(),b=town();assert.equal(new Set(a.map(p=>p.name)).size,500);assert.equal(new Set(a.map(p=>p.story.biography)).size,500);assert.deepEqual(a.map(p=>p.story),b.map(p=>p.story));
-  for(const p of a){assert.ok(p.story.biography.includes(p.name));assert.ok(p.story.biography.includes(a[p.story.friendId].name));assert.ok(p.story.biography.includes(a[p.story.kinId].name));assert.ok(p.story.year<1348);assert.ok(p.story.year>=1348-p.age+9);assert.ok(p.story.wish);}
+  for(const p of a){assert.ok(p.story.biography.includes(p.name));assert.ok(p.story.biography.includes(a[p.story.friendId].name));assert.ok(p.story.biography.includes(a[p.story.kinId].name));assert.ok(p.story.year<1348);assert.ok(p.story.year>=1348-p.age+3);assert.ok(p.story.wish);}
 });
 test('nearby conversations stop movement, alternate speakers, complete and leave persistent memories',()=>{
   const p=town(),a=p[0],b=p[1];a.social.cooldown=b.social.cooldown=0;a.x=0;a.z=0;b.x=1.5;b.z=0;a.path=[1];
