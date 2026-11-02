@@ -2,7 +2,7 @@
 const tau=Math.PI*2;
 export const angleDelta=(from,to)=>Math.atan2(Math.sin(to-from),Math.cos(to-from));
 export function createMotion(p){return{x:p.x,z:p.z,heading:p.heading,walk:0,talk:0,work:0,phase:p.phase,view:null};}
-export function updateMotion(m,p,dt){
+export function updateMotion(m,p,dt,simulationRate=1){
   dt=Math.max(0,Math.min(dt,.1));
   const follow=1-Math.exp(-24*dt),blend=1-Math.exp(-9*dt);
   m.x+=(p.x-m.x)*follow;m.z+=(p.z-m.z)*follow;
@@ -13,7 +13,7 @@ export function updateMotion(m,p,dt){
   // Continuous phase survives state switches; faster/shorter child steps and
   // slower elderly gait, with no quantisation to the simulation tick.
   const stride=p.age<16?.48:p.age>60?.69:.77;
-  m.phase=(m.phase+dt*p.speed/stride*tau*m.walk)%tau;
+  m.phase=(m.phase+dt*p.speed/stride*tau*m.walk*simulationRate)%tau;
   return m;
 }
 export function stableView(m,heading,observerAngle){
