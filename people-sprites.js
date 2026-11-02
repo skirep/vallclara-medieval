@@ -1,119 +1,86 @@
 import * as T from 'three';
 import {appearanceFor} from './appearance.js';
 import {createMotion,updateMotion,stableView} from './sprite-motion.js';
-
-export const FAMILY_ATLAS_URL=new URL('./assets/residents-families-v2.png',import.meta.url).href;
+import {drawnFrame,WALK_TYPES} from './animation-frames.js';
+import {loadResidentImages} from './resident-assets.js';
 export const ATLAS_URL=new URL('./assets/residents-directions-v1.png',import.meta.url).href;
-// Camera-facing, upright, alpha-cutout quads. Shared geometry/texture and a single
-// instanced draw keep the cost independent of the 500 residents' clothing palettes.
-export function createPeople(scene,population){
-  const n=population.length,geometry=new T.PlaneGeometry(1,1,16,24);
-  geometry.translate(0,.5-12/256,0);
-  const frames=new T.InstancedBufferAttribute(new Float32Array(n*4),4);
-  const motions=new T.InstancedBufferAttribute(new Float32Array(n*4),4);motions.setUsage(T.DynamicDrawUsage);geometry.setAttribute('residentMotion',motions);
-  const dyes=new T.InstancedBufferAttribute(new Float32Array(n*3),3);
-  const features=new T.InstancedBufferAttribute(new Float32Array(n*3),3);
-  frames.setUsage(T.DynamicDrawUsage);
-  geometry.setAttribute('residentFrame',frames);geometry.setAttribute('residentDye',dyes);geometry.setAttribute('residentFeatures',features);
-  const texture=new T.Texture();texture.colorSpace=T.SRGBColorSpace;
-  texture.magFilter=T.NearestFilter;texture.minFilter=T.NearestFilter;texture.generateMipmaps=false;
+export const FAMILY_ATLAS_URL=new URL('./assets/residents-families-v2.png',import.meta.url).href;
+const load=url=>new Promise((resolve,reject)=>new T.ImageLoader().load(url,resolve,undefined,()=>reject(new Error('No s’ha pogut carregar l’animació dels habitants. Torna a carregar la pàgina.'))));
+export function createPeople(scene,population,{onProgress}={}){
+ const appearances=population.map(appearanceFor),states=population.map(createMotion),groups=[],dummy=new T.Object3D(),color=new T.Color();
+ const geometry=new T.PlaneGeometry(1,1);geometry.translate(0,.5-12/256,0);
+ for(let type=0;type<8;type++){
+  const indices=population.map((p,i)=>i).filter(i=>appearances[i].row===type),g=geometry.clone(),n=indices.length;
+  const frames=new T.InstancedBufferAttribute(new Float32Array(n*4),4),dyes=new T.InstancedBufferAttribute(new Float32Array(n*3),3),features=new T.InstancedBufferAttribute(new Float32Array(n*3),3);
+  frames.setUsage(T.DynamicDrawUsage);g.setAttribute('residentFrame',frames);g.setAttribute('residentDye',dyes);g.setAttribute('residentFeatures',features);
+  const texture=new T.Texture();texture.colorSpace=T.SRGBColorSpace;texture.magFilter=texture.minFilter=T.NearestFilter;texture.generateMipmaps=false;
   const material=new T.MeshBasicMaterial({map:texture,alphaTest:.45,side:T.DoubleSide,fog:true});
   material.onBeforeCompile=shader=>{
-    shader.vertexShader=shader.vertexShader.replace('#include <common>',`#include <common>
+   shader.vertexShader=shader.vertexShader.replace('#include <common>',`#include <common>
 attribute vec4 residentFrame;
-attribute vec4 residentMotion;
 attribute vec3 residentDye;
 attribute vec3 residentFeatures;
 varying vec3 vDye;
 varying vec3 vFeatures;
 varying vec2 vResidentUV;`);
-    shader.vertexShader=shader.vertexShader.replace('#include <uv_vertex>',`#include <uv_vertex>
-vMapUv = vec2((uv.x + residentFrame.x) * .25, (uv.y + 7.0 - residentFrame.y) * .125);
-vDye = residentDye; vFeatures = residentFeatures; vResidentUV = uv;`);
-    shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
-// Continuous soft cutout rig. Weights separate the two legs, outer arms,
-// breathing torso and head; state envelopes avoid abrupt pose changes.
-float phase = residentMotion.x;
-float moving = residentMotion.y;
-float talking = residentMotion.z;
-float working = residentMotion.w;
-float clock = residentFrame.z;
-float side = sign(position.x);
-float profile = mod(residentFrame.x,2.0)>.5 ? .45 : 1.0;
-float leg = 1.0-smoothstep(.12,.46,uv.y);
-float arm = smoothstep(.13,.23,abs(position.x))*smoothstep(.40,.53,uv.y)*(1.0-smoothstep(.72,.80,uv.y));
-float upper = smoothstep(.40,.68,uv.y);
-float head = smoothstep(.75,.87,uv.y);
-float stepWave = sin(phase)*side;
-// Alternating lift and knee bend. Planted foot stays at the ground baseline.
-transformed.y += max(0.0,stepWave)*.060*moving*leg;
-transformed.x += sin(phase)*side*.027*moving*leg*profile;
-float gesture = sin(clock*2.4+side*.9)*talking*.045;
-float chore = sin(clock*3.1)*working*.018;
-transformed.x += (-sin(phase)*side*.038*moving*profile+gesture+chore)*arm;
-transformed.y += (cos(phase)*.013*moving+abs(gesture)*.5)*arm;
-transformed.y += (sin(clock*1.7)*.003+sin(phase*2.0)*.006*moving)*upper;
-transformed.x += sin(clock*1.1)*.003*upper*(1.0-moving);
-transformed.x += sin(clock*2.4)*.009*talking*head;
-transformed.y += sin(clock*2.4+.7)*.004*talking*head;
-// Small hem motion, with reduced amplitude in profile to protect silhouettes.
-transformed.x += sin(phase+uv.y*5.0)*.008*moving*smoothstep(.18,.3,uv.y)*(1.0-smoothstep(.5,.6,uv.y));`);
-    shader.fragmentShader=shader.fragmentShader.replace('#include <common>',`#include <common>
+   shader.vertexShader=shader.vertexShader.replace('#include <uv_vertex>',`#include <uv_vertex>
+vMapUv = vec2((uv.x+residentFrame.x)/7.0,(uv.y+3.0-residentFrame.y)/4.0);
+vDye=residentDye;vFeatures=residentFeatures;vResidentUV=uv;`);
+   // No vertex deformation: limbs and clothing move only through drawn frames.
+   shader.fragmentShader=shader.fragmentShader.replace('#include <common>',`#include <common>
 varying vec3 vDye;
 varying vec3 vFeatures;
 varying vec2 vResidentUV;`);
-    shader.fragmentShader=shader.fragmentShader.replace('#include <map_fragment>',`#include <map_fragment>
-float hi = max(diffuseColor.r,max(diffuseColor.g,diffuseColor.b));
-float lo = min(diffuseColor.r,min(diffuseColor.g,diffuseColor.b));
-float chroma = (hi-lo)/max(hi,.001);
-float luminance = dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
-// Dye saturated garments; preserve linen, belts, faces and source shading.
-float garment = step(.26,vResidentUV.y)*(1.0-step(.73,vResidentUV.y));
-float dyeMask = garment*smoothstep(.16,.46,chroma);
-diffuseColor.rgb = mix(diffuseColor.rgb,vDye*clamp(luminance*3.0,.15,1.6),dyeMask*.87);
-float head = smoothstep(.74,.82,vResidentUV.y);
-float hair = head*(1.0-smoothstep(.08,.3,luminance));
-diffuseColor.rgb = mix(diffuseColor.rgb,mix(vec3(vFeatures.x*.8,vFeatures.x*.57,vFeatures.x*.37),vec3(vFeatures.x),step(.66,vFeatures.x))*max(.28,luminance*4.0),hair*.72);
-diffuseColor.rgb *= mix(1.0,vFeatures.y,head*.5);
-// Tiny woven hem variation is stable for each resident, never frame-random.
-float hem = step(.30,vResidentUV.y)*(1.0-step(.32,vResidentUV.y));
-diffuseColor.rgb *= 1.0-hem*vFeatures.z*.23;`);
+   shader.fragmentShader=shader.fragmentShader.replace('#include <map_fragment>',`#include <map_fragment>
+float hi=max(diffuseColor.r,max(diffuseColor.g,diffuseColor.b));
+float lo=min(diffuseColor.r,min(diffuseColor.g,diffuseColor.b));
+float chroma=(hi-lo)/max(hi,.001);
+float luminance=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
+float garment=step(.26,vResidentUV.y)*(1.0-step(.73,vResidentUV.y));
+float dyeMask=garment*smoothstep(.16,.46,chroma);
+diffuseColor.rgb=mix(diffuseColor.rgb,vDye*clamp(luminance*3.0,.15,1.6),dyeMask*.87);
+float head=smoothstep(.74,.82,vResidentUV.y);
+float hair=head*(1.0-smoothstep(.08,.3,luminance));
+vec3 hairColor=mix(vec3(vFeatures.x*.8,vFeatures.x*.57,vFeatures.x*.37),vec3(vFeatures.x),step(.66,vFeatures.x));
+diffuseColor.rgb=mix(diffuseColor.rgb,hairColor*max(.28,luminance*4.0),hair*.72);
+diffuseColor.rgb*=mix(1.0,vFeatures.y,head*.5);`);
   };
-  material.customProgramCacheKey=()=> 'vallclara-directional-sprites-v2';
-  const mesh=new T.InstancedMesh(geometry,material,n);mesh.name='Habitants 2D';
-  mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);mesh.frustumCulled=false;
-  // Alpha test + depth write lets architecture and other residents occlude sprites.
-  mesh.castShadow=false;mesh.receiveShadow=false;mesh.userData.spriteBillboard=true;scene.add(mesh);
-  const dummy=new T.Object3D(),color=new T.Color(),appearances=population.map(appearanceFor);
-  for(let i=0;i<n;i++){const a=appearances[i];color.setHSL(a.hue,a.saturation,a.lightness);dyes.setXYZ(i,color.r,color.g,color.b);features.setXYZ(i,a.hair,a.skin,(population[i].id%13)/12);}
-  const load=url=>new Promise((resolve,reject)=>new T.ImageLoader().load(url,resolve,undefined,()=>reject(new Error('No s’ha pogut carregar l’atles dels habitants 2D. Torna a carregar la pàgina.'))));
-  const ready=Promise.all([load(ATLAS_URL),load(FAMILY_ATLAS_URL)]).then(images=>{
-    // Compact power-of-two height fits WebGL 2 devices with a 2048px limit.
-    const canvas=document.createElement('canvas');canvas.width=768;canvas.height=2048;
-    const ctx=canvas.getContext('2d');if(!ctx)throw Error('Canvas 2D no disponible');ctx.imageSmoothingEnabled=false;
-    const layouts=[
-      {centers:[234,503,764,1043],rows:[[2,326],[330,682],[685,972],[975,1253]],half:100},
-      {centers:[207,496,775,1070],rows:[[8,319],[331,631],[638,928],[934,1236]],half:110}
-    ];
-    for(let sheet=0;sheet<2;sheet++)for(let row=0;row<4;row++)for(let col=0;col<4;col++){
-      const layout=layouts[sheet],[top,bottom]=layout.rows[row],height=bottom-top,scale=232/height;
-      ctx.drawImage(images[sheet],layout.centers[col]-layout.half,top,layout.half*2,height,col*192+96-layout.half*scale,(row+sheet*4)*256+12,layout.half*2*scale,232);
+  material.customProgramCacheKey=()=> 'vallclara-drawn-frames-v3';
+  const mesh=new T.InstancedMesh(g,material,n);mesh.name='Habitants amb fotogrames · '+WALK_TYPES[type];mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);mesh.frustumCulled=false;mesh.userData.spriteBillboard=true;scene.add(mesh);
+  indices.forEach((index,i)=>{const a=appearances[index];color.setHSL(a.hue,a.saturation,a.lightness);dyes.setXYZ(i,color.r,color.g,color.b);features.setXYZ(i,a.hair,a.skin,0);});
+  groups.push({indices,frames,texture,mesh});
+ }
+ geometry.dispose();
+ const ready=loadResidentImages(load,onProgress).then(images=>{
+  const idleLayouts=[{centers:[234,503,764,1043],rows:[[2,326],[330,682],[685,972],[975,1253]],half:100},{centers:[207,496,775,1070],rows:[[8,319],[331,631],[638,928],[934,1236]],half:110}];
+  groups.forEach((group,type)=>{
+   const image=images[type+2],canvas=document.createElement('canvas');canvas.width=1568;canvas.height=1024;const ctx=canvas.getContext('2d');if(!ctx)throw Error('Canvas 2D no disponible');ctx.imageSmoothingEnabled=false;
+   // Source sheets use a 6x4 grid. The packing manifest records measured
+   // silhouette bounds and a shared row scale/baseline, preventing foot jitter.
+   const layout=WALK_LAYOUTS[WALK_TYPES[type]];
+   if(!layout)throw Error('Falta el pla de fotogrames '+WALK_TYPES[type]);
+   for(let view=0;view<4;view++){
+    const row=layout[view],scale=232/Math.max(...layout.map(r=>r.height));
+    for(let frame=0;frame<6;frame++){
+     const box=row.frames[frame];ctx.drawImage(image,box.x,row.top,box.w,row.height,frame*224+112-box.w*scale/2,view*256+244-row.height*scale,box.w*scale,row.height*scale);
     }
-    texture.image=canvas;texture.needsUpdate=true;
+    const source=idleLayouts[Math.floor(type/4)],[top,bottom]=source.rows[type%4],sc=232/(bottom-top);
+    ctx.drawImage(images[Math.floor(type/4)],source.centers[view]-source.half,top,source.half*2,bottom-top,6*224+112-source.half*sc,view*256+12,source.half*2*sc,232);
+   }
+   group.texture.image=canvas;group.texture.needsUpdate=true;
   });
-  const states=population.map(createMotion);
-  function animate(time,camera,range=100,dt=1/60){
-    for(let i=0;i<n;i++){
-      const p=population[i],a=appearances[i],m=updateMotion(states[i],p,dt),dx=camera.x-m.x,dz=camera.z-m.z;
-      const visible=dx*dx+dz*dz<range*range,angle=Math.atan2(dx,dz);
-      frames.setXYZW(i,stableView(m,m.heading,angle),a.row,time+p.phase,p.id);
-      motions.setXYZW(i,m.phase,m.walk,m.talk,m.work);
-      dummy.position.set(m.x,.015,m.z);dummy.rotation.set(0,angle,0);
-      // p.height is the original 1.8 m model's scale, shared by speech bubbles.
-      const h=visible?p.height*1.96:0;
-      dummy.scale.set(h*.75*a.width,h,1);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);
-    }
-    frames.needsUpdate=true;motions.needsUpdate=true;mesh.instanceMatrix.needsUpdate=true;
+ });
+ function animate(time,camera,range=100,dt=1/60){
+  population.forEach((p,i)=>updateMotion(states[i],p,dt));
+  for(const group of groups){
+   group.indices.forEach((index,i)=>{
+    const p=population[index],a=appearances[index],m=states[index],dx=camera.x-m.x,dz=camera.z-m.z,angle=Math.atan2(dx,dz);
+    const view=stableView(m,m.heading,angle);group.frames.setXYZW(i,drawnFrame(m),view,0,0);
+    dummy.position.set(m.x,.015,m.z);dummy.rotation.set(0,angle,0);const h=dx*dx+dz*dz<range*range?p.height*1.96:0;
+    dummy.scale.set(h*.875*a.width,h,1);dummy.updateMatrix();group.mesh.setMatrixAt(i,dummy.matrix);
+   });group.frames.needsUpdate=true;group.mesh.instanceMatrix.needsUpdate=true;
   }
-  return {animate,ready,parts:{sprites:mesh},appearances,states};
+ }
+ return {animate,ready,parts:Object.fromEntries(groups.map((g,i)=>[i===0?'sprites':WALK_TYPES[i],g.mesh])),appearances,states};
 }
+import {WALK_LAYOUTS} from './walk-layouts.js';

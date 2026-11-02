@@ -47,7 +47,7 @@ test('directional source PNG with transparency is packaged and sprite shader mat
  for(const n of people.parts.sprites.instanceMatrix.array)assert.ok(Number.isFinite(n));
  assert.equal(people.parts.sprites.material.alphaTest,.45);
  assert.equal(people.parts.sprites.material.depthWrite,true);
- assert.equal(scene.children.length,1);
+ assert.equal(scene.children.length,8);
  const next=readFileSync(new URL('../assets/residents-families-v2.png',import.meta.url));assert.equal(next[25],6);
  assert.equal(new Set(createPopulation().map(appearanceFor).map(a=>a.row)).size,8);
 });
