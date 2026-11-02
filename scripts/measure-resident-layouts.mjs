@@ -1,10 +1,11 @@
 // Measure the existing source artwork; this does not redraw or modify pixels.
 import {readFileSync,writeFileSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
 import {decodeRGBA} from './png-rgba.mjs';
 import {WALK_TYPES,LEGACY_TYPES} from '../animation-frames.js';
 import {SEPARATE_TYPES} from '../resident-assets.js';
 import {WALK_LAYOUTS} from '../walk-layouts.js';
-function measure(file,count){
+export function measure(file,count){
  const {pixels,width,height}=decodeRGBA(readFileSync(new URL('../assets/'+file,import.meta.url)));
  const seen=new Uint8Array(width*height),queue=new Int32Array(width*height),parts=[];
  for(let i=0;i<seen.length;i++){
@@ -33,6 +34,7 @@ function measure(file,count){
   const top=Math.min(...frames.map(b=>b.y));return {top,height:Math.max(...frames.map(b=>b.y+b.h))-top,frames};
  });
 }
+if(process.argv[1]===fileURLToPath(import.meta.url)){
 const layouts={};
 for(const type of WALK_TYPES){
  if(SEPARATE_TYPES.includes(type))layouts[type]={walk:LEGACY_TYPES.includes(type)?WALK_LAYOUTS[type]:measure(`walk-${type}.png`,4),idle:measure(`idle-${type}.png`,4)};
@@ -40,3 +42,5 @@ for(const type of WALK_TYPES){
  console.log(type,layouts[type].walk.length*6+layouts[type].idle.length*6,'frames');
 }
 writeFileSync(new URL('../resident-layouts.js',import.meta.url),'// Measured source rectangles, torso anchors and foot baselines.\nexport const RESIDENT_LAYOUTS='+JSON.stringify(layouts)+';\n');
+
+}

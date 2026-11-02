@@ -1,20 +1,23 @@
 // Render-only smoothing: simulation remains deterministic at 30 Hz.
+import {ACTION_DURATIONS} from './resident-actions.js';
 const tau=Math.PI*2;
 export const angleDelta=(from,to)=>Math.atan2(Math.sin(to-from),Math.cos(to-from));
-export function createMotion(p){return{x:p.x,z:p.z,heading:p.heading,walk:0,talk:0,work:0,phase:p.phase,idleTime:(p.id*.61803398875)%3.49,view:null};}
-export function updateMotion(m,p,dt,simulationRate=1){
+export function createMotion(p){return{x:p.x,z:p.z,heading:p.heading,walk:0,talk:0,work:0,action:null,actionTime:0,talkTime:0,phase:p.phase,idleTime:(p.id*.61803398875)%3.49,view:null};}
+export function updateMotion(m,p,dt,simulationRate=1,speaking=p.state==='talking'){
   dt=Math.max(0,Math.min(dt,.1));
   const follow=1-Math.exp(-24*dt),blend=1-Math.exp(-9*dt);
   m.x+=(p.x-m.x)*follow;m.z+=(p.z-m.z)*follow;
   m.heading+=angleDelta(m.heading,p.heading)*(1-Math.exp(-10*dt));
   m.walk+=((p.state==='walking'?1:0)-m.walk)*blend;
-  m.talk+=((p.state==='talking'?1:0)-m.talk)*blend;
+  m.talk+=((speaking?1:0)-m.talk)*blend;
   m.work+=((p.state==='working'?1:0)-m.work)*blend;
   // Continuous phase survives state switches; faster/shorter child steps and
   // slower elderly gait, with no quantisation to the simulation tick.
   const stride=p.age<16?.48:p.age>60?.69:.77;
   m.phase=(m.phase+dt*p.speed/stride*tau*m.walk*simulationRate)%tau;
   m.idleTime+=dt*simulationRate*(.88+(p.id%11)*.025+m.talk*.55+m.work*.18);
+  if(m.action){m.actionTime+=dt*simulationRate;if(m.actionTime>=ACTION_DURATIONS[m.action]){m.action=null;m.actionTime=0;}}
+  m.talkTime=m.talk>.05?m.talkTime+dt*simulationRate:0;
   return m;
 }
 export function stableView(m,heading,observerAngle){

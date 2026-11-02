@@ -15,7 +15,7 @@ export const ORIGINAL_RESIDENTS=[
  ['priest','priest'],['midwife','elder-female'],['apprentice-boy','boy'],['freckled-girl','girl']
 ].map(([id,category])=>({id,category}));
 // Activate a design only after its painted sheet passes frame and alpha checks.
-export const READY_RESIDENT_IDS=new Set('baker baker-wife fisherman fishmonger carpenter weaver shepherd shepherdess boy-baker girl-baker stonemason potter-wife'.split(' '));
+export const READY_RESIDENT_IDS=new Set('baker baker-wife fisherman fishmonger carpenter weaver shepherd shepherdess boy-baker girl-baker stonemason potter-wife potter seamstress elder-mason elder-weaver boy-fisher girl-fisher girl-carpenter'.split(' '));
 export const PLANNED_RESIDENT_ROSTER=[...ORIGINAL_RESIDENTS,...NEW_RESIDENTS];
 export const RESIDENT_ROSTER=[...ORIGINAL_RESIDENTS,...NEW_RESIDENTS.filter(r=>READY_RESIDENT_IDS.has(r.id))];
 export const RESIDENT_CHOICES=Object.fromEntries([...Object.keys(groups),'priest'].map(category=>[category,RESIDENT_ROSTER.flatMap((r,i)=>r.category===category?[i]:[])]));

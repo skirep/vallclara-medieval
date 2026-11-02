@@ -5,12 +5,17 @@ RGB values of fully transparent pixels may change, but visible pixels and alpha
 must remain identical. No image generation or frame redrawing takes place here.
 """
 from pathlib import Path
-import json, subprocess
+import argparse, json, subprocess
 from PIL import Image, ImageChops
 
 root = Path(__file__).resolve().parent.parent
 before = after = 0
 names = json.loads(subprocess.check_output(['node','--input-type=module','-e',"import {RESIDENT_ASSETS} from './resident-assets.js'; console.log(JSON.stringify(RESIDENT_ASSETS.map(a=>a.fallback)))"],cwd=root,text=True))
+parser = argparse.ArgumentParser()
+parser.add_argument('--only', nargs='+', help='Encode selected resident source IDs')
+args = parser.parse_args()
+if args.only:
+    names = [name for name in names if any(name in [f'resident-{resident}.png',f'walk-{resident}.png',f'idle-{resident}.png'] for resident in args.only)]
 sources = [root / 'assets' / name for name in names]
 for source in sorted(sources):
     image = Image.open(source).convert('RGBA')
