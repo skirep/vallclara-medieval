@@ -57,7 +57,7 @@ function updateAssemblyPanel(){
  $('#assemblyTitle').textContent=turn?`${turn.person.name} · ${turn.person.job}`:assemblies.phase==='gathering'?'Tothom cap a la plaça':assemblies.phase==='dispersing'?'La vila reprèn el dia':'La reunió diària de Vallclara';
  const message=turn?.text||(assemblies.phase==='gathering'?`Són les 12:00. Els veïns arriben per camins diferents · ${assemblies.attending}/${population.length} habitants a lloc.`:assemblies.phase==='dispersing'?'La ronda s’ha acabat. Cadascú torna caminant a les seves activitats.':`Pròxima reunió: ${Math.floor(assemblies.nextAt/24)>Math.floor(clock.hours/24)?'demà a les ':''}12:00.`);
  if($('#assemblyText').textContent!==message)$('#assemblyText').textContent=message;
- $('#assemblyNote').textContent=meeting?(turn.kind==='report'?`Torn ${assemblies.reportNumber}/${assemblies.totalReports} · La resta escolta qui parla. El control de velocitat també accelera la ronda.`:turn.kind==='opening'?'El sacerdot obre la ronda; després hi parlarà tothom.':'El sacerdot tanca la reunió fins demà.'):assemblies.phase==='gathering'?'El rellotge espera que arribin tots els habitants.':'Una reunió al dia · sempre a les 12:00';
+ $('#assemblyNote').textContent=meeting?(turn.kind==='report'?`Torn ${assemblies.reportNumber}/${assemblies.totalReports} · La resta escolta qui parla. El control de velocitat també accelera la ronda.`:turn.kind==='opening'?'El sacerdot modera una ronda de 50 habitants. Els participants canvien cada dia.':'El sacerdot tanca la reunió fins demà.'):assemblies.phase==='gathering'?'El rellotge espera que arribin tots els habitants.':'Una reunió al dia · sempre a les 12:00';
  $('#assemblyNext').hidden=!meeting;
 }
 const reducedMotion=matchMedia('(prefers-reduced-motion:reduce)').matches;

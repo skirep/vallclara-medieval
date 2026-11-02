@@ -1,7 +1,12 @@
 import {createAssemblyNavigation} from './assembly-navigation.js';
 import {createDailyReports} from './daily-reports.js';
-export const ASSEMBLY_INTERVAL=24,ASSEMBLY_HOUR=12,ASSEMBLY_LEAD=0;
+export const ASSEMBLY_INTERVAL=24,ASSEMBLY_HOUR=12,ASSEMBLY_LEAD=0,DAILY_REPORT_LIMIT=50;
 export function nextAssemblyTime(hours){const noon=Math.floor(hours/24)*24+ASSEMBLY_HOUR;return hours<=noon+1e-8?noon:noon+24;}
+export function selectDailySpeakers(population,day){
+ const ordered=[...population].sort((a,b)=>a.id-b.id),count=Math.min(DAILY_REPORT_LIMIT,ordered.length);
+ const offset=ordered.length?((day*count)%ordered.length+ordered.length)%ordered.length:0;
+ return Array.from({length:count},(_,i)=>ordered[(offset+i)%ordered.length]);
+}
 export function createAssemblies(population,{obstacles=[],social,initialHours=9}={}){
  const nav=createAssemblyNavigation(obstacles),priest=population.find(p=>p.role==='priest')||population.find(p=>p.sex===0&&p.age>=60)||population[0];
  if(!priest)throw Error('Cal un habitant per fer de sacerdot');
@@ -25,9 +30,8 @@ export function createAssemblies(population,{obstacles=[],social,initialHours=9}
  }
  function beginDaily(){
   phase='daily';meetingDay=Math.floor(nextAt/24);turnIndex=0;turnTime=0;
-  const others=population.filter(p=>p!==priest),offset=others.length?meetingDay%others.length:0;
-  const order=[priest,...others.slice(offset),...others.slice(0,offset)];
-  turns=[{kind:'opening',person:priest,text:'Bon migdia, vila. Comencem la reunió diària: cadascú explica què va fer ahir i què farà avui. Un torn per persona; escoltem-nos i coordinem la feina.'},
+  const order=selectDailySpeakers(population,meetingDay);
+  turns=[{kind:'opening',person:priest,text:`Bon migdia, vila. Avui escoltarem ${order.length} habitants: què van fer ahir i què faran avui. Els torns roten cada dia; la resta escolta i ajuda a coordinar la feina.`},
    ...order.map(person=>({kind:'report',person,...reports.report(person)})),
    {kind:'closing',person:priest,text:'Gràcies a tothom. Ja hem compartit la feina feta i els plans d’avui. Ajudeu qui ho necessiti i tornem a les nostres activitats. Ens retrobem demà a les dotze.'}];
   orientAudience();
@@ -74,7 +78,7 @@ export function createAssemblies(population,{obstacles=[],social,initialHours=9}
  }
  function bubbles(){const turn=turns[turnIndex];return phase==='daily'&&turn?[{id:`daily-${meetingDay}-${turnIndex}`,person:turn.person,text:turn.text,priority:1}]:[];}
  return {update,seek,bubbles,priest,advanceTurn:nextTurn,get phase(){return phase;},get nextAt(){return nextAt;},get completed(){return completed;},
-  get currentTurn(){return phase==='daily'?turns[turnIndex]:null;},get reportNumber(){return phase==='daily'&&turns[turnIndex]?.kind==='report'?turnIndex:0;},get totalReports(){return population.length;},
+  get currentTurn(){return phase==='daily'?turns[turnIndex]:null;},get reportNumber(){return phase==='daily'&&turns[turnIndex]?.kind==='report'?turnIndex:0;},get totalReports(){return Math.min(DAILY_REPORT_LIMIT,population.length);},
   get clockLimit(){return nextAt;},
   get attending(){return phase==='gathering'||phase==='daily'?[...members.values()].filter(m=>m.arrived).length:0;},
   get active(){return phase!=='idle';}};

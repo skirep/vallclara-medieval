@@ -5,7 +5,7 @@ import {createWorld} from '../world.js';
 import {createPopulation,updatePerson,blocked} from '../simulation.js';
 import {createHistories} from '../stories.js';
 import {createSocialSystem} from '../social.js';
-import {createAssemblies,nextAssemblyTime} from '../assemblies.js';
+import {createAssemblies,nextAssemblyTime,selectDailySpeakers} from '../assemblies.js';
 import {createVillageClock,formatHour,validTimeRate} from '../village-clock.js';
 import {createAssemblyNavigation} from '../assembly-navigation.js';
 import {lanes} from '../simulation.js';
@@ -57,7 +57,8 @@ test('500 villagers gather without teleporting, listen together, disperse and re
  }
  assert.equal(assembly.completed,2);assert.deepEqual(heard,[12,36]);
  assert.equal(social.journal.length,0);
- assert.deepEqual(rounds.map(r=>r.size),[500,500]);
+ assert.deepEqual(rounds.map(r=>r.size),[50,50]);
+ assert.equal(new Set([...rounds[0],...rounds[1]]).size,100,'consecutive days must give different residents a turn');
 });
 
 test('private conversations are interrupted without inventing completed social memories',()=>{
@@ -123,4 +124,19 @@ test('daily schedule has no meetings at midnight, six or eighteen; manual turns 
  while(assembly.phase==='daily')assert.equal(assembly.advanceTurn(),true);
  assert.equal(assembly.completed,1);assert.equal(assembly.nextAt,36);assert.equal(assembly.advanceTurn(),false);
  assembly.seek(9);assert.equal(assembly.nextAt,36,'rewinding within a completed day must not repeat the noon meeting');
+});
+
+
+test('fifty daily reports rotate through all five hundred residents in ten days',()=>{
+ const population=createPopulation(),seen=new Set();
+ for(let day=0;day<10;day++){
+  const speakers=selectDailySpeakers(population,day);assert.equal(speakers.length,50);
+  assert.equal(new Set(speakers.map(p=>p.id)).size,50);
+  for(const p of speakers){assert.equal(seen.has(p.id),false);seen.add(p.id);}
+ }
+ assert.equal(seen.size,500);
+ assert.deepEqual(selectDailySpeakers(population,10),selectDailySpeakers(population,0));
+ assert.deepEqual(selectDailySpeakers([...population].reverse(),0),selectDailySpeakers(population,0));
+ const small=population.slice(0,7);assert.equal(selectDailySpeakers(small,2).length,7);
+ assert.deepEqual(selectDailySpeakers([],0),[]);
 });
