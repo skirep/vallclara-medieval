@@ -1,3 +1,4 @@
+import {attachNarrative} from './village-narrative.js';
 import {random} from './simulation.js';
 const firstNames=['Arnau','Elisenda','Bernat','Agnès','Guillem','Sança','Pere','Blanca','Ramon','Eulàlia','Ferrer','Joana','Berenguer','Margarida','Jaume','Isabel'];
 const origins=['Vallclara','el mas del Roure','la vall del riu','el veïnat de l’Om','la vila de Montclar','el camí del coll','les bordes del nord','el mas de la Font'];
@@ -15,5 +16,6 @@ export function createHistories(population){
     p.social={cooldown:rng()*14,conversation:null,met:{},meetings:0};
   }
   for(const p of population){const f=population[p.story.friendId],k=population[p.story.kinId];p.story.biography=`${p.name}, de ${p.age} anys, ${p.age<16?'és '+p.job:'treballa de '+p.job} i viu a la casa ${p.story.household}. Ve ${('de '+p.story.origin).replace(/^de el /,'del ')}. L’any ${p.story.year}, ${p.story.past}. Conserva ${p.story.keepsake} d’aquella etapa. Forma part de la família ${p.surname}, on és ${p.familyRole}. Manté una amistat amb ${f.name} i un vincle familiar amb ${k.name}. Té un tarannà ${p.story.temperament}; ara vol ${p.story.wish}, i té una preocupació: ${p.story.worry}.`;}
+  attachNarrative(population);
   return population;
 }

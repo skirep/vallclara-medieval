@@ -12,5 +12,6 @@ export function createVillageClock(initial=9){
  let hours=initial;
  return {get hours(){return hours;},get hour(){return (hours%24+24)%24;},
   advance(seconds,limit=Infinity){hours=Math.min(hours+Math.max(0,seconds)/180,Math.max(hours,limit));return hours;},
+  restoreHours(value){if(Number.isFinite(value)&&value>=0&&value<1e7)hours=value;return hours;},
   seek(hour){hours=Math.floor(hours/24)*24+((hour%24+24)%24);return hours;}};
 }

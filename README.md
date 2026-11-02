@@ -88,3 +88,11 @@ Geometria estàtica agrupada per material i sprites amb InstancedMesh. Tots els 
   - https://polyhaven.com/a/autumn_field_puresky
 - Tipografies Cormorant Garamond i Manrope, Google Fonts, amb alternatives Georgia i Arial.
 - Geometria, textures de reserva i codi de la simulació creats per a aquest projecte.
+
+## Vida del poble: diàlegs, oficis i rebost
+
+El pacte de les dues ribes connecta les històries de la vila en quatre etapes i setze fils. Cada habitant disposa de **512 entrades contextuals de diàleg**, consultables a les Cròniques. Les escenes s’adapten a les dades de cada persona; no són 256.000 frases escrites individualment ni requereixen una API d’IA.
+
+Els **500 habitants tenen feina assignada i l’executen**: van al lloc, reserven els materials, treballen i lliuren el resultat. Gra, aigua, fusta, llana i pa connecten oficis. Les pauses, les converses, la tornada a casa i la reunió conserven el treball pendent. La reunió diària de les dotze manté els 50 torns rotatius i informa de tasques realment completades.
+
+Consulta **Cròniques → Història del poble**, **Oficis i rebost** o la fitxa d’un habitant. Vegeu [la història i el funcionament de la simulació](docs/village-life.md) per als personatges, les regles de treball, els desaments i els límits del model.
