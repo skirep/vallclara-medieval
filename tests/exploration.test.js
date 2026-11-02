@@ -2,7 +2,7 @@ import test from 'node:test';import assert from 'node:assert/strict';
 import {housePlan,wallPanels} from '../interiors.js';
 import {blocked} from '../simulation.js';
 import {BRIDGE,RIVER,bridgeHeight,groundHeight,landscapeHeight,riverCenter} from '../terrain.js';
-import {drawnFrame,WALK_TYPES,WALK_FRAMES} from '../animation-frames.js';
+import {drawnFrame,LEGACY_TYPES as WALK_TYPES,WALK_FRAMES} from '../animation-frames.js';
 import {WALK_LAYOUTS} from '../walk-layouts.js';
 import {readFileSync} from 'node:fs';
 

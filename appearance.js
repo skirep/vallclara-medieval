@@ -1,12 +1,9 @@
-// Eight age/sex archetypes share family traits without cloning each resident.
+// Sixteen painted archetypes retain their natural skin, hair and textile colors.
 export function appearanceFor(p){
-  const category=(p.age<16?2:0)+(p.sex?1:0);
-  const family=p.familyId??Math.floor(p.id/5);
-  const atlas=p.age>=60||p.age<16&&family%2===1?1:0;
-  const hue=((family*137.507764+(p.id%5)*13)%360)/360;
-  return {row:category+atlas*4,hue:p.role==='priest'?.1:hue,saturation:p.role==='priest'?.06:.28+(p.id%5)*.075,lightness:p.role==='priest'?.16:.32+(Math.floor(p.id/5)%5)*.045,
-    width:.87+(p.id%13)*.021,hair:p.age>=60?.68:.10+(family%7)*.065,skin:.78+(family%9)*.027,
-    signature:`${category+atlas*4}:${p.id}`};
+ const family=p.familyId??Math.floor(p.id/5);
+ const choices=p.age<16?(p.sex?[3,7,11,15]:[2,6,10,14]):p.age>=60?(p.sex?[5,13]:[4,8]):p.sex?[1,9]:[0,8,4];
+ const row=p.role==='priest'?12:choices[(((Math.imul(p.id+17,2654435761)>>>0)>>>16)+family*13)%choices.length];
+ return {row,width:.87+(p.id%13)*.021,signature:`${row}:${p.id}`};
 }
 export function spriteView(heading,observerAngle){
   const quarter=((Math.round((observerAngle-heading)/(Math.PI/2))%4)+4)%4;

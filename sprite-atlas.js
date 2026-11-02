@@ -1,27 +1,23 @@
-import {WALK_LAYOUTS} from './walk-layouts.js';
+import {RESIDENT_LAYOUTS} from './resident-layouts.js';
 export const CELL={width:224,height:256,baseline:244,center:112};
-// Reuse a planted-foot pose from the same sheet when stopped. Mixing the older
-// idle illustration into this sheet changed the resident's body on every stop.
-export const REST_FRAME=1;
-export function framePlacement(type,view,frame){
- const rows=WALK_LAYOUTS[type];
- if(!rows?.[view])throw Error(`Invalid resident view: ${type}/${view}`);
- const source=rows[view].frames[frame===6?REST_FRAME:frame];
+export function cellSize(pixelHeight=256){const height=[128,192,256].includes(pixelHeight)?pixelHeight:256;return {width:height*.875,height,baseline:height*244/256,center:height*.875/2};}
+export function framePlacement(type,view,frame,pixelHeight=256){
+ const state=frame<6?'walk':'idle',rows=RESIDENT_LAYOUTS[type]?.[state];
+ if(!rows?.[view])throw Error(`Invalid resident view: ${type}/${view}/${state}`);
+ const source=rows[view].frames[frame%6],cell=cellSize(pixelHeight),column=frame%6,row=view+(state==='idle'?4:0);
  if(!source)throw Error(`Invalid resident frame: ${frame}`);
- const scale=232/Math.max(...rows.flatMap(row=>row.frames.map(box=>box.footY-box.y)));
- return {sx:source.x,sy:source.y,sw:source.w,sh:source.h,
-  dx:frame*CELL.width+CELL.center+(source.x-source.anchorX)*scale,
-  dy:view*CELL.height+CELL.baseline+(source.y-source.footY)*scale,
+ const scale=(cell.height*232/256)/Math.max(...rows[view].frames.map(box=>box.footY-box.y));
+ return {state,sx:source.x,sy:source.y,sw:source.w,sh:source.h,
+  dx:column*cell.width+cell.center+(source.x-source.anchorX)*scale,
+  dy:row*cell.height+cell.baseline+(source.y-source.footY)*scale,
   dw:source.w*scale,dh:source.h*scale,scale};
 }
-export function packWalkAtlas(image,type,canvas){
- canvas.width=CELL.width*7;canvas.height=CELL.height*4;
- const ctx=canvas.getContext('2d');
- if(!ctx)throw Error('Canvas 2D no disponible');
- ctx.imageSmoothingEnabled=false;
- for(let view=0;view<4;view++)for(let frame=0;frame<7;frame++){
-  const p=framePlacement(type,view,frame);
-  ctx.drawImage(image,p.sx,p.sy,p.sw,p.sh,p.dx,p.dy,p.dw,p.dh);
+export function packWalkAtlas(images,type,canvas,pixelHeight=256){
+ const cell=cellSize(pixelHeight);canvas.width=cell.width*6;canvas.height=cell.height*8;
+ const ctx=canvas.getContext('2d');if(!ctx)throw Error('Canvas 2D no disponible');ctx.imageSmoothingEnabled=false;
+ for(let view=0;view<4;view++)for(let frame=0;frame<12;frame++){
+  const p=framePlacement(type,view,frame,pixelHeight);
+  ctx.drawImage(images[p.state],p.sx,p.sy,p.sw,p.sh,p.dx,p.dy,p.dw,p.dh);
  }
  return canvas;
 }

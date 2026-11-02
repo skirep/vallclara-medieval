@@ -32,7 +32,7 @@ test('failed WebP loads fall back to source PNG and a double failure rejects sta
   if(url.endsWith('.webp'))throw Error('decode failed');
   return url;
  });
- assert.equal(calls.length,18);
+ assert.equal(calls.length,RESIDENT_ASSETS.length*2);
  assert.ok(images.every(url=>url.endsWith('.png')));
  await assert.rejects(loadResidentImages(async()=>{throw Error('offline');}),/offline/);
  await assert.rejects(loadResidentImages(async url=>{

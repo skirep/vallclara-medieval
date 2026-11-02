@@ -1,7 +1,7 @@
 // Render-only smoothing: simulation remains deterministic at 30 Hz.
 const tau=Math.PI*2;
 export const angleDelta=(from,to)=>Math.atan2(Math.sin(to-from),Math.cos(to-from));
-export function createMotion(p){return{x:p.x,z:p.z,heading:p.heading,walk:0,talk:0,work:0,phase:p.phase,view:null};}
+export function createMotion(p){return{x:p.x,z:p.z,heading:p.heading,walk:0,talk:0,work:0,phase:p.phase,idleTime:(p.id*.61803398875)%3.49,view:null};}
 export function updateMotion(m,p,dt,simulationRate=1){
   dt=Math.max(0,Math.min(dt,.1));
   const follow=1-Math.exp(-24*dt),blend=1-Math.exp(-9*dt);
@@ -14,6 +14,7 @@ export function updateMotion(m,p,dt,simulationRate=1){
   // slower elderly gait, with no quantisation to the simulation tick.
   const stride=p.age<16?.48:p.age>60?.69:.77;
   m.phase=(m.phase+dt*p.speed/stride*tau*m.walk*simulationRate)%tau;
+  m.idleTime+=dt*simulationRate*(.88+(p.id%11)*.025+m.talk*.55+m.work*.18);
   return m;
 }
 export function stableView(m,heading,observerAngle){

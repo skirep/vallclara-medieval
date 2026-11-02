@@ -1,23 +1,23 @@
 <!doctype html><html lang="ca"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Vallclara · Revisió dels fotogrames</title>
-<style>body{margin:24px;background:#172b28;color:#e9dfc5;font:16px system-ui}h1{font-size:24px}label{display:inline-block;margin:0 20px 16px 0}select{padding:8px}main{display:grid;grid-template-columns:repeat(4,minmax(160px,224px));gap:12px}article{background:#263c37;border:1px solid #52695c;text-align:center;padding:8px}canvas{display:block;width:100%;height:auto;image-rendering:pixelated}p{max-width:900px}@media(max-width:700px){main{grid-template-columns:repeat(2,minmax(130px,224px))}}</style>
+<style>body{margin:24px;background:#172b28;color:#e9dfc5;font:16px system-ui}h1{font-size:24px}label{display:inline-block;margin:0 20px 16px 0}select{padding:8px}main{display:grid;grid-template-columns:repeat(8,minmax(120px,160px));gap:12px}article{background:#263c37;border:1px solid #52695c;text-align:center;padding:8px}canvas{display:block;width:100%;height:auto;image-rendering:pixelated}p{max-width:900px}@media(max-width:700px){main{grid-template-columns:repeat(2,minmax(130px,224px))}}</style>
 <h1>Vallclara · Revisió dels fotogrames</h1><p>Mateix empaquetador que el joc. La línia daurada marca el terra; el traç vertical marca l’ancoratge del tors. Canvia la vista i alterna caminar i repòs.</p>
 <label>Orientació <select id="view"><option value="0">Davant</option><option value="1">Perfil cap a la dreta</option><option value="2">Esquena</option><option value="3">Perfil cap a l’esquerra</option></select></label>
 <label>Animació <select id="mode"><option value="walk">Caminar</option><option value="rest">Repòs</option><option value="alternate">Caminar i aturar-se</option></select></label><output id="status">Carregant…</output><main></main>
 <script type="module">
-import {WALK_TYPES} from '../animation-frames.js';
-import {loadResidentImages} from '../resident-assets.js';
+import {WALK_TYPES,drawnFrame} from '../animation-frames.js';
+import {loadResidentImages,sourcesFor} from '../resident-assets.js';
 import {packWalkAtlas} from '../sprite-atlas.js';
 const load=url=>new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve(image);image.onerror=reject;image.src=url;});
 const images=await loadResidentImages(load),views=[];
-for(let i=0;i<8;i++){
- const atlas=packWalkAtlas(images[i+2],WALK_TYPES[i],document.createElement('canvas'));
+for(let i=0;i<WALK_TYPES.length;i++){
+ const atlas=packWalkAtlas(sourcesFor(images,WALK_TYPES[i]),WALK_TYPES[i],document.createElement('canvas'));
  const article=document.createElement('article'),canvas=document.createElement('canvas');canvas.width=224;canvas.height=256;
  article.append(document.createTextNode(WALK_TYPES[i]),canvas);document.querySelector('main').append(article);views.push({atlas,canvas});
 }
 function draw(now){
  const mode=document.querySelector('#mode').value,view=Number(document.querySelector('#view').value),rest=mode==='rest'||mode==='alternate'&&Math.floor(now/2000)%2;
- const frame=rest?6:Math.floor(now/160)%6;
- for(const {atlas,canvas} of views){const c=canvas.getContext('2d');c.clearRect(0,0,224,256);c.imageSmoothingEnabled=false;c.strokeStyle='#50675a';c.beginPath();c.moveTo(112,0);c.lineTo(112,256);c.stroke();c.drawImage(atlas,frame*224,view*256,224,256,0,0,224,256);c.strokeStyle='#d7b76e';c.beginPath();c.moveTo(0,244);c.lineTo(224,244);c.stroke();}
- document.querySelector('#status').textContent=`8 personatges · ${rest?'Repòs':`Fotograma ${frame+1}/6`}`;requestAnimationFrame(draw);
+ const frame=drawnFrame({walk:rest?0:1,phase:now/160/6*Math.PI*2,idleTime:now/1000});
+ for(const {atlas,canvas} of views){const c=canvas.getContext('2d');c.clearRect(0,0,224,256);c.imageSmoothingEnabled=false;c.strokeStyle='#50675a';c.beginPath();c.moveTo(112,0);c.lineTo(112,256);c.stroke();c.drawImage(atlas,(frame%6)*224,(view+(frame>=6?4:0))*256,224,256,0,0,224,256);c.strokeStyle='#d7b76e';c.beginPath();c.moveTo(0,244);c.lineTo(224,244);c.stroke();}
+ document.querySelector('#status').textContent=`16 personatges · ${rest?`Repòs ${frame%6+1}/6`:`Caminar ${frame+1}/6`}`;requestAnimationFrame(draw);
 }requestAnimationFrame(draw);
 </script></html>

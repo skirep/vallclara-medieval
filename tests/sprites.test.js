@@ -7,11 +7,12 @@ import {createHistories} from '../stories.js';
 import {writeConversation} from '../social.js';
 import {createPeople} from '../people-sprites.js';
 
-test('500 stable visual variants include men, women, boys and girls with age-appropriate scale',()=>{
+test('500 stable resident assignments cover sixteen painted archetypes with age-appropriate scale',()=>{
  const p=createPopulation(),a=p.map(appearanceFor);
  assert.equal(new Set(a.map(x=>x.signature)).size,500);
- assert.equal(new Set(a.map(x=>`${x.row}:${x.hue}:${x.width}:${x.hair}`)).size,500);
- for(let row=0;row<4;row++)assert.ok(a.filter(x=>x.row%4===row).length>=100);
+ assert.equal(new Set(a.map(x=>x.width)).size,13);
+ assert.ok(new Set(a.map(x=>x.row)).size>=15);
+ for(const person of p){const row=appearanceFor(person).row;if(person.age<16)assert.ok([2,3,6,7,10,11,14,15].includes(row));}
  assert.deepEqual(a,createPopulation().map(appearanceFor));
  for(const person of p){assert.ok(person.age>=7);assert.ok(person.age<16?person.height<.8:person.height>=.82);}
 });
@@ -36,18 +37,19 @@ test('children have recent memories and conversations without adult work histori
 test('directional source PNG with transparency is packaged and sprite shader matches Three chunks',()=>{
  const png=readFileSync(new URL('../assets/residents-directions-v1.png',import.meta.url));
  assert.equal(png.subarray(1,4).toString(),'PNG');assert.equal(png[25],6);
- const shader={vertexShader:T.ShaderLib.basic.vertexShader,fragmentShader:T.ShaderLib.basic.fragmentShader};
+ const shader={vertexShader:T.ShaderLib.basic.vertexShader,fragmentShader:T.ShaderLib.basic.fragmentShader};const originalFragment=shader.fragmentShader;
  // CPU scene smoke test exercises the actual material transformation, not WebGL.
  globalThis.document={createElementNS(){return{addEventListener(){},removeEventListener(){},set src(v){}};}};
  const scene=new T.Scene(),people=createPeople(scene,createPopulation());
  people.parts.sprites.material.onBeforeCompile(shader);
  assert.match(shader.vertexShader,/residentFrame/);assert.match(shader.vertexShader,/vMapUv = vec2/);
- assert.match(shader.fragmentShader,/dyeMask/);
+ assert.equal(shader.fragmentShader,originalFragment,'painted skin and clothing must pass through without recoloring');
+ assert.equal(people.parts.sprites.geometry.getAttribute('residentDye'),undefined);
  people.animate(1,new T.Vector3(0,1.7,0),65);
  for(const n of people.parts.sprites.instanceMatrix.array)assert.ok(Number.isFinite(n));
  assert.equal(people.parts.sprites.material.alphaTest,.45);
  assert.equal(people.parts.sprites.material.depthWrite,true);
- assert.equal(scene.children.length,8);
+ assert.equal(scene.children.length,16);
  const next=readFileSync(new URL('../assets/residents-families-v2.png',import.meta.url));assert.equal(next[25],6);
- assert.equal(new Set(createPopulation().map(appearanceFor).map(a=>a.row)).size,8);
+ assert.equal(new Set(createPopulation().map(appearanceFor).map(a=>a.row)).size,15);
 });
