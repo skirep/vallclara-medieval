@@ -4,7 +4,7 @@ export function appearanceFor(p){
   const family=p.familyId??Math.floor(p.id/5);
   const atlas=p.age>=60||p.age<16&&family%2===1?1:0;
   const hue=((family*137.507764+(p.id%5)*13)%360)/360;
-  return {row:category+atlas*4,hue,saturation:.28+(p.id%5)*.075,lightness:.32+(Math.floor(p.id/5)%5)*.045,
+  return {row:category+atlas*4,hue:p.role==='priest'?.1:hue,saturation:p.role==='priest'?.06:.28+(p.id%5)*.075,lightness:p.role==='priest'?.16:.32+(Math.floor(p.id/5)%5)*.045,
     width:.87+(p.id%13)*.021,hair:p.age>=60?.68:.10+(family%7)*.065,skin:.78+(family%9)*.027,
     signature:`${category+atlas*4}:${p.id}`};
 }

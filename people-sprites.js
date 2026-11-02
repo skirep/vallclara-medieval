@@ -57,8 +57,8 @@ diffuseColor.rgb*=mix(1.0,vFeatures.y,head*.5);`);
    group.texture.image=packWalkAtlas(images[type+2],WALK_TYPES[type],document.createElement('canvas'));group.texture.needsUpdate=true;
   });
  });
- function animate(time,camera,range=100,dt=1/60){
-  population.forEach((p,i)=>updateMotion(states[i],p,dt));
+ function animate(time,camera,range=100,dt=1/60,simulationRate=1){
+  population.forEach((p,i)=>updateMotion(states[i],p,dt,simulationRate));
   for(const group of groups){
    group.indices.forEach((index,i)=>{
     const p=population[index],a=appearances[index],m=states[index],dx=camera.x-m.x,dz=camera.z-m.z,angle=Math.atan2(dx,dz);

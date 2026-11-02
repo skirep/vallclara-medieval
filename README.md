@@ -19,6 +19,14 @@ Els fotogrames ara comparteixen un ancoratge del tors i una línia de terra mesu
 
 La pàgina local `scripts/sprite-review.html` permet revisar els vuit personatges, les quatre orientacions i el pas entre caminar i aturar-se amb el mateix empaquetador del joc, sense WebGL. S’ha inspeccionat aquesta vista 2D; la revisió dins del joc WebGL continua pendent. `node scripts/measure-walk-anchors.mjs` regenera les mesures sense modificar els dibuixos.
 
+## Temps i reunions de la vila
+
+- A **Opcions → Velocitat del temps**, slider de 0 a 8×, en passos de 0,25. 0 atura el món; 1× manté el ritme original (tres minuts reals per hora del joc). La preferència es desa en aquest navegador. El jugador continua movent-se a velocitat normal. La simulació dels habitants, els animals i els efectes ambientals segueix el multiplicador; l’animació de caminar també.
+- El rellotge recorre les 24 hores, amb reunions a les **00:00, 06:00, 12:00 i 18:00** del joc. Els habitants comencen a anar a la plaça amb anticipació. Una graella de navegació comparteix camins segurs pels carrers i evita els obstacles; cada assistent ocupa un lloc diferent. Les converses privades s’interrompen sense generar records falsos.
+- Un dels 500 habitants exerceix de **sacerdot**, identificat com a Mossèn i amb roba de paleta fosca. Conserva els vincles familiars; no s’afegeix un habitant número 501 ni un nou full d’animació específic. Pronuncia quatre parlaments originals segons l’hora, amb subtítols al HUD i bafarada. Les veus continuen sent opcionals i depenen de SpeechSynthesis del navegador.
+- El rellotge espera a l’hora prevista fins que hi ha els **500 habitants**, i durant el parlament. Els textos mantenen el temps de lectura real encara que s’acceleri el món; a 0× també es pausa el parlament. Després, els habitants tornen caminant al lloc on eren i reprenen les rutines. Canviar manualment l’hora cancel·la el parlament pendent i els fa tornar abans de planificar la pròxima reunió.
+- La vista local `scripts/assembly-review.html` permet comprovar la distribució i els parlaments en 2D amb la geometria i el planificador del joc. Verificades reunions consecutives a les 12, 18, 00 i 06 h, la interrupció de converses, les col·lisions, la velocitat del temps i el canvi manual d’hora. La revisió completa dins del joc WebGL continua pendent per la limitació del navegador de prova.
+
 ## Materials i vida social
 
 - Materials PBR fotogràfics CC0 amb color, normals OpenGL i rugositat per a pedra medieval, llambordes, arrebossat, teules de fang, fusta, escorça, terra, lli i cuir. Escala de textura en metres i mapes compartits per reduir memòria.
