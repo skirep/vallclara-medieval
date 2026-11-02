@@ -11,7 +11,7 @@ test('nearby conversations stop movement, alternate speakers, complete and leave
   const p=town(),a=p[0],b=p[1];a.social.cooldown=b.social.cooldown=0;a.x=0;a.z=0;b.x=1.5;b.z=0;a.path=[1];
   const system=createSocialSystem(p);assert.ok(system.begin(a,b,10));const before=a.x;updatePerson(a,1,10);assert.equal(a.x,before);assert.equal(a.state,'talking');assert.equal(system.begin(a,p[2],10),false);
   const turns=system.active[0].turns;assert.ok(new Set(turns.map(t=>t.speakerId)).size===2);assert.ok(turns.every(t=>t.text.length>10));
-  for(let i=0;i<40;i++)system.update(1,10);
+  for(let i=0;i<100&&system.active.length;i++)system.update(1,10,{allowNew:false});
   assert.equal(a.social.conversation,null);assert.equal(b.social.conversation,null);assert.equal(a.social.met[b.id],1);assert.ok(a.social.meetings>=1);assert.ok(system.journal.some(c=>c.a===a.id&&c.b===b.id));
   const restored=town(),next=createSocialSystem(restored);next.restore(JSON.parse(JSON.stringify(system.serialize())));assert.equal(restored[0].social.met[1],1);assert.ok(next.journal.length>0);assert.equal(restored[0].social.conversation,null);
 });

@@ -1,3 +1,4 @@
+import {taskFor} from './resident-tasks.js';
 // Fictional opening-day history, followed by activities actually observed in the simulation.
 const work=[
  ['vaig treballar al camp','revisaré els sembrats','regaré l’hort','prepararé les llavors'],
@@ -17,6 +18,7 @@ const childhood=['llegiré una estona','ajudaré la gent de casa','practicaré e
 const mod=(n,length)=>((n%length)+length)%length;
 function workDone(p){return p.role==='priest'?'vaig ajudar els veïns i preparar la reunió':p.age<16?'vaig aprendre coses noves i ajudar la gent de casa':work[mod(p.jobId||0,work.length)][0];}
 export function dailyPlan(p,day){
+ if(p.duty)return taskFor(p,day).future;
  const variation=p.id+Math.floor(p.id/5)+day;
  if(p.role==='priest')return ['coordinaré les peticions de la vila','visitaré els veïns que necessiten ajuda','prepararé la reunió de demà'][mod(variation,3)];
  if(p.age<16)return childhood[mod(variation,childhood.length)];
@@ -36,6 +38,7 @@ export function createDailyReports(population,initialHours=9){
   }
  }
  function report(p){
+  if(p.duty){const recorded=p.duty.yesterday,completed=recorded?.day===day-1&&recorded.completed>0;const yesterday=completed?[...new Set(recorded.tasks)].slice(0,2).join(' i '):'no vaig completar cap tasca anotada';const today=dailyPlan(p,day),blocker=p.duty.phase==='blocked'?` Ara em falta ${p.duty.blocker}.`:'';return{personId:p.id,day,yesterday,today,text:`Ahir ${yesterday}. Avui ${today}.${blocker}`};}
   const entry=previous.get(p.id),past=[];
   if(entry?.opening)past.push(entry.opening);
   else{
