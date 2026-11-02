@@ -3,6 +3,7 @@ import {appearanceFor} from './appearance.js';
 import {createMotion,updateMotion,stableView} from './sprite-motion.js';
 import {drawnFrame,WALK_TYPES} from './animation-frames.js';
 import {loadResidentImages} from './resident-assets.js';
+import {packWalkAtlas} from './sprite-atlas.js';
 export const ATLAS_URL=new URL('./assets/residents-directions-v1.png',import.meta.url).href;
 export const FAMILY_ATLAS_URL=new URL('./assets/residents-families-v2.png',import.meta.url).href;
 const load=url=>new Promise((resolve,reject)=>new T.ImageLoader().load(url,resolve,undefined,()=>reject(new Error('No s’ha pogut carregar l’animació dels habitants. Torna a carregar la pàgina.'))));
@@ -45,29 +46,15 @@ vec3 hairColor=mix(vec3(vFeatures.x*.8,vFeatures.x*.57,vFeatures.x*.37),vec3(vFe
 diffuseColor.rgb=mix(diffuseColor.rgb,hairColor*max(.28,luminance*4.0),hair*.72);
 diffuseColor.rgb*=mix(1.0,vFeatures.y,head*.5);`);
   };
-  material.customProgramCacheKey=()=> 'vallclara-drawn-frames-v3';
+  material.customProgramCacheKey=()=> 'vallclara-drawn-frames-v4';
   const mesh=new T.InstancedMesh(g,material,n);mesh.name='Habitants amb fotogrames · '+WALK_TYPES[type];mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);mesh.frustumCulled=false;mesh.userData.spriteBillboard=true;scene.add(mesh);
   indices.forEach((index,i)=>{const a=appearances[index];color.setHSL(a.hue,a.saturation,a.lightness);dyes.setXYZ(i,color.r,color.g,color.b);features.setXYZ(i,a.hair,a.skin,0);});
   groups.push({indices,frames,texture,mesh});
  }
  geometry.dispose();
  const ready=loadResidentImages(load,onProgress).then(images=>{
-  const idleLayouts=[{centers:[234,503,764,1043],rows:[[2,326],[330,682],[685,972],[975,1253]],half:100},{centers:[207,496,775,1070],rows:[[8,319],[331,631],[638,928],[934,1236]],half:110}];
   groups.forEach((group,type)=>{
-   const image=images[type+2],canvas=document.createElement('canvas');canvas.width=1568;canvas.height=1024;const ctx=canvas.getContext('2d');if(!ctx)throw Error('Canvas 2D no disponible');ctx.imageSmoothingEnabled=false;
-   // Source sheets use a 6x4 grid. The packing manifest records measured
-   // silhouette bounds and a shared row scale/baseline, preventing foot jitter.
-   const layout=WALK_LAYOUTS[WALK_TYPES[type]];
-   if(!layout)throw Error('Falta el pla de fotogrames '+WALK_TYPES[type]);
-   for(let view=0;view<4;view++){
-    const row=layout[view],scale=232/Math.max(...layout.map(r=>r.height));
-    for(let frame=0;frame<6;frame++){
-     const box=row.frames[frame];ctx.drawImage(image,box.x,row.top,box.w,row.height,frame*224+112-box.w*scale/2,view*256+244-row.height*scale,box.w*scale,row.height*scale);
-    }
-    const source=idleLayouts[Math.floor(type/4)],[top,bottom]=source.rows[type%4],sc=232/(bottom-top);
-    ctx.drawImage(images[Math.floor(type/4)],source.centers[view]-source.half,top,source.half*2,bottom-top,6*224+112-source.half*sc,view*256+12,source.half*2*sc,232);
-   }
-   group.texture.image=canvas;group.texture.needsUpdate=true;
+   group.texture.image=packWalkAtlas(images[type+2],WALK_TYPES[type],document.createElement('canvas'));group.texture.needsUpdate=true;
   });
  });
  function animate(time,camera,range=100,dt=1/60){
@@ -83,4 +70,3 @@ diffuseColor.rgb*=mix(1.0,vFeatures.y,head*.5);`);
  }
  return {animate,ready,parts:Object.fromEntries(groups.map((g,i)=>[i===0?'sprites':WALK_TYPES[i],g.mesh])),appearances,states};
 }
-import {WALK_LAYOUTS} from './walk-layouts.js';

@@ -4,7 +4,7 @@ Poble medieval explorable de Dejoco Arts, construït amb Three.js r180. Primera 
 
 ## Actualització: fotogrames, riu, pont i interiors
 
-- **192 dibuixos de caminar** generats amb imagegen: vuit figures base × quatre vistes × sis fotogrames. Les cames, els braços i la roba canvien de dibuix; s’ha eliminat la deformació de la malla. La fase segueix la velocitat i l’edat, amb transicions de moviment i interpolació de posició. En aturar-se es mostra un fotograma de repòs. Les converses i els oficis no tenen encara seqüències pròpies dibuixades.
+- **192 dibuixos de caminar** generats amb imagegen: vuit figures base × quatre vistes × sis fotogrames. Les cames, els braços i la roba canvien de dibuix; s’ha eliminat la deformació de la malla. La fase segueix la velocitat i l’edat, amb transicions de moviment i interpolació de posició. En aturar-se es conserva un pas amb suport al terra del mateix full; encara no hi ha una postura neutra dibuixada pròpia. Les converses i els oficis no tenen encara seqüències pròpies dibuixades.
 - Es conserven les 500 variants i les 100 famílies. Els PNG originals, els prompts i les caixes mesurades dels fotogrames són a `assets/walk-*.png`, `assets/walk-prompts.md` i `walk-layouts.js`. Els dibuixos generats poden tenir petites variacions de proporció entre passos; cal revisar el resultat animat en dispositius reals.
 - **32 plantes baixes accessibles**, sense canvi de pantalla. Portes obertes amb passos reals, finestres amb obertures, parets de gruix físic, sostre, bigues, taules, llits o bancs, cofres, prestatges, terrissa i llars de foc. Els mobles principals i les parets tenen col·lisions; el passadís central connecta les dues portes. No hi ha escala a plantes superiors ni interacció amb portes o objectes.
 - Més detall arquitectònic: llindes, brancals, porticons, ampits, entramat de fusta, careners, xemeneies, materials PBR fotogràfics i llum càlida interior. Només s’activen les tres llums interiors més pròximes.
@@ -12,6 +12,12 @@ Poble medieval explorable de Dejoco Arts, construït amb Three.js r180. Primera 
 - El jugador segueix l’altura del tauler del pont i del terreny. El mapa mostra el riu i el pont i el límit d’exploració s’amplia a 165 m. La simulació dels habitants continua al traçat de carrers existent; no entren automàticament als interiors ni travessen el pont.
 - Vuit InstancedMesh amb quads de quatre vèrtexs, un per figura, amb textures de 1568 × 1024, filtre de píxel i alpha test. Els elements estàtics es continuen agrupant per material. Les animacions es carreguen com a WebP sense pèrdua: 7,35 MB en lloc de 17,29 MB (57,5% menys), amb el mateix canal alfa i els mateixos píxels visibles. Els PNG originals es conserven com a alternativa si el navegador no pot carregar el WebP. El botó d’entrada mostra el progrés de les deu imatges. Per regenerar les còpies optimitzades: `python scripts/encode-walk-textures.py` (Pillow; no és necessari per executar el joc ni per desplegar).
 - La direcció de l’escenari és més naturalista i detallada, però **no es dona per assolit el fotorealisme**. La revisió visual WebGL i la mesura de rendiment real continuen pendents: el navegador de prova obre la previsualització però no pot crear un context WebGL 2.
+
+## Correcció de l’alineació dels habitants
+
+Els fotogrames ara comparteixen un ancoratge del tors i una línia de terra mesurats individualment sobre el canal alfa. Això elimina el desplaçament causat per centrar la caixa completa de la silueta i per utilitzar el mateix retall vertical per a tot un cicle. El repòs reutilitza una postura del mateix full en lloc de canviar a la il·lustració antiga, que tenia altres proporcions.
+
+La pàgina local `scripts/sprite-review.html` permet revisar els vuit personatges, les quatre orientacions i el pas entre caminar i aturar-se amb el mateix empaquetador del joc, sense WebGL. S’ha inspeccionat aquesta vista 2D; la revisió dins del joc WebGL continua pendent. `node scripts/measure-walk-anchors.mjs` regenera les mesures sense modificar els dibuixos.
 
 ## Materials i vida social
 
