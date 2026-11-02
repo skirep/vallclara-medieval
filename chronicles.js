@@ -1,7 +1,7 @@
 import {familiesOf,relationLabel} from './families.js';
 import * as T from 'three';
 export function createChronicles(population,social,{onOpen,onClose}){
-  const $=s=>document.querySelector(s),dialog=$('#chronicles'),list=$('#resident-list'),bio=$('#biography'),byId=new Map(population.map(p=>[p.id,p])),projected=new T.Vector3(),bubbles=new Map();let selected=0,lastSpoken='',lastSpokenAt=0;
+  const $=s=>document.querySelector(s),dialog=$('#chronicles'),list=$('#resident-list'),bio=$('#biography'),byId=new Map(population.map(p=>[p.id,p])),projected=new T.Vector3(),bubbles=new Map();let selected=0,lastSpoken='',lastSpokenAt=0,lastPublicKey='';
   const text=(tag,value,className='')=>{const el=document.createElement(tag);el.textContent=value;if(className)el.className=className;return el;};
   const familyFilter=$('#familyFilter');
   for(const family of familiesOf(population)){const option=text('option',`${family.surname} · casa ${family.household}`);option.value=family.id;familyFilter.append(option);}
@@ -26,10 +26,12 @@ export function createChronicles(population,social,{onOpen,onClose}){
   function tab(which){$('#peoplePanel').hidden=which!=='people';$('#talkPanel').hidden=which!=='talk';$('#peopleTab').setAttribute('aria-pressed',String(which==='people'));$('#talkTab').setAttribute('aria-pressed',String(which==='talk'));if(which==='talk')renderLog();}
   $('#peopleTab').onclick=()=>tab('people');$('#talkTab').onclick=()=>tab('talk');
   function updateBubbles(camera,enabled,voices,publicBubbles=[]){
+    const publicKey=enabled&&voices?(publicBubbles[0]?.id||''):'';
+    if(publicKey!==lastPublicKey){window.speechSynthesis?.cancel();lastSpoken='';lastSpokenAt=-Infinity;lastPublicKey=publicKey;}
     const candidates=enabled?[...publicBubbles,...social.bubbles()].map(b=>({...b,distance:Math.hypot(camera.position.x-b.person.x,camera.position.z-b.person.z)})).filter(b=>b.distance<(b.priority?45:22)).sort((a,b)=>(b.priority||0)-(a.priority||0)||a.distance-b.distance).slice(0,3):[];
     const used=new Set();
     for(const b of candidates){const p=b.person;projected.set(p.x,2.15*p.height,p.z).project(camera);if(projected.z< -1||projected.z>1||Math.abs(projected.x)>.92||Math.abs(projected.y)>.8)continue;used.add(b.id);let el=bubbles.get(b.id);if(!el){el=document.createElement('div');el.className='speech';el.append(text('strong',''),text('span',''));$('#speech-layer').append(el);bubbles.set(b.id,el);}el.firstChild.textContent=p.name;el.lastChild.textContent=b.text;el.style.left=`${(projected.x*.5+.5)*100}%`;el.style.top=`${(-projected.y*.5+.5)*100}%`;el.style.opacity=String(Math.max(0,Math.min(1,((b.priority?45:22)-b.distance)/6)));
-      const now=performance.now(),key=`${b.id}:${b.text}`;if(voices&&b.distance<(b.priority?45:12)&&key!==lastSpoken&&now-lastSpokenAt>4000&&window.speechSynthesis&&!window.speechSynthesis.speaking){const utterance=new SpeechSynthesisUtterance(b.text);utterance.lang='ca-ES';utterance.rate=.95;utterance.volume=.55;const voice=speechSynthesis.getVoices().find(v=>v.lang.startsWith('ca'));if(voice)utterance.voice=voice;speechSynthesis.speak(utterance);lastSpoken=key;lastSpokenAt=now;}
+      const now=performance.now(),key=`${b.id}:${b.text}`;if(voices&&b.distance<(b.priority?45:12)&&key!==lastSpoken&&now-lastSpokenAt>(b.priority?0:4000)&&window.speechSynthesis&&!window.speechSynthesis.speaking){const utterance=new SpeechSynthesisUtterance(b.text);utterance.lang='ca-ES';utterance.rate=.95;utterance.volume=.55;const voice=speechSynthesis.getVoices().find(v=>v.lang.startsWith('ca'));if(voice)utterance.voice=voice;speechSynthesis.speak(utterance);lastSpoken=key;lastSpokenAt=now;}
     }
     for(const[id,el]of bubbles)if(!used.has(id)){el.remove();bubbles.delete(id);}if((!enabled||!voices)&&window.speechSynthesis?.speaking)window.speechSynthesis.cancel();
   }

@@ -1,10 +1,10 @@
 <!doctype html><html lang="ca"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Vallclara · Rellotge i plaça</title>
 <script type="importmap">{"imports":{"three":"../vendor/three.module.js"}}</script>
-<style>body{background:#142923;color:#eee2c4;font:16px system-ui;margin:24px}main{display:flex;gap:24px;flex-wrap:wrap}canvas{width:min(600px,90vw);height:auto;border:1px solid #a59268}aside{max-width:420px}label{display:block;margin:16px 0}input{width:240px;max-width:70vw}button{padding:12px;background:#d0b67c;border:0;border-radius:6px}#sermon{line-height:1.6}small{color:#b9c8b2}</style>
+<style>body{background:#142923;color:#eee2c4;font:16px system-ui;margin:24px}main{display:flex;gap:24px;flex-wrap:wrap}canvas{width:min(600px,90vw);height:auto;border:1px solid #a59268}aside{max-width:420px}label{display:block;margin:16px 0}input{width:240px;max-width:70vw}button{padding:12px;background:#d0b67c;border:0;border-radius:6px}#dailyText{line-height:1.6}small{color:#b9c8b2}</style>
 <h1>Vallclara · Rellotge i plaça</h1><p>Revisió 2D amb la geometria, els obstacles, els 500 habitants i el planificador que utilitza el joc.</p>
 <main><canvas id="map" width="600" height="600" aria-label="Posicions dels 500 habitants"></canvas><aside>
 <label for="rate">Velocitat del temps <output id="rateValue">1×</output></label><input id="rate" type="range" min="0" max="8" step=".25" value="1">
-<p id="clock"></p><p id="state"></p><strong id="priest"></strong><p id="sermon"></p><button id="next">Simular fins al pròxim parlament</button><p><small>El punt daurat és el sacerdot; els punts clars són els altres habitants. Aquesta vista no substitueix la revisió del joc WebGL.</small></p>
+<p id="clock"></p><p id="state"></p><strong id="priest"></strong><p id="dailyText"></p><button id="next">Simular fins a la pròxima reunió diària</button><p><small>El punt daurat és el sacerdot; els punts clars són els altres habitants. Aquesta vista no substitueix la revisió del joc WebGL.</small></p>
 </aside></main>
 <script type="module">
 import * as T from 'three';import {createWorld} from '../world.js';import {createPopulation,updatePerson} from '../simulation.js';import {createHistories} from '../stories.js';import {createSocialSystem} from '../social.js';import {createVillageClock,formatHour,validTimeRate} from '../village-clock.js';import {createAssemblies} from '../assemblies.js';
@@ -17,15 +17,15 @@ function render(){
  ctx.strokeStyle='#d3b777';ctx.strokeRect(to(-20),to(-20),120,120);
  for(const p of people){ctx.fillStyle=p===assembly.priest?'#ffd36f':'#d5dfc2';ctx.beginPath();ctx.arc(to(p.x),to(p.z),p===assembly.priest?4:1.5,0,Math.PI*2);ctx.fill();}
  document.querySelector('#clock').textContent=`Hora: ${formatHour(clock.hours)} · Pròxima reunió: ${formatHour(assembly.nextAt)}`;
- document.querySelector('#state').textContent=`${assembly.phase} · ${assembly.attending}/500 a la plaça · ${assembly.completed} parlaments acabats`;
- document.querySelector('#priest').textContent=assembly.priest.name;
- document.querySelector('#sermon').textContent=assembly.bubbles()[0]?.text||'Els habitants encara no escolten el sacerdot.';
+ document.querySelector('#state').textContent=`${assembly.phase} · ${assembly.attending}/500 a la plaça · ${assembly.completed} reunions diàries acabades`;
+ document.querySelector('#priest').textContent=assembly.currentTurn?.person.name||assembly.priest.name;
+ document.querySelector('#dailyText').textContent=assembly.bubbles()[0]?.text||'La ronda diària de les 12 encara no ha començat.';
 }
 document.querySelector('#next').onclick=()=>{
  if(rate===0)return;
- let steps=0;const completed=assembly.completed,wasSermon=assembly.phase==='sermon';
+ let steps=0;const completed=assembly.completed,wasDaily=assembly.phase==='daily';
  do{clock.advance(.5,assembly.clockLimit);assembly.update(.5,.5/rate,clock.hours);for(const p of people)if(!p.assembly&&!p.assemblyReleased)updatePerson(p,.5,clock.hour);steps++;}
- while(steps<15000&&(assembly.phase!=='sermon'||wasSermon&&assembly.completed===completed));
+ while(steps<15000&&(assembly.phase!=='daily'||wasDaily&&assembly.completed===completed));
  render();
 };render();
 </script></html>

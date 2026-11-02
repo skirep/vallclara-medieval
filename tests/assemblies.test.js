@@ -23,12 +23,12 @@ test('clock covers midnight, respects assembly holds, and validates user speed s
  for(const v of [-1,9,NaN,Infinity,'corrupt','',null,true])assert.equal(validTimeRate(v),1);
 });
 
-test('500 villagers gather without teleporting, listen together, disperse and repeat six game hours later',()=>{
+test('500 villagers gather without teleporting, listen together, disperse and repeat only at noon on the following day',()=>{
  const people=createHistories(createPopulation()),social=createSocialSystem(people),clock=createVillageClock();
  const assembly=createAssemblies(people,{obstacles:world.obstacles,social});
  assert.match(assembly.priest.name,/^Mossèn /);assert.equal(people.filter(p=>p.role==='priest').length,1);
- const heard=[],dt=.5;let previousPhase='idle',steps=0;
- while(assembly.completed<4&&steps++<16000){
+ const heard=[],rounds=[],dt=2;let previousPhase='idle',steps=0,lastBubble='';
+ while(assembly.completed<2&&steps++<16000){
   const old=people.map(p=>({x:p.x,z:p.z}));
   clock.advance(dt,assembly.clockLimit);assembly.update(dt,dt/8,clock.hours);
   for(const [i,p] of people.entries()){
@@ -36,18 +36,28 @@ test('500 villagers gather without teleporting, listen together, disperse and re
    assert.ok(Math.hypot(p.x-old[i].x,p.z-old[i].z)<=p.speed*dt+1e-7,`teleport ${p.id}`);
   }
   if(steps%100===0&&assembly.phase==='gathering')for(const p of people)assert.equal(blocked(p.x,p.z,world.obstacles,.34),false,`path crossed an obstacle for ${p.id}`);
-  if(assembly.phase==='sermon'&&previousPhase!=='sermon'){
-   heard.push(clock.hours);assert.equal(assembly.attending,500);
+  if(assembly.phase==='daily'&&previousPhase!=='daily'){
+   heard.push(clock.hours);rounds.push(new Set());assert.equal(assembly.attending,500);
    assert.equal(new Set(people.map(p=>`${p.x.toFixed(5)}:${p.z.toFixed(5)}`)).size,500);
    for(const p of people){assert.ok(Math.abs(p.x)<20&&Math.abs(p.z)<20);assert.equal(blocked(p.x,p.z,world.obstacles,.34),false);}
    assert.equal(assembly.bubbles()[0].person,assembly.priest);assert.ok(assembly.bubbles()[0].text.length>10);
    assert.equal(social.begin(people[0],people[1],clock.hour),false);
   }
-  if(assembly.phase==='sermon'){const h=clock.hours;clock.advance(1,assembly.clockLimit);assert.equal(clock.hours,h);}
+  if(assembly.phase==='daily'){
+   const h=clock.hours;clock.advance(1,assembly.clockLimit);assert.equal(clock.hours,h);
+   const bubble=assembly.bubbles()[0],turn=assembly.currentTurn;
+   if(bubble.id!==lastBubble){
+    lastBubble=bubble.id;assert.equal(people.filter(p=>p.state==='talking').length,1);
+    assert.equal(bubble.person.state,'talking');
+    if(turn.kind==='report'){assert.match(bubble.text,/^Ahir .+\. Avui .+\.$/);assert.equal(rounds.at(-1).has(bubble.person.id),false);rounds.at(-1).add(bubble.person.id);}
+    for(const p of people)if(p!==bubble.person){assert.equal(p.state,'resting');const expected=Math.atan2(bubble.person.x-p.x,bubble.person.z-p.z);assert.ok(Math.abs(p.heading-expected)<1e-10,`listener ${p.id} did not face speaker ${bubble.person.id}`);}
+   }
+  }
   previousPhase=assembly.phase;
  }
- assert.equal(assembly.completed,4);assert.deepEqual(heard,[12,18,24,30]);
+ assert.equal(assembly.completed,2);assert.deepEqual(heard,[12,36]);
  assert.equal(social.journal.length,0);
+ assert.deepEqual(rounds.map(r=>r.size),[500,500]);
 });
 
 test('private conversations are interrupted without inventing completed social memories',()=>{
@@ -61,9 +71,10 @@ test('seeking the time during a gathering safely returns people before schedulin
  const people=createHistories(createPopulation()),clock=createVillageClock(),social=createSocialSystem(people);
  const assembly=createAssemblies(people,{obstacles:world.obstacles,social});
  const original=people.map(p=>({x:p.x,z:p.z}));
- for(let i=0;i<100;i++)assembly.update(.5,.5,9);
+ assembly.update(1,1,11.99);assert.equal(assembly.phase,'idle');
+ clock.seek(12);for(let i=0;i<100;i++)assembly.update(.5,.5,clock.hours);
  assert.equal(assembly.phase,'gathering');clock.seek(1);assembly.seek(clock.hours);
- assert.equal(assembly.phase,'dispersing');assert.equal(assembly.nextAt,6);
+ assert.equal(assembly.phase,'dispersing');assert.equal(assembly.nextAt,12);
  for(let i=0;i<1000&&assembly.active;i++)assembly.update(.5,.5,clock.hours);
  assert.equal(assembly.phase,'idle');assert.equal(assembly.completed,0);
  for(const [i,p] of people.entries()){
@@ -95,4 +106,21 @@ test('residents sharing a departure point choose different safe streets without 
  assert.ok(new Set(routes.map(route=>JSON.stringify(route))).size>=12);
  nav.resetTraffic();
  assert.deepEqual(nav.path(from,to,{seed:0}),routes[0],'resetting a gathering must make route planning reproducible');
+});
+
+
+test('daily schedule has no meetings at midnight, six or eighteen; manual turns respect pause and completed days',()=>{
+ assert.deepEqual([0,6,11.99,12,12.01,18,24,36,36.01].map(nextAssemblyTime),[12,12,12,12,36,36,36,36,60]);
+ const people=createHistories(createPopulation(10)),assembly=createAssemblies(people,{obstacles:world.obstacles,initialHours:0});
+ assert.equal(assembly.advanceTurn(),false);
+ for(const hour of [0,6,9,11.99]){assembly.update(1,1,hour);assert.equal(assembly.phase,'idle');}
+ assembly.update(0,0,12);assert.equal(assembly.phase,'gathering');
+ for(let i=0;i<1500&&assembly.phase==='gathering';i++)assembly.update(.5,.5,12);
+ assert.equal(assembly.phase,'daily');assert.equal(assembly.currentTurn.kind,'opening');
+ const opening=assembly.bubbles()[0].id;assembly.update(0,100,12);assert.equal(assembly.bubbles()[0].id,opening,'paused simulation must not advance on wall time');
+ assembly.update(12,0,12);assert.notEqual(assembly.bubbles()[0].id,opening,'simulation speed must control turn progress');
+ assert.equal(assembly.currentTurn.kind,'report');assert.equal(assembly.reportNumber,1);
+ while(assembly.phase==='daily')assert.equal(assembly.advanceTurn(),true);
+ assert.equal(assembly.completed,1);assert.equal(assembly.nextAt,36);assert.equal(assembly.advanceTurn(),false);
+ assembly.seek(9);assert.equal(assembly.nextAt,36,'rewinding within a completed day must not repeat the noon meeting');
 });
