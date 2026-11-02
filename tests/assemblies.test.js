@@ -7,6 +7,8 @@ import {createHistories} from '../stories.js';
 import {createSocialSystem} from '../social.js';
 import {createAssemblies,nextAssemblyTime} from '../assemblies.js';
 import {createVillageClock,formatHour,validTimeRate} from '../village-clock.js';
+import {createAssemblyNavigation} from '../assembly-navigation.js';
+import {lanes} from '../simulation.js';
 import {createMotion,updateMotion} from '../sprite-motion.js';
 
 const ctx={fillRect(){},strokeRect(){},beginPath(){},moveTo(){},bezierCurveTo(){},stroke(){}};
@@ -73,4 +75,24 @@ test('animation phase follows time speed while render smoothing stays independen
  const p=createPopulation()[2];p.state='walking';const a=createMotion(p),b=createMotion(p),paused=createMotion(p);
  const phase=a.phase;updateMotion(a,p,1/60,1);updateMotion(b,p,1/60,4);updateMotion(paused,p,1/60,0);
  assert.ok(Math.abs((b.phase-phase)-4*(a.phase-phase))<1e-10);assert.equal(paused.phase,phase);assert.equal(a.walk,b.walk);
+});
+
+
+test('residents sharing a departure point choose different safe streets without excessive detours',()=>{
+ const nav=createAssemblyNavigation(world.obstacles),from={x:-78,z:-78},to={x:0,z:0};
+ const length=points=>points.reduce((sum,p,i)=>sum+Math.hypot(p.x-(i?points[i-1]:from).x,p.z-(i?points[i-1]:from).z),0);
+ const shortest=length(nav.path(from,to,{diversity:false,recordTraffic:false}));
+ const street=value=>lanes.reduce((best,lane)=>Math.abs(value-lane)<Math.abs(value-best)?lane:best,lanes[0]);
+ const routes=[],streets=new Set();
+ for(let seed=0;seed<24;seed++){
+  const route=nav.path(from,to,{seed});routes.push(route);
+  const signature=route.map(p=>`${street(p.x)}:${street(p.z)}`).filter((s,i,a)=>!i||s!==a[i-1]).join('/');streets.add(signature);
+  assert.ok(length(route)<=shortest*1.45+1e-7,`unnecessary detour for ${seed}`);
+  assert.deepEqual(route.at(-1),to);
+  for(let i=0;i<route.length;i++)assert.ok(nav.segmentClear(i?route[i-1]:from,route[i]),`unsafe segment for ${seed}`);
+ }
+ assert.ok(streets.size>=3,`expected different street choices, got ${streets.size}`);
+ assert.ok(new Set(routes.map(route=>JSON.stringify(route))).size>=12);
+ nav.resetTraffic();
+ assert.deepEqual(nav.path(from,to,{seed:0}),routes[0],'resetting a gathering must make route planning reproducible');
 });

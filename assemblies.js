@@ -15,13 +15,13 @@ export function createAssemblies(population,{obstacles=[],social,initialHours=9}
  if(priest.story)priest.story.biography+=' És el sacerdot de Vallclara i reuneix la vila a la plaça cada sis hores.';
  let phase='idle',nextAt=nextAssemblyTime(initialHours),line=0,lineTime=0,cycle=0,completed=0;
  const members=new Map();
- function setPath(p,target){const member=members.get(p.id);member.path=nav.path(p,target);member.index=0;member.arrived=false;p.assembly=true;}
+ function setPath(p,target){const member=members.get(p.id);member.path=nav.path(p,target,{seed:Math.imul(p.id+1,2654435761)^Math.round(nextAt/ASSEMBLY_INTERVAL)^(phase==='dispersing'?0x51ed270b:0)});member.index=0;member.arrived=false;p.assembly=true;}
  function gather(){
-  social?.interruptAll();members.clear();let seat=0;
+  social?.interruptAll();members.clear();nav.resetTraffic();let seat=0;
   for(const p of population){members.set(p.id,{returnTo:{x:p.x,z:p.z},path:[],index:0,arrived:false});setPath(p,p===priest?nav.priest:nav.seats[seat++]);}
   phase='gathering';line=0;lineTime=0;
  }
- function disperse(){phase='dispersing';for(const p of population)setPath(p,members.get(p.id).returnTo);}
+ function disperse(){phase='dispersing';nav.resetTraffic();for(const p of population)setPath(p,members.get(p.id).returnTo);}
  function move(p,dt){
   const m=members.get(p.id);if(!m||!p.assembly)return;
   let budget=p.speed*dt;
