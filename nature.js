@@ -1,10 +1,11 @@
+import {landscapeHeight,riverCenter} from './terrain.js';
 import * as T from 'three';
 import {mergeGeometries} from './vendor/BufferGeometryUtils.js';
 import {random} from './simulation.js';
 import {worldUV} from './materials.js';
 export function createNature(scene,mats,buildings){
   const rng=random(3378),r=(a,b)=>a+rng()*(b-a),trees=[];
-  for(let i=0;i<220;i++){const a=r(0,Math.PI*2),rad=r(115,305),x=Math.cos(a)*rad,z=Math.sin(a)*rad;if(Math.abs(x)<7||Math.abs(z)<7)continue;trees.push({x,z,h:r(6,13)});}
+  for(let i=0;i<220;i++){const a=r(0,Math.PI*2),rad=r(115,305),x=Math.cos(a)*rad,z=Math.sin(a)*rad;if(Math.abs(x)<7||Math.abs(z)<7||Math.abs(x-riverCenter(z))<17)continue;trees.push({x,z,h:r(6,13)});}
   for(const [x,z] of [[-20,22],[20,-21],[-50,22],[24,58],[56,-21]])trees.push({x,z,h:r(7,10)});
   const trunks=[],cylinder=new T.CylinderGeometry(.68,1,1,7),dummy=new T.Object3D();
   function branch(a,b,radius){const direction=b.clone().sub(a),length=direction.length();dummy.position.copy(a).add(b).multiplyScalar(.5);dummy.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),direction.normalize());dummy.scale.set(radius,length,radius);dummy.updateMatrix();const g=cylinder.toNonIndexed().applyMatrix4(dummy.matrix);worldUV(g,2);trunks.push(g);}
@@ -24,9 +25,9 @@ export function createNature(scene,mats,buildings){
   const leafMat=new T.MeshStandardMaterial({vertexColors:true,side:T.DoubleSide,roughness:.88});
   const wind={value:0};leafMat.onBeforeCompile=shader=>{shader.uniforms.uWindTime=wind;shader.vertexShader='uniform float uWindTime;\n'+shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\ntransformed.x += sin(uWindTime * .7 + instanceMatrix[3].x*.2 + position.y)*.075;');};
   const leaves=new T.InstancedMesh(leafGeo,leafMat,trees.length*26);leaves.castShadow=true;leaves.receiveShadow=true;let id=0;
-  for(const tree of trees){const base=new T.Vector3(tree.x,0,tree.z),top=new T.Vector3(tree.x+.3,tree.h*.77,tree.z);branch(base,top,.25+tree.h*.016);
-    for(let i=0;i<7;i++){const angle=i/7*Math.PI*2+r(-.3,.3),end=new T.Vector3(tree.x+Math.cos(angle)*r(1.8,3.4),tree.h*r(.7,1),tree.z+Math.sin(angle)*r(1.8,3.4));branch(new T.Vector3(tree.x,tree.h*r(.4,.65),tree.z),end,.11);}
-    for(let i=0;i<26;i++){const a=r(0,6.28),rad=r(.4,3),height=tree.h-r(0,3);dummy.position.set(tree.x+Math.cos(a)*rad,height,tree.z+Math.sin(a)*rad);dummy.rotation.set(r(-1,1),r(0,6.28),r(-.6,.6));dummy.scale.setScalar(r(.9,1.35));dummy.updateMatrix();leaves.setMatrixAt(id++,dummy.matrix);}
+  for(const tree of trees){const ground=landscapeHeight(tree.x,tree.z)+.1;const base=new T.Vector3(tree.x,ground,tree.z),top=new T.Vector3(tree.x+.3,ground+tree.h*.77,tree.z);branch(base,top,.25+tree.h*.016);
+    for(let i=0;i<7;i++){const angle=i/7*Math.PI*2+r(-.3,.3),end=new T.Vector3(tree.x+Math.cos(angle)*r(1.8,3.4),ground+tree.h*r(.7,1),tree.z+Math.sin(angle)*r(1.8,3.4));branch(new T.Vector3(tree.x,ground+tree.h*r(.4,.65),tree.z),end,.11);}
+    for(let i=0;i<26;i++){const a=r(0,6.28),rad=r(.4,3),height=ground+tree.h-r(0,3);dummy.position.set(tree.x+Math.cos(a)*rad,height,tree.z+Math.sin(a)*rad);dummy.rotation.set(r(-1,1),r(0,6.28),r(-.6,.6));dummy.scale.setScalar(r(.9,1.35));dummy.updateMatrix();leaves.setMatrixAt(id++,dummy.matrix);}
   }
   leaves.instanceMatrix.needsUpdate=true;leaves.computeBoundingSphere();scene.add(leaves);
   const merged=mergeGeometries(trunks,false),wood=new T.Mesh(merged,mats.bark);wood.castShadow=wood.receiveShadow=true;scene.add(wood);trunks.forEach(g=>g.dispose());cylinder.dispose();
