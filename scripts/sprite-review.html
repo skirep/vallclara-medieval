@@ -18,6 +18,6 @@ function draw(now){
  const mode=document.querySelector('#mode').value,view=Number(document.querySelector('#view').value),rest=mode==='rest'||mode==='alternate'&&Math.floor(now/2000)%2;
  const frame=drawnFrame({walk:rest?0:1,phase:now/160/6*Math.PI*2,idleTime:now/1000});
  for(const {atlas,canvas} of views){const c=canvas.getContext('2d');c.clearRect(0,0,224,256);c.imageSmoothingEnabled=false;c.strokeStyle='#50675a';c.beginPath();c.moveTo(112,0);c.lineTo(112,256);c.stroke();c.drawImage(atlas,(frame%6)*224,(view+(frame>=6?4:0))*256,224,256,0,0,224,256);c.strokeStyle='#d7b76e';c.beginPath();c.moveTo(0,244);c.lineTo(224,244);c.stroke();}
- document.querySelector('#status').textContent=`16 personatges · ${rest?`Repòs ${frame%6+1}/6`:`Caminar ${frame+1}/6`}`;requestAnimationFrame(draw);
+ document.querySelector('#status').textContent=`${WALK_TYPES.length} personatges · ${rest?`Repòs ${frame%6+1}/6`:`Caminar ${frame+1}/6`}`;requestAnimationFrame(draw);
 }requestAnimationFrame(draw);
 </script></html>

@@ -2,12 +2,12 @@ import * as T from 'three';
 import {appearanceFor} from './appearance.js';
 import {createMotion,updateMotion,stableView} from './sprite-motion.js';
 import {drawnFrame,WALK_TYPES} from './animation-frames.js';
-import {loadResidentImages,sourcesFor} from './resident-assets.js';
+import {loadPackedResident} from './resident-assets.js';
 import {packWalkAtlas} from './sprite-atlas.js';
 export const ATLAS_URL=new URL('./assets/residents-directions-v1.png',import.meta.url).href;
 export const FAMILY_ATLAS_URL=new URL('./assets/residents-families-v2.png',import.meta.url).href;
 const load=url=>new Promise((resolve,reject)=>new T.ImageLoader().load(url,resolve,undefined,()=>reject(new Error('No s’ha pogut carregar l’animació dels habitants. Torna a carregar la pàgina.'))));
-export function createPeople(scene,population,{onProgress,pixelHeight=256}={}){
+export function createPeople(scene,population,{onProgress,pixelHeight=128}={}){
  const appearances=population.map(appearanceFor),states=population.map(createMotion),groups=[],dummy=new T.Object3D();
  const geometry=new T.PlaneGeometry(1,1);geometry.translate(0,.5-12/256,0);
  for(let type=0;type<WALK_TYPES.length;type++){
@@ -25,9 +25,16 @@ export function createPeople(scene,population,{onProgress,pixelHeight=256}={}){
   groups.push({indices,frames,texture,mesh});
  }
  geometry.dispose();
- const ready=loadResidentImages(load,onProgress).then(images=>{
-  groups.forEach((group,type)=>{group.texture.image=packWalkAtlas(sourcesFor(images,WALK_TYPES[type]),WALK_TYPES[type],document.createElement('canvas'),pixelHeight);group.texture.needsUpdate=true;});
- });
+ // Four requests at a time. Normal startup decodes only the texture resolution
+ // used on this device, instead of all eighty full-resolution source sheets.
+ let next=0,completed=0;
+ const ready=Promise.all(Array.from({length:4},async()=>{
+  while(next<groups.length){const type=next++,group=groups[type];
+   group.texture.image=await loadPackedResident(WALK_TYPES[type],pixelHeight,load,
+    images=>packWalkAtlas(images,WALK_TYPES[type],document.createElement('canvas'),pixelHeight));
+   group.texture.needsUpdate=true;onProgress?.(++completed,groups.length);
+  }
+ }));
  function animate(time,camera,range=100,dt=1/60,simulationRate=1){
   population.forEach((p,i)=>updateMotion(states[i],p,dt,simulationRate));
   for(const group of groups){

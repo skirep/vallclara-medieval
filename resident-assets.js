@@ -13,6 +13,19 @@ for(const id of WALK_TYPES){
  }
 }
 export function sourcesFor(images,type){const source=RESIDENT_SOURCES[type];return {walk:images[source.walk],idle:images[source.idle]};}
+export async function loadPackedResident(type,pixelHeight,load,packFallback){
+ try{return await load(new URL(`./assets/packed/${type}-${pixelHeight}.webp`,import.meta.url).href);}
+ catch{
+  const source=RESIDENT_SOURCES[type],images=new Map();
+  for(const index of new Set([source.walk,source.idle])){
+   const asset=RESIDENT_ASSETS[index];let image;
+   try{image=await load(new URL(`./assets/${asset.source}`,import.meta.url).href);}
+   catch{image=await load(new URL(`./assets/${asset.fallback}`,import.meta.url).href);}
+   images.set(index,image);
+  }
+  return packFallback({walk:images.get(source.walk),idle:images.get(source.idle)});
+ }
+}
 export function loadResidentImages(load,onProgress=()=>{}){
  let completed=0;
  return Promise.all(RESIDENT_ASSETS.map(async asset=>{

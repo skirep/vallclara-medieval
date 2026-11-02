@@ -1,5 +1,6 @@
 export const WALK_FRAMES=6;
-export const WALK_TYPES=['tunic-man','dress-woman','boy','girl','smith','elder-woman','hood-boy','cap-girl','miller','herbalist','red-boy','curly-girl','priest','midwife','apprentice-boy','freckled-girl'];
+import {RESIDENT_ROSTER} from './resident-roster.js';
+export const WALK_TYPES=RESIDENT_ROSTER.map(r=>r.id);
 export const LEGACY_TYPES=WALK_TYPES.slice(0,8);
 export const IDLE_FRAMES=6;
 export const IDLE_DURATIONS=[.7,.55,.14,.7,.65,.75];

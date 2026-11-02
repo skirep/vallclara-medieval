@@ -5,14 +5,16 @@ import {createPopulation} from '../simulation.js';
 import {appearanceFor,spriteView} from '../appearance.js';
 import {createHistories} from '../stories.js';
 import {writeConversation} from '../social.js';
+import {RESIDENT_ROSTER,categoryFor} from '../resident-roster.js';
+import {createAssemblies} from '../assemblies.js';
 import {createPeople} from '../people-sprites.js';
 
-test('500 stable resident assignments cover sixteen painted archetypes with age-appropriate scale',()=>{
+test('500 stable resident assignments cover all completed painted designs with age-appropriate scale',()=>{
  const p=createPopulation(),a=p.map(appearanceFor);
  assert.equal(new Set(a.map(x=>x.signature)).size,500);
  assert.equal(new Set(a.map(x=>x.width)).size,13);
- assert.ok(new Set(a.map(x=>x.row)).size>=15);
- for(const person of p){const row=appearanceFor(person).row;if(person.age<16)assert.ok([2,3,6,7,10,11,14,15].includes(row));}
+ createAssemblies(p);assert.equal(new Set(p.map(x=>appearanceFor(x).row)).size,RESIDENT_ROSTER.length);
+ for(const person of p){const row=appearanceFor(person).row;assert.equal(RESIDENT_ROSTER[row].category,categoryFor(person));}
  assert.deepEqual(a,createPopulation().map(appearanceFor));
  for(const person of p){assert.ok(person.age>=7);assert.ok(person.age<16?person.height<.8:person.height>=.82);}
 });
@@ -49,7 +51,7 @@ test('directional source PNG with transparency is packaged and sprite shader mat
  for(const n of people.parts.sprites.instanceMatrix.array)assert.ok(Number.isFinite(n));
  assert.equal(people.parts.sprites.material.alphaTest,.45);
  assert.equal(people.parts.sprites.material.depthWrite,true);
- assert.equal(scene.children.length,16);
+ assert.equal(scene.children.length,RESIDENT_ROSTER.length);
  const next=readFileSync(new URL('../assets/residents-families-v2.png',import.meta.url));assert.equal(next[25],6);
- assert.equal(new Set(createPopulation().map(appearanceFor).map(a=>a.row)).size,15);
+ assert.equal(new Set(createPopulation().map(appearanceFor).map(a=>a.row)).size,RESIDENT_ROSTER.length-1);
 });
