@@ -20,7 +20,7 @@ const world=createWorld(new T.Scene());
 test('compact town has exactly 200 identities and retains every completed design and the latest 24 named residents',()=>{
  const p=createHistories(createTownPopulation()),byId=new Map(p.map(p=>[p.id,p]));
  assert.equal(p.length,200);assert.equal(byId.size,200);
- assert.equal(p.filter(p=>!p.character).length,176);assert.deepEqual(p.filter(p=>p.character).map(p=>p.spriteId),FEATURED_RESIDENTS.map(c=>c.id));
+ assert.equal(p.filter(p=>!p.character).length,167);assert.deepEqual(p.filter(p=>p.character?.featured).map(p=>p.spriteId),FEATURED_RESIDENTS.map(c=>c.id));
  createAssemblies(p,{obstacles:world.obstacles});
  assert.equal(new Set(p.map(p=>RESIDENT_ROSTER[appearanceFor(p).row].id)).size,RESIDENT_ROSTER.length);
  for(const person of p){assert.equal(blocked(person.x,person.z,world.obstacles,.15),false,`unsafe spawn ${person.id} at ${person.x},${person.z}`);for(const id of [...person.parentIds,...person.childIds,person.story.friendId])assert.ok(byId.has(id));}

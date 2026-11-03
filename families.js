@@ -19,7 +19,7 @@ export function groupFamilies(population,nodes){
       p.x=family.homeX+p.lane;p.z=nodes[home].z+(slot%2?1:-1)*.65;
       if(slot<2){p.height=.53+(p.age-7)*.025;p.job=p.sex?'nena · aprenenta':'nen · aprenent';}
       if(slot===4)p.speed*=.82;
-      if(members.length===1){p.age=42;p.familyRole='veïna';p.parentIds=[];p.childIds=[];p.job='artesana';p.height=.95;}
+      if(members.length<3){p.age=34+slot*7;p.familyRole=p.sex?'germana':'germà';p.parentIds=[];p.childIds=[];p.job=p.sex?'artesana':'artesà';p.height=.95;}
     }
   }
   return families;

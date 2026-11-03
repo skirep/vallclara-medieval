@@ -45,4 +45,4 @@ El desament existent s’amplia amb el rellotge, els recursos, les tasques en cu
 
 Les proves recorren les 102.400 entrades, comproven identitats i relacions, simulen una jornada amb 200 habitants, validen costos i lliuraments, bloquejos, continuïtat després de desar, converses interrompudes, informes del dia anterior i rutes amb obstacles durant una reunió completa. La validació de geometria no substitueix una comprovació visual de WebGL.
 
-La vila compacta inclou 176 veïns ordinaris i 24 identitats noves. El rei i la reina segueixen una rutina de cort pròpia i assisteixen a la reunió; no produeixen els béns dels oficis ordinaris. El castell, la parròquia i el pont són accessibles des del menú de llocs de la vila.
+La vila compacta inclou 167 veïns ordinaris, 24 identitats amb nom propi i 9 artistes adults. El rei i la reina segueixen una rutina de cort pròpia i assisteixen a la reunió; no produeixen els béns dels oficis ordinaris. El castell, la parròquia i el pont són accessibles des del menú de llocs de la vila.

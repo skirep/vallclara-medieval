@@ -4,7 +4,7 @@ Exploració lliure en primera persona: https://skirep.github.io/vallclara-mediev
 
 ## Vila compacta · novembre de 2026
 
-- **200 habitants en total**: 176 veïns i els últims 24 personatges amb nom propi. Es mantenen els 59 dissenys dibuixats, les famílies, les històries i les 512 entrades contextuals de diàleg per habitant.
+- **200 habitants en total**: 167 veïns, els últims 24 personatges amb nom propi i 9 artistes adults (tres exemplars de cadascun dels tres nous dissenys). Es mantenen els 62 dissenys dibuixats, les famílies, les històries i les 512 entrades contextuals de diàleg per habitant.
 - Els personatges nous mantenen els IDs 500–523. Les cerques d’identitat fan servir mapes, sense assumir que l’ID sigui una posició de l’array.
 - Àrea transitable limitada a ±90 m, 25 cases explorables, església i castell. Els carrers se separen en dues ribes; l’únic enllaç de navegació és el pont de pedra central.
 - **Castell de Rocafort**: sala del tron, biblioteca/cancelleria, cuines/rebost, armeria, cambra reial, menjador, capella i galeria. Portes, parets i mobiliari comparteixen coordenades amb les col·lisions.
@@ -47,3 +47,7 @@ Les proves cobreixen les 200 identitats, la conservació dels dissenys, les rute
   - https://polyhaven.com/a/autumn_field_puresky
 - Tipografies Cormorant Garamond i Manrope, Google Fonts, amb alternatives Georgia i Arial.
 - Geometria, textures de reserva i codi de la simulació creats per a aquest projecte.
+
+Les cases tenen cobertes sòlides, frontons amb gruix, ràfecs encaixats amb els murs, reforços curts i porticons separats dels brancals. Els tres dissenys nous tenen 120 fotogrames propis de caminar, repòs, salt, cop de puny i conversa. Els artistes tenen converses suggeridores no explícites només amb altres adults; amb menors mantenen les converses ordinàries de la vila.
+
+Durant la feina artística, els nou visitants alternen salts i cops de puny a l’aire com a exercicis d’actuació. Les accions s’aturen quan caminen o van a la reunió i respecten la pausa del rellotge.

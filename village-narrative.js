@@ -1,3 +1,4 @@
+import {canFlirt,flirtConversation} from './flirt-dialogue.js';
 import {VILLAGE_LORE,THREADS,KEY_RESIDENTS} from './village-lore.js';
 import {dialogueEntry,DIALOGUE_COUNT} from './dialogue-catalogue.js';
 export function attachNarrative(population){
@@ -10,6 +11,7 @@ export function attachNarrative(population){
  for(const p of population){const n=p.story.narrative;p.story.biography+=` Davant del pacte de les dues ribes, defensa ${n.stance}. Confia en ${byId.get(n.friendId).name}; discrepa amb ${byId.get(n.rivalId).name}, però poden arribar a entendre’s.`;}
 }
 export function narrativeConversation(a,b,hour,meeting=0,{topic,chapter=0,relationship}={}){
+ if(canFlirt(a,b))return flirtConversation(a,b,hour,meeting);
  topic=topic??((Math.floor((a.social.meetings+b.social.meetings)/2)+a.familyId+b.familyId+meeting)%16);
  const first=meeting%2?b:a,second=first===a?b:a;
  const turns=Array.from({length:8},(_,beat)=>dialogueEntry(beat%2?second:first,topic*32+chapter*8+beat,beat%2?first:second));
@@ -34,9 +36,11 @@ export function createVillageNarrative(population){
   relationships.set(k,{a:Math.min(a.id,b.id),b:Math.max(a.id,b.id),score:a.story.narrative.rivalId===b.id||b.story.narrative.rivalId===a.id?-2:a.familyId===b.familyId?2:0,encounters:0,promise:null});
   if(relationships.size>4000)relationships.delete(relationships.keys().next().value);
  }return relationships.get(k);}
- function plan(a,b,hour){const r=relation(a,b),topic=r.promise?.topic??((r.encounters+Math.floor(a.social.meetings/2)+a.familyId+b.familyId)%16);return{topic,chapter,turns:narrativeConversation(a,b,hour,a.social.met[b.id]||0,{topic,chapter,relationship:r})};}
+ function plan(a,b,hour){const r=relation(a,b),topic=r.promise?.topic??((r.encounters+Math.floor(a.social.meetings/2)+a.familyId+b.familyId)%16);return{topic,chapter,romantic:canFlirt(a,b),turns:narrativeConversation(a,b,hour,a.social.met[b.id]||0,{topic,chapter,relationship:r})};}
  function complete(a,b,c){
-  const r=relation(a,b),reunited=!!r.promise;r.encounters++;r.score=Math.min(10,r.score+1+(reunited?1:0));r.promise=reunited?null:{topic:c.topic};total++;
+  const r=relation(a,b),reunited=!!r.promise;
+  if(c.romantic){r.encounters++;r.score=Math.min(10,r.score+1);return 'Conversa de flirteig · sense compromís ni cap promesa obligada';}
+  r.encounters++;r.score=Math.min(10,r.score+1+(reunited?1:0));r.promise=reunited?null:{topic:c.topic};total++;
   const token=`${key(a,b)}:${c.topic}`;
   if(c.chapter===chapter&&!evidence.has(token)&&evidence.size<4000){evidence.add(token);witnesses.add(a.id);witnesses.add(b.id);topics.add(c.topic);}
   if(chapter<3&&evidence.size>=target&&witnesses.size>=Math.min(12,population.length)&&topics.size>=6){chapter++;events.unshift({chapter,text:VILLAGE_LORE.chapters[chapter].summary});evidence.clear();witnesses.clear();topics.clear();}

@@ -1,3 +1,4 @@
+import {houseRoofPlan,gableGeometry} from './house-geometry.js';
 import {housePlan,wallPanels} from './interiors.js';
 import {addCastle} from './castle.js';
 import {addChurch} from './church.js';
@@ -55,12 +56,12 @@ function house(x,z,w,d,h,variant){
   // Open doors, worn stone jambs, and real openings rather than painted portals.
   for(const dx of [-1.05,1.05])B(mats.stone,x+dx,1.29,z+side*(d/2+.05),.18,2.58,.45);
   B(mats.wood,x,2.65,z+side*d/2,2.3,.2,.45);
-  B(mats.wood,x-1.42,1.2,z+side*(d/2-.3),.72,2.4,.09,.35*side);
+  B(mats.wood,x-1.08,1.2,z+side*(d/2-.36),.72,2.4,.09,1.35*side);
   for(const win of [-w*.3,w*.3]){
    B(mats.wood,x+win,1.25,z+side*d/2,1.12,.12,.47);
    B(mats.wood,x+win,2.35,z+side*d/2,1.12,.12,.47);
    for(const dx of [-.54,0,.54])B(mats.darkwood,x+win+dx,1.8,z+side*d/2,.07,1.1,.22);
-   for(const shutter of [-1,1])B(mats.wood,x+win+shutter*.8,1.8,z+side*(d/2+.1),.45,1.05,.09,shutter*.25);
+   for(const shutter of [-1,1])B(mats.wood,x+win+shutter*.68,1.8,z+side*(d/2+.27),.32,1.05,.09,shutter*.25);
   }
   for(const wing of [-1,1])B(mats.moss,x+wing*(w+1.9)/4,.12,z+side*(d/2+.18),(w-1.9)/2,.16,.07);
  }
@@ -68,11 +69,11 @@ function house(x,z,w,d,h,variant){
  for(const dx of [-w/2,w/2])for(const dz of [-d/2,d/2])B(mats.darkwood,x+dx,h/2,z+dz,.22,h+.15,.22);
  for(let zz=-d/2+.7;zz<d/2;zz+=1.4)B(mats.darkwood,x,3.15,z+zz,w,.2,.18);
  B(mats.wood,x,3.28,z,w,.10,d);
- const roofHeight=w*.4,vertices=roofVertices(w,d,roofHeight),roofGeo=new T.BufferGeometry();
- roofGeo.setAttribute('position',new T.BufferAttribute(vertices.slice(18),3));roofGeo.computeVertexNormals();
- const roofMaterial=variant%3===0?mats.roof2:mats.roof;
- add(roofGeo,roofMaterial,x,h+.1,z);roofGeo.dispose();
- const gable=new T.BufferGeometry();gable.setAttribute('position',new T.BufferAttribute(vertices.slice(0,18),3));gable.computeVertexNormals();add(gable,wall,x,h+.1,z);gable.dispose();
+ const roof=houseRoofPlan(w,d,h),roofHeight=roof.rise,roofMaterial=variant%3===0?mats.roof2:mats.roof;
+ for(const slab of roof.slabs)B(roofMaterial,x+slab.x,slab.y,z,slab.w,slab.h,slab.d,0,slab.rz);
+ const gable=gableGeometry(w,d,roofHeight-.01);
+ for(const side of [-1,1])add(gable,wall,x,h-.03,z+side*d/2);
+ gable.dispose();
  C(mats.roof,x,h+roofHeight+.1,z,.13,d+1.2,.13,Math.PI/2);
  for(const side of [-1,1]){
   B(mats.darkwood,x+side*(w/2+.4),h+.04,z,.18,.24,d+1.3);
@@ -86,8 +87,8 @@ function house(x,z,w,d,h,variant){
  // Individual dressed corner stones, plinths and timber bracing.
  for(const side of [-1,1]){
   for(const dx of [-w/2,w/2])for(let y=.35;y<h;y+=.55)B(mats.stone,x+dx,y,z+side*(d/2+.07),.45,.38,.43);
-  for(const wing of [-1,1]){B(mats.stone,x+wing*(w+2.3)/4,.19,z+side*(d/2+.10),(w-2.3)/2,.3,.38);B(mats.darkwood,x+wing*w*.3,h*.66,z+side*(d/2+.18),.14,h*.58,.12,0,wing*.62);}
-  for(const dx of [-.35,.2]){B(mats.iron,x-1.42,1.2+dx,z+side*(d/2-.34),.62,.06,.08,.35*side);}
+  for(const wing of [-1,1]){B(mats.stone,x+wing*(w+2.3)/4,.19,z+side*(d/2+.10),(w-2.3)/2,.3,.38);B(mats.darkwood,x+wing*(w/2-.42),h-.65,z+side*(d/2+.23),.14,1.1,.12,0,wing*.62);}
+  for(const dx of [-.35,.2]){B(mats.iron,x-1.08,1.2+dx,z+side*(d/2-.37),.62,.06,.08,1.35*side);}
   for(const win of [-w*.3,w*.3])for(const dz of [-.4,0,.4])B(mats.wood,x+win+dz,2.53,z+side*(d/2+.22),.08,.18,.48);
  }
  B(mats.red,x-w*.24,.075,z+d*.05,w*.35,.018,d*.27);

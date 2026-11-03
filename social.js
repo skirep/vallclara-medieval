@@ -7,7 +7,7 @@ export function createSocialSystem(population){
   function begin(a,b,hour){
     if(a===b||a.assembly||b.assembly||a.social.conversation!==null||b.social.conversation!==null||a.social.cooldown>0||b.social.cooldown>0)return false;
     const id=nextId++,plan=narrative.plan(a,b,hour),turns=plan.turns;
-    const conversation={id,a:a.id,b:b.id,topic:plan.topic,chapter:plan.chapter,turns,index:0,remaining:Math.min(8,2.2+turns[0].text.length*.028),time:elapsed};
+    const conversation={id,a:a.id,b:b.id,topic:plan.topic,chapter:plan.chapter,romantic:plan.romantic===true,turns,index:0,remaining:Math.min(8,2.2+turns[0].text.length*.028),time:elapsed};
     active.push(conversation);a.social.conversation=b.social.conversation=id;a.state=b.state='talking';
     a.heading=Math.atan2(b.x-a.x,b.z-a.z);b.heading=Math.atan2(a.x-b.x,a.z-b.z);
     return true;

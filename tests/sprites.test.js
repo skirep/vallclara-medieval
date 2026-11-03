@@ -14,7 +14,7 @@ test('500 stable resident assignments cover all completed painted designs with a
  const p=createPopulation(),a=p.map(appearanceFor);
  assert.equal(new Set(a.map(x=>x.signature)).size,500);
  assert.equal(new Set(a.map(x=>x.width)).size,13);
- createAssemblies(p);assert.equal(new Set(p.map(x=>appearanceFor(x).row)).size,RESIDENT_ROSTER.length-FEATURED_RESIDENTS.length);
+ createAssemblies(p);assert.equal(new Set(p.map(x=>appearanceFor(x).row)).size,RESIDENT_ROSTER.filter(r=>!r.special).length-FEATURED_RESIDENTS.length);
  for(const person of p){const row=appearanceFor(person).row;assert.equal(RESIDENT_ROSTER[row].category,categoryFor(person));}
  assert.deepEqual(a,createPopulation().map(appearanceFor));
  for(const person of p){assert.ok(person.age>=7);assert.ok(person.age<16?person.height<.8:person.height>=.82);}
@@ -54,5 +54,5 @@ test('directional source PNG with transparency is packaged and sprite shader mat
  assert.equal(people.parts.sprites.material.depthWrite,true);
  assert.equal(scene.children.length,RESIDENT_ROSTER.length+2);
  const next=readFileSync(new URL('../assets/residents-families-v2.png',import.meta.url));assert.equal(next[25],6);
- assert.equal(new Set(createPopulation().map(appearanceFor).map(a=>a.row)).size,RESIDENT_ROSTER.length-FEATURED_RESIDENTS.length-1);
+ assert.equal(new Set(createPopulation().map(appearanceFor).map(a=>a.row)).size,RESIDENT_ROSTER.filter(r=>!r.special).length-FEATURED_RESIDENTS.length-1);
 });

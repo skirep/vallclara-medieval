@@ -1,3 +1,4 @@
+import {NEWCOMER_DESIGNS} from '../newcomers.js';
 import test from 'node:test';import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';import {createHash} from 'node:crypto';
 import {decodeRGBA} from '../scripts/png-rgba.mjs';
@@ -56,5 +57,5 @@ test('standing villagers continually advance drawn idle frames, remain asynchron
  const before=motion.map(m=>m.idleTime);for(let j=0;j<motion.length;j++)updateMotion(motion[j],people[j],1/60,0);
  assert.deepEqual(motion.map(m=>m.idleTime),before);
  people[4].role='priest';assert.equal(appearanceFor(people[4]).row,12);
- assert.equal(new Set(people.map(p=>appearanceFor(p).row )).size,WALK_TYPES.length-FEATURED_RESIDENTS.length);
+ assert.equal(new Set(people.map(p=>appearanceFor(p).row )).size,WALK_TYPES.length-FEATURED_RESIDENTS.length-NEWCOMER_DESIGNS.length);
 });

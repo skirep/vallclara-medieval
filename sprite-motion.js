@@ -1,8 +1,8 @@
 // Render-only smoothing: simulation remains deterministic at 30 Hz.
-import {ACTION_DURATIONS} from './resident-actions.js';
+import {ACTION_DURATIONS,startResidentAction} from './resident-actions.js';
 const tau=Math.PI*2;
 export const angleDelta=(from,to)=>Math.atan2(Math.sin(to-from),Math.cos(to-from));
-export function createMotion(p){return{x:p.x,z:p.z,heading:p.heading,walk:0,talk:0,work:0,action:null,actionTime:0,talkTime:0,phase:p.phase,idleTime:(p.id*.61803398875)%3.49,view:null};}
+export function createMotion(p){return{x:p.x,z:p.z,heading:p.heading,walk:0,talk:0,work:0,action:null,actionTime:0,talkTime:0,practiceTime:0,practiceCount:0,phase:p.phase,idleTime:(p.id*.61803398875)%3.49,view:null};}
 export function updateMotion(m,p,dt,simulationRate=1,speaking=p.state==='talking'){
   dt=Math.max(0,Math.min(dt,.1));
   const follow=1-Math.exp(-24*dt),blend=1-Math.exp(-9*dt);
@@ -17,6 +17,13 @@ export function updateMotion(m,p,dt,simulationRate=1,speaking=p.state==='talking
   m.phase=(m.phase+dt*p.speed/stride*tau*m.walk*simulationRate)%tau;
   m.idleTime+=dt*simulationRate*(.88+(p.id%11)*.025+m.talk*.55+m.work*.18);
   if(m.action){m.actionTime+=dt*simulationRate;if(m.actionTime>=ACTION_DURATIONS[m.action]){m.action=null;m.actionTime=0;}}
+  if(p.flirtatious){
+    if(p.assembly||p.state==='walking'){m.action=null;m.actionTime=0;}
+    if(!p.assembly&&p.state==='working'&&m.walk<.05&&m.talk<.05&&!m.action){
+      m.practiceTime+=dt*simulationRate;
+      if(m.practiceTime>=10+p.id%6){startResidentAction(m,m.practiceCount++%2?'punch':'jump');m.practiceTime=0;}
+    }
+  }
   m.talkTime=m.talk>.05?m.talkTime+dt*simulationRate:0;
   return m;
 }
