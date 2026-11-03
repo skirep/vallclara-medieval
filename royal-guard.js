@@ -20,7 +20,7 @@ export function createRoyalGuard(population,{obstacles=[],navigation=null}={}){
  function update(dt,hours){
   if(!Number.isFinite(dt)||dt<=0)return;flight=dragonFlight(hours);
   for(const m of members){const p=m.person,g=p.royalGuard;
-   if(p.dragonEmergency){g.phase=p.dragonEmergency.role==='returning'?'returning':'responding';m.key=null;continue;}
+   if(p.health===0||p.missionCombat)continue;if(p.dragonEmergency){g.phase=p.dragonEmergency.role==='returning'?'returning':'responding';m.key=null;continue;}
    // The castle stays guarded during the daily gathering as well as at night.
    const post=g.post,target=flight?guardCombatPost(p,nav):m.patrol?{x:post.x+(post.x<CASTLE.x?1:-1)*1.1,z:post.z}:post,key=`${target.x}:${target.z}`;
    if(key!==m.key){m.path=nav.path(p,target,{seed:p.id,diversity:false,recordTraffic:false});m.step=0;m.key=key;}

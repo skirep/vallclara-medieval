@@ -4,7 +4,8 @@ import {DRAGON_PLAZA,DRAGON_DURATION,DRAGON_RAID,dragonAlarm} from './dragon-enc
 export const isDragonDefender=p=>p.age>=18&&(p.spriteId==='summer-athlete'||p.dragonDefender===true);
 const PANIC=['El drac! Correu!','Aparteu-vos de les flames!','Cap als carrers de fora!','No us atureu! El foc ve cap aquí!','Ajudeu els petits! Tothom fora de la plaça!'];
 const BRAVE=['Ei, drac! Mira cap aquí!','Deixeu-los marxar! Nosaltres el distraurem!','No faràs fora la nostra gent!'];
-export function createDragonEmergency(population,{obstacles=[],navigation=null,social,onAlarm=()=>{}}={}){
+export function createDragonEmergency(population,{obstacles=[],navigation=null,social,onDamage=()=>{},onAlarm=()=>{}}={}){
+ const allResidents=population;
  const nav=navigation??createAssemblyNavigation(obstacles),members=new Map(),refuges=[[-54,-54],[-54,-36],[-54,0],[-54,36],[-54,54],[-36,-54],[-36,54],[36,-54],[54,-36],[54,0],[54,36],[54,54],[36,54],[36,-72]].map(([x,z])=>({x,z}));
  let phase='idle',flightId=null,elapsed=0,current=null,target=null,targetBeat=null,targetId=null,completed=0;
  const distance=p=>Math.hypot(p.x-DRAGON_PLAZA.x,p.z-DRAGON_PLAZA.z);
@@ -20,12 +21,13 @@ export function createDragonEmergency(population,{obstacles=[],navigation=null,s
  function startReturn(){phase='returning';target=null;nav.resetTraffic();for(const p of population){const m=members.get(p.id);if(!m)continue;m.path=route(p,m.origin);m.step=0;m.arrived=false;p.dragonEmergency.role='returning';p.emergencySpeed=Math.max(1.8,p.speed*1.7);delete p.dragonPunchTime;delete p.guardAttackTime;}}
  function release(p){delete p.dragonEmergency;delete p.emergencySpeed;delete p.dragonPunchTime;delete p.guardAttackTime;p.state=p.path.length?'walking':'resting';members.delete(p.id);}
  function move(p,m,dt){let budget=p.emergencySpeed*dt;while(m.step<m.path.length){const q=m.path[m.step],dx=q.x-p.x,dz=q.z-p.z,d=Math.hypot(dx,dz);if(d<1e-7){m.step++;continue;}if(budget<=0)break;const step=Math.min(budget,d);p.x+=dx/d*step;p.z+=dz/d*step;p.heading=Math.atan2(dx,dz);p.walk+=step*5;budget-=step;if(step===d)m.step++;}m.arrived=m.step===m.path.length;p.state=m.arrived?'resting':'walking';}
- function update(dt,hours){if(!Number.isFinite(dt)||dt<=0)return;const alarm=dragonAlarm(hours);current=alarm;
+ function update(dt,hours,{peaceful=false}={}){if(!Number.isFinite(dt)||dt<=0)return;population=allResidents.filter(p=>!p.missionDead);for(const p of allResidents)if(p.missionDead&&members.has(p.id))release(p);const alarm=peaceful?null:dragonAlarm(hours);current=alarm;
   if(alarm&&(alarm.id!==flightId||phase==='idle'||phase==='returning'))begin(alarm);
   if(!alarm&&phase==='alarm')startReturn();
   if(phase==='idle')return;elapsed+=dt;
   for(const p of population){const m=members.get(p.id);if(!m)continue;move(p,m,dt);delete p.dragonPunchTime;delete p.guardAttackTime;
    if(phase==='returning'){if(m.arrived)release(p);continue;}
+   if(phase==='alarm'&&current?.phase==='attacking'&&distance(p)<8){m.burnTime=(m.burnTime??0)+dt;if(m.burnTime>=3){onDamage(p,6);m.burnTime=0;}}
    if(m.defender&&m.arrived){p.heading=Math.atan2(DRAGON_PLAZA.x-p.x,DRAGON_PLAZA.z-p.z);const beat=(elapsed+p.id*.23)%2.1;if(current?.phase==='attacking'){if(p.royalGuard&&beat<.8)p.guardAttackTime=beat;else if(!p.royalGuard&&beat<.66)p.dragonPunchTime=beat;}}
   }
   if(phase==='returning'&&!members.size){phase='idle';completed++;}

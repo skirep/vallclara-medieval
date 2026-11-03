@@ -13,7 +13,7 @@ export function createResidentFollow(population,{obstacles=[],buildings=[],heigh
   }
   return from.clone().addScaledVector(delta,hit);
  }
- function select(id){const p=byId.get(id);if(!p)return false;target=p;initialized=false;return true;}
+ function select(id){const p=byId.get(id);if(!p||p.missionDead)return false;target=p;initialized=false;return true;}
  function stop(){const p=target;target=null;initialized=false;return p;}
  function update(camera,dt,{yaw=0,pitch=0,position=target}={}){
   if(!target)return false;const p=position??target,ground=heightAt(p.x,p.z),room=buildings.find(b=>Math.abs(p.x-b.x)<b.w/2&&Math.abs(p.z-b.z)<b.d/2);

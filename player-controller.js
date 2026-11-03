@@ -5,5 +5,5 @@ export function movePlayer(player,dx,dz,{obstacles=[],boundary=111,heightAt=()=>
 }
 export function createPlayerJump(){let height=0,velocity=0;return{start(){if(height>0||velocity>0)return false;velocity=4.2;return true;},update(dt){if(height||velocity){height+=velocity*dt;velocity-=12*dt;if(height<=0){height=velocity=0;}}return height;},reset(){height=velocity=0;},get height(){return height;}};}
 export function nearbyDuelTarget(population,player,yaw,{canPunch=()=>true,visible=()=>true}={}){
- return population.map(p=>({p,d:Math.hypot(p.x-player.x,p.z-player.z)})).filter(({p,d})=>d<2.8&&d>.2&&p.age>=18&&!p.assembly&&!p.dragonEmergency&&!p.courtSeat&&!p.playerDuel&&p.social.conversation===null&&canPunch(p)&&visible(p)&&(-(p.x-player.x)*Math.sin(yaw)-(p.z-player.z)*Math.cos(yaw))/d>.45).sort((a,b)=>a.d-b.d)[0]?.p??null;
+ return population.map(p=>({p,d:Math.hypot(p.x-player.x,p.z-player.z)})).filter(({p,d})=>d<2.8&&d>.2&&p.health!==0&&p.age>=18&&!p.assembly&&!p.dragonEmergency&&!p.courtSeat&&!p.playerDuel&&p.social.conversation===null&&canPunch(p)&&visible(p)&&(-(p.x-player.x)*Math.sin(yaw)-(p.z-player.z)*Math.cos(yaw))/d>.45).sort((a,b)=>a.d-b.d)[0]?.p??null;
 }

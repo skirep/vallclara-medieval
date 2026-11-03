@@ -6,7 +6,7 @@ export function createRoyalCourt(population,obstacles){
  for(const m of members)m.person.courtSeat=m.seat;
  function update(dt,hours){
   const hour=(hours%24+24)%24;
-  for(const m of members){const p=m.person;if(p.dragonEmergency){p.seated=false;continue;}
+  for(const m of members){const p=m.person;if(p.health===0||p.missionCombat)continue;if(p.missionDead){p.seated=false;continue;}if(p.dragonEmergency){p.seated=false;continue;}
    if(p.assembly||p.assemblyReleased){p.seated=false;m.destination=null;continue;}
    const audience=hour>=8.5&&hour<19,target=audience?m.seat:{x:43.2+(p.sex?4.7:0),z:-71.5};
    const key=`${target.x}:${target.z}`;
@@ -29,5 +29,5 @@ export function createSeatedRoyalLegs(scene,population){
   for(const dx of [-.19,.19])part(boot,dx,.10,.60,.20,.18,.34);
   scene.add(group);return {group,person};
  });
- return {update(){for(const {group,person}of groups)group.visible=!!person?.seated&&!person.assembly;}};
+ return {update(){for(const {group,person}of groups)group.visible=!!person?.seated&&!person.missionDead&&!person.assembly;}};
 }

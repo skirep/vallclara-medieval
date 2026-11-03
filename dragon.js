@@ -33,12 +33,12 @@ export function createDragon(scene,buildings=[],{textureLoader=new T.TextureLoad
  }
  let phase=null,heading=0;
 
- function update(hours,observer={x:0,z:0},{target=null}={}){
+ function update(hours,observer={x:0,z:0},{target=null,peaceful=false}={}){
   current=dragonFlight(hours);phase=current?dragonPhase(current.progress):null;root.visible=!!current;fireActive=false;if(!current){fire.update(root.position,0,observer,0,0);return;}
   const t=current.progress,p=point(t),ahead=point(Math.min(1,t+.001)),behind=point(Math.max(0,t-.001)),direction=ahead.sub(behind);
   heading=phase==='attacking'?Math.atan2((target?.x??p.x)-p.x,(target?.z??p.z+12)-p.z):Math.atan2(direction.x,direction.z);const angle=Math.atan2(observer.x-p.x,observer.z-p.z);
   view=spriteDirection('dragon',stableView(viewState,heading,angle)).view;frame=Math.floor(t*DRAGON_DURATION*180*DRAGON_FPS)%DRAGON_FRAMES;
-  const low=phase==='attacking',aim=low?(target??{x:p.x,y:1,z:p.z+14}):null,strength=phase==='ascending'?0:fireEnvelope(t);fireActive=strength>0;fire.update(p,heading,observer,hours*180,strength,{target:aim});
+  const low=phase==='attacking',aim=low?(target??{x:p.x,y:1,z:p.z+14}):null,strength=peaceful||phase==='ascending'?0:fireEnvelope(t);fireActive=strength>0;fire.update(p,heading,observer,hours*180,strength,{target:aim});
   root.position.copy(p);root.rotation.set(0,angle,0);
   if(texture)texture.offset.set((frame*256+.5)/1536,((3-view)*256+.5)/1024);
  }
