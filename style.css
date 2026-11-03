@@ -35,3 +35,24 @@
 @media(prefers-reduced-motion:reduce){#playerFist.strike{animation:none}#hitFlash.strike{animation:hit .2s ease-out}}
 body.game-mode #touchLook{display:none}
 #dragonRaidPanel{position:fixed;left:28px;bottom:100px;z-index:5;max-width:min(410px,calc(100vw - 56px));padding:16px 18px;background:#361f18ed;border:1px solid #edab62;border-radius:9px;box-shadow:0 7px 35px #0005}#dragonRaidPanel strong{font-size:13px;color:#ffd39b;letter-spacing:1px}#dragonRaidPanel p{font-size:12px;line-height:1.6;margin:9px 0}#dragonRaidPanel small{font-size:10px;line-height:1.6;color:#e2c6a9;display:block}.alarm-speech{background:#fff0d9;color:#662c1c;border:1px solid #dc9453;font-weight:600}.alarm-speech:after{border-top-color:#fff0d9}.alarm-speech strong{color:#9b431c}@media(max-width:700px){#dragonRaidPanel{left:15px;bottom:190px;max-width:calc(100vw - 150px);padding:12px}#dragonRaidPanel strong{font-size:11px}#dragonRaidPanel p{font-size:11px}#dragonRaidPanel small{font-size:9px}}@media(max-height:560px){#dragonRaidPanel{left:15px;bottom:75px;max-width:40vw;padding:10px}#dragonRaidPanel small{display:none}}
+
+/* Keep the visibility toggle and gameplay controls available in the clear view. */
+#infoToggle{display:none;align-items:center;justify-content:center;min-width:44px;min-height:44px;padding:8px}
+body.playing #infoToggle{display:inline-flex}
+#infoToggle .eye-slash{display:none}
+#infoToggle[aria-pressed="true"] .eye-slash{display:block}
+body.info-hidden .location,
+body.info-hidden .map-card,
+body.info-hidden #hint,
+body.info-hidden #touchLook,
+body.info-hidden #assemblyPanel,
+body.info-hidden #followPanel,
+body.info-hidden #dragonNotice,
+body.info-hidden #dragonRaidPanel,
+body.info-hidden #gameStatus,
+body.info-hidden #thoughtCard,
+body.info-hidden #speech-layer,
+body.info-hidden #thought-layer,
+body.info-hidden header .brand,
+body.info-hidden #live{display:none!important}
+body.info-hidden header{justify-content:flex-end}
