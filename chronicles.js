@@ -4,13 +4,15 @@ import {dialoguePage,DIALOGUE_COUNT} from './dialogue-catalogue.js';
 import {ROLE_LABELS,RESOURCE_LABELS,phaseLabel} from './resident-tasks.js';
 import {familiesOf,relationLabel} from './families.js';
 import * as T from 'three';
-export function createChronicles(population,social,{work=null,onOpen,onClose}){
+export function createChronicles(population,social,{work=null,onOpen,onClose,onFollow}){
   const $=s=>document.querySelector(s),dialog=$('#chronicles'),list=$('#resident-list'),bio=$('#biography'),byId=new Map(population.map(p=>[p.id,p])),projected=new T.Vector3(),bubbles=new Map();let selected=0,lastSpoken='',lastSpokenAt=0,lastPublicKey='';
   const text=(tag,value,className='')=>{const el=document.createElement(tag);el.textContent=value;if(className)el.className=className;return el;};
   const familyFilter=$('#familyFilter');
   for(const family of familiesOf(population)){const option=text('option',`${family.surname} · casa ${family.household}`);option.value=family.id;familyFilter.append(option);}
   familyFilter.onchange=()=>renderPeople();
   function showBio(id){selected=id;const p=byId.get(id);bio.replaceChildren(text('span',p.job.toUpperCase(),'eyebrow'),text('h3',p.name),text('p',p.story.biography));const dl=document.createElement('dl');for(const [label,value]of [['Objectiu',p.story.wish],['Preocupació',p.story.worry],['Record estimat',p.story.keepsake],['Amistat',byId.get(p.story.friendId).name],['Vincle familiar',byId.get(p.story.kinId).name],['Trobades',String(p.social.meetings)],['Davant del pacte',p.story.narrative.stance],['Desacord amb',byId.get(p.story.narrative.rivalId).name],['Paper al poble',p.story.narrative.role||'Veu de la família'],['Pista personal',p.story.narrative.secret],['Repertori',`${DIALOGUE_COUNT} línies contextuals`]]){dl.append(text('dt',label),text('dd',value));}bio.append(dl);
+    if(onFollow){const follow=text('button','Seguir amb la càmera','follow-resident');follow.type='button';follow.onclick=()=>{dialog.close();onFollow(p);};bio.insertBefore(follow,dl);}
+
     if(p.duty){const d=p.duty,job=document.createElement('section');job.className='resident-duty';job.append(text('h4',`Funció · ${ROLE_LABELS[d.role]}`),text('p',`Avui ${d.plan}.`),text('p',phaseLabel(d)),text('p',`Tasques lliurades avui: ${d.today.completed}. Lloc: ${work?.sites[d.station]?.name||ROLE_LABELS[d.role]}.`));if(d.phase==='working'){const progress=document.createElement('progress');progress.max=d.task.duration;progress.value=d.elapsed;progress.setAttribute('aria-label','Progrés de la feina');job.append(progress);}if(d.lastCompleted)job.append(text('p',`Darrera tasca: ${d.lastCompleted.label}.`));bio.append(job);}
 
     const familyBox=document.createElement('section');familyBox.className='family-members';familyBox.append(text('h4',`Família ${p.surname} · casa ${p.family.household}`));

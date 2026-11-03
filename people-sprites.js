@@ -30,7 +30,7 @@ export function createPeople(scene,population,{onProgress,pixelHeight=128,height
    // Painted skin and clothes remain intact; only seated lower legs are clipped.
   };
   material.customProgramCacheKey=()=> 'vallclara-seated-v7-'+rows;
-  const mesh=new T.InstancedMesh(g,material,n);mesh.name='Habitants amb fotogrames · '+WALK_TYPES[type];mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);mesh.frustumCulled=false;mesh.userData.spriteBillboard=true;scene.add(mesh);
+  const mesh=new T.InstancedMesh(g,material,n);mesh.name='Habitants amb fotogrames · '+WALK_TYPES[type];mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);mesh.frustumCulled=false;mesh.userData.spriteBillboard=true;mesh.userData.residentIndices=indices;scene.add(mesh);
   groups.push({indices,frames,texture,mesh,extended});
  }
  geometry.dispose();
