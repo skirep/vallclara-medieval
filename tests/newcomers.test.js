@@ -9,9 +9,9 @@ import {hasResidentActions,actionFrame} from '../resident-actions.js';
 import {houseRoofPlan,gableGeometry} from '../house-geometry.js';
 import * as T from 'three';
 
-test('three adult designs occur exactly three times, with unique identities inside the 200 resident budget',()=>{
+test('three adult designs occur exactly three times, with unique identities alongside the royal guard',()=>{
  const p=createHistories(createTownPopulation()),artists=p.filter(p=>p.flirtatious);
- assert.equal(p.length,200);assert.equal(artists.length,9);assert.equal(new Set(p.map(p=>p.id)).size,200);
+ assert.equal(p.length,212);assert.equal(artists.length,9);assert.equal(new Set(p.map(p=>p.id)).size,212);
  for(const id of ['summer-dancer','summer-athlete','summer-blonde']){
   const copies=artists.filter(p=>p.spriteId===id);assert.equal(copies.length,3);assert.equal(new Set(copies.map(p=>p.name)).size,3);
   for(const person of copies){assert.ok(person.age>=27);assert.equal(person.character.category,person.sex?'adult-female':'adult-male');for(const action of ['jump','punch','talk'])assert.equal(hasResidentActions(id,action),true);}

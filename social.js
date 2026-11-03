@@ -5,7 +5,7 @@ export function createSocialSystem(population){
   const active=[],journal=[];let elapsed=0,scan=0,nextId=0,scanCursor=0;
   const byId=new Map(population.map(p=>[p.id,p]));
   function begin(a,b,hour,override=null){
-    if(active.length>=18||a===b||a.dragonEmergency||b.dragonEmergency||a.playerDuel||b.playerDuel||a.assembly||b.assembly||a.social.conversation!==null||b.social.conversation!==null||a.social.cooldown>0||b.social.cooldown>0)return false;
+    if(active.length>=18||a===b||a.royalGuard||b.royalGuard||a.dragonEmergency||b.dragonEmergency||a.playerDuel||b.playerDuel||a.assembly||b.assembly||a.social.conversation!==null||b.social.conversation!==null||a.social.cooldown>0||b.social.cooldown>0)return false;
     const id=nextId++,plan=override??narrative.plan(a,b,hour),turns=plan.turns;
     const conversation={...plan,id,a:a.id,b:b.id,turnElapsed:0,topic:plan.topic,chapter:plan.chapter,romantic:plan.romantic===true,turns,index:0,remaining:turns[0].duration??Math.min(8,2.2+turns[0].text.length*.028),time:elapsed};
     active.push(conversation);a.social.conversation=b.social.conversation=id;a.state=b.state='talking';

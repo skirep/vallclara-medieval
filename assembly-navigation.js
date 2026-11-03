@@ -16,7 +16,8 @@ export function createAssemblyNavigation(obstacles){
  for(let id=0;id<total;id++){
   const p=point(id),inSquare=Math.abs(p.x+12)<=20.9&&Math.abs(p.z)<=20.9;
   const inStreet=lanes.some(l=>Math.abs(p.x-l)<=2.2||Math.abs(p.z-l)<=2.2);
-  const inCastle=p.x>21&&p.x<51&&p.z> -86&&p.z< -58;
+  // Include the exterior patrol ring; walls and towers still block edges.
+  const inCastle=p.x>16&&p.x<56&&p.z> -90&&p.z< -52;
   free[id]=(inSquare||inStreet||inCastle)&&isClear(p.x,p.z)?1:0;
  }
  // Validate each undirected edge once; every resident reuses this collision graph.

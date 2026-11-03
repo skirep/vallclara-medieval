@@ -46,3 +46,9 @@ El desament existent s’amplia amb el rellotge, els recursos, les tasques en cu
 Les proves recorren les 102.400 entrades, comproven identitats i relacions, simulen una jornada amb 200 habitants, validen costos i lliuraments, bloquejos, continuïtat després de desar, converses interrompudes, informes del dia anterior i rutes amb obstacles durant una reunió completa. La validació de geometria no substitueix una comprovació visual de WebGL.
 
 La vila compacta inclou 167 veïns ordinaris, 24 identitats amb nom propi i 9 artistes adults. El rei i la reina segueixen una rutina de cort pròpia i assisteixen a la reunió; no produeixen els béns dels oficis ordinaris. El castell, la parròquia i el pont són accessibles des del menú de llocs de la vila.
+
+## Guàrdia reial
+
+La vila conserva els seus 200 habitants i afegeix 12 soldats amb identitats estables: sis amb espasa i escut i sis amb llança. Els seus fotogrames vectorials tenen quatre orientacions, sis poses per animació i tres estats: caminar, respirar mentre vigilen i atacar amb l’arma.
+
+Patrullen els accessos i el perímetre exterior del castell durant tot el dia. No abandonen la guàrdia per treballar als tallers, discutir amb els veïns o assistir a la reunió del migdia. Quan el drac comença a sobrevolar la vila, es mobilitzen per camins transitables i travessen el riu pel pont. A la plaça formen dues línies, ataquen amb les armes mentre els forçuts distreuen el drac i els veïns es refugien. Quan acaba l’alarma tornen caminant als seus llocs al castell. Els pensaments i els crits reflecteixen cada fase de la defensa.
