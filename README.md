@@ -54,6 +54,8 @@ Durant la feina artística, els nou visitants alternen salts i cops de puny a l�
 
 ## Drac i càmera de seguiment
 
-El drac tridimensional passa cada dia del joc a les **10:00 i les 17:00**, durant mitja hora del rellotge (90 segons a 1×). Vola prop de les cases i ajusta l’alçada a les teulades i al campanar. Ales i cua s’animen amb l’hora absoluta: la pausa, la velocitat i la restauració del desament conserven la posició del vol. Canviar l’hora mostra la fase corresponent, sense programar vols addicionals.
+El drac 2D amb 24 fotogrames dibuixats passa cada dia del joc a les **10:00 i les 17:00**, durant mitja hora del rellotge (90 segons a 1×). Vola prop de les cases i ajusta l’alçada a les teulades i al campanar. La batuda de les ales s’anima amb l’hora absoluta: la pausa, la velocitat i la restauració del desament conserven la posició del vol. Canviar l’hora mostra la fase corresponent, sense programar vols addicionals.
 
 Toca un habitant visible o obre **Cròniques → fitxa → Seguir amb la càmera**. La càmera el segueix, el ratolí permet orbitar i es comproven parets i mobles per reduir travessaments. **F**, el botó **Deixar de seguir** o començar a caminar recuperen el control a peu a prop del personatge. La marca daurada identifica el veí seguit.
+
+El drac és un sprite pla orientat cap a la càmera, amb sis dibuixos de vol per cadascuna de les quatre vistes. L’atles manté la transparència i no fa servir el model volumètric anterior. Previsualització: [drac 2D](drac.html).

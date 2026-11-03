@@ -13,14 +13,15 @@ test('dragon makes exactly two bounded flights per game day, including restored 
  }
  assert.equal(dragonFlight(NaN),null);assert.equal(nextDragonHour(17.6),34);assert.equal(nextDragonHour(24),34);
 });
-test('volumetric dragon animation follows absolute game time, clears roofs and freezes with the clock',()=>{
- const scene=new T.Scene(),buildings=[{x:-9,z:-30,w:9,d:10,h:6.3},{kind:'church',x:-42,z:-6,w:12,d:13,h:19}],dragon=createDragon(scene,buildings);
+test('2D dragon frame animation follows absolute game time, clears roofs and freezes with the clock',()=>{
+ const scene=new T.Scene(),buildings=[{x:-9,z:-30,w:9,d:10,h:6.3},{kind:'church',x:-42,z:-6,w:12,d:13,h:19}],dragon=createDragon(scene,buildings,{textureLoader:{load(url,resolve){resolve(new T.Texture());}}});
  dragon.update(9);assert.equal(dragon.root.visible,false);
- dragon.update(10.15);assert.equal(dragon.root.visible,true);const before=dragon.root.position.clone(),wing=dragon.wings[0].pivot.rotation.z;
- dragon.update(10.15);assert.deepEqual(dragon.root.position,before);assert.equal(dragon.wings[0].pivot.rotation.z,wing);
- dragon.update(10.2);assert.notDeepEqual(dragon.root.position,before);assert.notEqual(dragon.wings[0].pivot.rotation.z,wing);
+ dragon.update(10.15);assert.equal(dragon.root.visible,true);const before=dragon.root.position.clone(),frame=dragon.frame;
+ dragon.update(10.15);assert.deepEqual(dragon.root.position,before);assert.equal(dragon.frame,frame);
+ dragon.update(10.151);assert.notDeepEqual(dragon.root.position,before);assert.notEqual(dragon.frame,frame);
  for(let t=0;t<=1;t+=.005){const p=dragon.point(t);assert.ok(Number.isFinite(p.y));for(const b of buildings)if(Math.abs(p.x-b.x)<b.w/2&&Math.abs(p.z-b.z)<b.d/2){const top=b.kind==='church'?19:b.h+b.w*.4;assert.ok(p.y>=top+5.9);}}
  scene.traverse(o=>{if(o.isMesh)for(const value of o.geometry.attributes.position.array)assert.ok(Number.isFinite(value));});
+ assert.ok(dragon.sprite.geometry instanceof T.PlaneGeometry);assert.equal(dragon.root.children.length,1);assert.equal(dragon.sprite.userData.spriteBillboard,true);
  dragon.update(10.5);assert.equal(dragon.root.visible,false);
 });
 test('following supports sparse person IDs, keeps the target in view and clips against walls',()=>{
