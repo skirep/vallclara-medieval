@@ -10,7 +10,7 @@ const worries=['la humitat del magatzem','el preu del gra','la falta de fusta se
 export function createHistories(population){
   for(const p of population){
     const rng=random(134800+p.id*97),choose=a=>a[Math.floor(rng()*a.length)];
-    p.name=firstNames[p.id%firstNames.length]+' '+p.surname;
+    p.name=p.character?.name??(firstNames[p.id%firstNames.length]+' '+p.surname);
     p.story={origin:choose(origins),past:choose(pasts),wish:choose(wishes),keepsake:choose(keepsakes),temperament:choose(temperaments),worry:choose(worries),year:1348-Math.min(p.age-3,4+Math.floor(rng()*23)),friendId:(p.id+17)%population.length,kinId:p.parentIds[0]??p.partnerId??p.childIds[0]??p.id,household:p.family.household};
     if(p.age<16){p.story.past=choose(['va aprendre a fer nusos amb la gent de casa','va trobar un niu vora el torrent','va ajudar a plantar un arbre a l’hort','va participar en la festa de la vila']);p.story.wish=choose(['aprendre a tocar el flabiol','jugar a la plaça amb els amics','aprendre a llegir','cuidar una cabreta','construir un petit carro de fusta']);p.story.worry=choose(['un amic que avui no ha sortit a jugar','la pluja que pot espatllar la festa','una joguina que ha perdut']);}
     p.social={cooldown:rng()*14,conversation:null,met:{},meetings:0};

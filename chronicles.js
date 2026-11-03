@@ -1,3 +1,4 @@
+import {residentHeight} from './resident-scale.js';
 import {VILLAGE_LORE,THREADS} from './village-lore.js';
 import {dialoguePage,DIALOGUE_COUNT} from './dialogue-catalogue.js';
 import {ROLE_LABELS,RESOURCE_LABELS,phaseLabel} from './resident-tasks.js';
@@ -60,7 +61,7 @@ export function createChronicles(population,social,{work=null,onOpen,onClose}){
     if(publicKey!==lastPublicKey){window.speechSynthesis?.cancel();lastSpoken='';lastSpokenAt=-Infinity;lastPublicKey=publicKey;}
     const candidates=enabled?[...publicBubbles,...social.bubbles()].map(b=>({...b,distance:Math.hypot(camera.position.x-b.person.x,camera.position.z-b.person.z)})).filter(b=>b.distance<(b.priority?45:22)).sort((a,b)=>(b.priority||0)-(a.priority||0)||a.distance-b.distance).slice(0,3):[];
     const used=new Set();
-    for(const b of candidates){const p=b.person;projected.set(p.x,2.15*p.height,p.z).project(camera);if(projected.z< -1||projected.z>1||Math.abs(projected.x)>.92||Math.abs(projected.y)>.8)continue;used.add(b.id);let el=bubbles.get(b.id);if(!el){el=document.createElement('div');el.className='speech';el.append(text('strong',''),text('span',''));$('#speech-layer').append(el);bubbles.set(b.id,el);}el.firstChild.textContent=p.name;el.lastChild.textContent=b.text;el.style.left=`${(projected.x*.5+.5)*100}%`;el.style.top=`${(-projected.y*.5+.5)*100}%`;el.style.opacity=String(Math.max(0,Math.min(1,((b.priority?45:22)-b.distance)/6)));
+    for(const b of candidates){const p=b.person;projected.set(p.x,residentHeight(p)+.32,p.z).project(camera);if(projected.z< -1||projected.z>1||Math.abs(projected.x)>.92||Math.abs(projected.y)>.8)continue;used.add(b.id);let el=bubbles.get(b.id);if(!el){el=document.createElement('div');el.className='speech';el.append(text('strong',''),text('span',''));$('#speech-layer').append(el);bubbles.set(b.id,el);}el.firstChild.textContent=p.name;el.lastChild.textContent=b.text;el.style.left=`${(projected.x*.5+.5)*100}%`;el.style.top=`${(-projected.y*.5+.5)*100}%`;el.style.opacity=String(Math.max(0,Math.min(1,((b.priority?45:22)-b.distance)/6)));
       const now=performance.now(),key=`${b.id}:${b.text}`;if(voices&&b.distance<(b.priority?45:12)&&key!==lastSpoken&&now-lastSpokenAt>(b.priority?0:4000)&&window.speechSynthesis&&!window.speechSynthesis.speaking){const utterance=new SpeechSynthesisUtterance(b.text);utterance.lang='ca-ES';utterance.rate=.95;utterance.volume=.55;const voice=speechSynthesis.getVoices().find(v=>v.lang.startsWith('ca'));if(voice)utterance.voice=voice;speechSynthesis.speak(utterance);lastSpoken=key;lastSpokenAt=now;}
     }
     for(const[id,el]of bubbles)if(!used.has(id)){el.remove();bubbles.delete(id);}if((!enabled||!voices)&&window.speechSynthesis?.speaking)window.speechSynthesis.cancel();

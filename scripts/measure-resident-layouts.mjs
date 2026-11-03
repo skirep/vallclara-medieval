@@ -4,6 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {decodeRGBA} from './png-rgba.mjs';
 import {WALK_TYPES,LEGACY_TYPES} from '../animation-frames.js';
 import {SEPARATE_TYPES} from '../resident-assets.js';
+import {FEATURED_LAYOUTS} from '../featured-layouts.js';
 import {WALK_LAYOUTS} from '../walk-layouts.js';
 export function measure(file,count){
  const {pixels,width,height}=decodeRGBA(readFileSync(new URL('../assets/'+file,import.meta.url)));
@@ -37,10 +38,11 @@ export function measure(file,count){
 if(process.argv[1]===fileURLToPath(import.meta.url)){
 const layouts={};
 for(const type of WALK_TYPES){
+ if(FEATURED_LAYOUTS[type])continue;
  if(SEPARATE_TYPES.includes(type))layouts[type]={walk:LEGACY_TYPES.includes(type)?WALK_LAYOUTS[type]:measure(`walk-${type}.png`,4),idle:measure(`idle-${type}.png`,4)};
  else{const rows=measure(`resident-${type}.png`,8);layouts[type]={walk:rows.slice(0,4),idle:rows.slice(4)};}
  console.log(type,layouts[type].walk.length*6+layouts[type].idle.length*6,'frames');
 }
-writeFileSync(new URL('../resident-layouts.js',import.meta.url),'// Measured source rectangles, torso anchors and foot baselines.\nexport const RESIDENT_LAYOUTS='+JSON.stringify(layouts)+';\n');
+writeFileSync(new URL('../resident-layouts.js',import.meta.url),"import {FEATURED_LAYOUTS} from './featured-layouts.js';\n// Measured source rectangles, torso anchors and foot baselines.\nconst BASE_RESIDENT_LAYOUTS="+JSON.stringify(layouts)+';\nexport const RESIDENT_LAYOUTS={...BASE_RESIDENT_LAYOUTS,...FEATURED_LAYOUTS};\n');
 
 }

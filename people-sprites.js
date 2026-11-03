@@ -1,5 +1,6 @@
 import * as T from 'three';
 import {appearanceFor} from './appearance.js';
+import {residentRenderHeight,residentHeight} from './resident-scale.js';
 import {createMotion,updateMotion,stableView} from './sprite-motion.js';
 import {drawnFrame,WALK_TYPES} from './animation-frames.js';
 import {loadPackedResident} from './resident-assets.js';
@@ -46,7 +47,7 @@ export function createPeople(scene,population,{onProgress,pixelHeight=128}={}){
    group.indices.forEach((index,i)=>{
     const p=population[index],a=appearances[index],m=states[index],dx=camera.x-m.x,dz=camera.z-m.z,angle=Math.atan2(dx,dz);
     const view=stableView(m,m.heading,angle),frame=drawnFrame(m),action=actionFrame(m,WALK_TYPES[type]);group.frames.setXYZW(i,action?.frame??frame%6,action?8+action.row+view:view+(frame>=6?4:0),0,0);
-    dummy.position.set(m.x,.015+(action?.action==='jump'?JUMP_LIFT[action.frame]*p.height:0),m.z);dummy.rotation.set(0,angle,0);const h=dx*dx+dz*dz<range*range?p.height*1.96:0;
+    dummy.position.set(m.x,.015+(action?.action==='jump'?JUMP_LIFT[action.frame]*residentHeight(p):0),m.z);dummy.rotation.set(0,angle,0);const h=dx*dx+dz*dz<range*range?residentRenderHeight(p,WALK_TYPES[type],view,frame,action?.action):0;
     dummy.scale.set(h*.875*a.width,h,1);dummy.updateMatrix();group.mesh.setMatrixAt(i,dummy.matrix);
    });group.frames.needsUpdate=true;group.mesh.instanceMatrix.needsUpdate=true;
   }

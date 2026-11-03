@@ -19,7 +19,7 @@ test('runtime walk textures are smaller lossless WebP files with retained PNG fa
 });
 
 test('all completed residents ship bounded lossless textures at every device resolution',()=>{
- assert.equal(PLANNED_RESIDENT_ROSTER.length,80);assert.equal(WALK_TYPES.length,RESIDENT_ROSTER.length);assert.equal(new Set(WALK_TYPES).size,WALK_TYPES.length);
+ assert.equal(PLANNED_RESIDENT_ROSTER.length,104);assert.equal(WALK_TYPES.length,RESIDENT_ROSTER.length);assert.equal(new Set(WALK_TYPES).size,WALK_TYPES.length);
  let bytes=0;
  for(const type of WALK_TYPES)for(const height of [64,96,128]){
   const file=readFileSync(new URL(`../assets/packed/${type}-${height}.webp`,import.meta.url));

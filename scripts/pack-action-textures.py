@@ -2,6 +2,7 @@
 from pathlib import Path
 import json
 import subprocess
+import argparse
 from PIL import Image
 
 root = Path(__file__).resolve().parent.parent
@@ -12,6 +13,13 @@ spec = json.loads(subprocess.check_output(['node', '--input-type=module', '-e',
 ], cwd=root, text=True))
 target = root / 'assets' / 'packed'
 target.mkdir(exist_ok=True)
+parser=argparse.ArgumentParser()
+parser.add_argument('--only',nargs='+',help='Repack selected action designs')
+args=parser.parse_args()
+if args.only:
+    unknown=set(args.only)-{r['type'] for r in spec}
+    if unknown:parser.error(f'Unknown action designs: {sorted(unknown)}')
+    spec=[r for r in spec if r['type'] in args.only]
 for resident in spec:
     sources = {state: Image.open(root / 'assets' / file).convert('RGBA') for state, file in resident['files'].items()}
     for size in resident['sizes']:

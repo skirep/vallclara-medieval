@@ -1,3 +1,4 @@
+import {FEATURED_RESIDENTS} from './featured-residents.js';
 // Distinct painted characters; no runtime skin, hair or clothing recoloring.
 const groups={
  'adult-male':'baker fisherman carpenter stonemason potter tanner merchant scribe guard innkeeper farmer monk',
@@ -16,7 +17,7 @@ export const ORIGINAL_RESIDENTS=[
 ].map(([id,category])=>({id,category}));
 // Activate a design only after its painted sheet passes frame and alpha checks.
 export const READY_RESIDENT_IDS=new Set('baker baker-wife fisherman fishmonger carpenter weaver shepherd shepherdess boy-baker girl-baker stonemason potter-wife potter seamstress elder-mason elder-weaver boy-fisher girl-fisher girl-carpenter'.split(' '));
-export const PLANNED_RESIDENT_ROSTER=[...ORIGINAL_RESIDENTS,...NEW_RESIDENTS];
-export const RESIDENT_ROSTER=[...ORIGINAL_RESIDENTS,...NEW_RESIDENTS.filter(r=>READY_RESIDENT_IDS.has(r.id))];
-export const RESIDENT_CHOICES=Object.fromEntries([...Object.keys(groups),'priest'].map(category=>[category,RESIDENT_ROSTER.flatMap((r,i)=>r.category===category?[i]:[])]));
+export const PLANNED_RESIDENT_ROSTER=[...ORIGINAL_RESIDENTS,...NEW_RESIDENTS,...FEATURED_RESIDENTS];
+export const RESIDENT_ROSTER=[...ORIGINAL_RESIDENTS,...NEW_RESIDENTS.filter(r=>READY_RESIDENT_IDS.has(r.id)),...FEATURED_RESIDENTS];
+export const RESIDENT_CHOICES=Object.fromEntries([...Object.keys(groups),'priest'].map(category=>[category,RESIDENT_ROSTER.flatMap((r,i)=>r.category===category&&!r.featured?[i]:[])]));
 export function categoryFor(p){return p.role==='priest'?'priest':p.age<16?(p.sex?'girl':'boy'):`${p.age>=60?'elder':'adult'}-${p.sex?'female':'male'}`;}

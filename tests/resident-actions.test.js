@@ -10,8 +10,8 @@ import {createPopulation} from '../simulation.js';
 import {RESIDENT_ROSTER} from '../resident-roster.js';
 
 test('new action designs have measured, distinct available frames and loadable packed files',()=>{
- assert.equal(ACTION_TYPES.length,7);
- assert.equal(ACTION_TYPES.filter(type=>ACTION_LAYOUTS[type].punch).length,6);
+ assert.equal(ACTION_TYPES.length,31);
+ assert.equal(ACTION_TYPES.filter(type=>ACTION_LAYOUTS[type].punch).length,30);
  const cache=new Map();
  for(const type of ACTION_TYPES){
   assert.ok(RESIDENT_ROSTER.some(r=>r.id===type));

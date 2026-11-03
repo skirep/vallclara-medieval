@@ -1,6 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';import {createHash} from 'node:crypto';
 import {decodeRGBA} from '../scripts/png-rgba.mjs';
+import {FEATURED_RESIDENTS} from '../featured-residents.js';
 import {WALK_TYPES,IDLE_CYCLE,drawnFrame} from '../animation-frames.js';
 import {RESIDENT_LAYOUTS} from '../resident-layouts.js';
 import {RESIDENT_ASSETS,RESIDENT_SOURCES} from '../resident-assets.js';
@@ -55,5 +56,5 @@ test('standing villagers continually advance drawn idle frames, remain asynchron
  const before=motion.map(m=>m.idleTime);for(let j=0;j<motion.length;j++)updateMotion(motion[j],people[j],1/60,0);
  assert.deepEqual(motion.map(m=>m.idleTime),before);
  people[4].role='priest';assert.equal(appearanceFor(people[4]).row,12);
- assert.equal(new Set(people.map(p=>appearanceFor(p).row )).size,WALK_TYPES.length);
+ assert.equal(new Set(people.map(p=>appearanceFor(p).row )).size,WALK_TYPES.length-FEATURED_RESIDENTS.length);
 });

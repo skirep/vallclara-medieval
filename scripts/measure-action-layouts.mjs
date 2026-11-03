@@ -14,4 +14,4 @@ for(const file of readdirSync(new URL('../assets/',import.meta.url)).filter(f=>/
  const left=`jump-left-${id}.png`;if(existsSync(new URL('../assets/'+left,import.meta.url))){layouts[id].jump[3]=measure(left,1)[0];layouts[id].jump[3].source='jumpLeft';sources[id].jumpLeft=left;}
  console.log(id,Object.keys(layouts[id]).length*24,'action frames');
 }
-writeFileSync(new URL('../action-layouts.js',import.meta.url),'// Measured rectangles and anchors for actual painted jump, punch and talk frames.\nexport const ACTION_LAYOUTS='+JSON.stringify(layouts)+';\nexport const ACTION_SOURCES='+JSON.stringify(sources)+';\n');
+writeFileSync(new URL('../action-layouts.js',import.meta.url),"import {FEATURED_ACTION_LAYOUTS,FEATURED_ACTION_SOURCES} from './featured-layouts.js';\nconst BASE_ACTION_LAYOUTS="+JSON.stringify(layouts)+';\nconst BASE_ACTION_SOURCES='+JSON.stringify(sources)+';\nexport const ACTION_LAYOUTS={...BASE_ACTION_LAYOUTS,...FEATURED_ACTION_LAYOUTS};\nexport const ACTION_SOURCES={...BASE_ACTION_SOURCES,...FEATURED_ACTION_SOURCES};\n');

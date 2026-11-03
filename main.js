@@ -1,8 +1,9 @@
+import {addFeaturedResidents} from './featured-residents.js';
 import {createVillageWork} from './resident-work.js';
 import {createWorkVisuals} from './work-visuals.js';
 import * as T from 'three';
 import {createWorld} from './world.js';
-import {createPopulation,blocked,random,lanes} from './simulation.js';
+import {createPopulation,blocked,random,lanes,nodes} from './simulation.js';
 import {createPeople,createAnimals} from './actors.js';
 import {createGraphics} from './graphics.js';
 import {createHistories} from './stories.js';
@@ -18,7 +19,7 @@ const hemi=new T.HemisphereLight('#c5d3dc','#68614c',.55);scene.add(hemi);const 
 const sky=new T.Mesh(new T.SphereGeometry(800,32,20),new T.ShaderMaterial({side:T.BackSide,depthWrite:false,uniforms:{top:{value:new T.Color('#809ba7')},bottom:{value:new T.Color('#e4d7ad')}},vertexShader:'varying vec3 vWorld; void main(){vWorld=(modelMatrix*vec4(position,1.)).xyz;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'varying vec3 vWorld;uniform vec3 top;uniform vec3 bottom;void main(){float h=normalize(vWorld).y;gl_FragColor=vec4(mix(bottom,top,smoothstep(-.05,.7,h)),1.);}'}));scene.add(sky);
 function puffTexture(){const c=document.createElement('canvas');c.width=c.height=128;const ctx=c.getContext('2d'),g=ctx.createRadialGradient(64,64,2,64,64,64);g.addColorStop(0,'rgba(239,233,212,.55)');g.addColorStop(.4,'rgba(239,233,212,.25)');g.addColorStop(1,'rgba(239,233,212,0)');ctx.fillStyle=g;ctx.fillRect(0,0,128,128);return new T.CanvasTexture(c);}
 const puff=puffTexture(),cloudMaterial=new T.SpriteMaterial({map:puff,transparent:true,depthWrite:false,opacity:.75});const rng=random(871);for(let i=0;i<22;i++){const cloud=new T.Sprite(cloudMaterial);cloud.position.set((rng()-.5)*650,75+rng()*60,(rng()-.5)*650);cloud.scale.set(70+rng()*110,15+rng()*25,1);scene.add(cloud);}
-$('#loadText').textContent='Construint carrers i cases…';await new Promise(requestAnimationFrame);const world=createWorld(scene),population=createHistories(createPopulation(500)),social=createSocialSystem(population),clock=createVillageClock(),assemblies=createAssemblies(population,{obstacles:world.obstacles,social,initialHours:clock.hours}),work=createVillageWork(population,{initialHours:clock.hours,obstacles:world.obstacles}),workVisuals=createWorkVisuals(scene,population,work.sites),people=createPeople(scene,population,{pixelHeight:touch?(navigator.deviceMemory&&navigator.deviceMemory<=3?64:96):128,onProgress:(done,total)=>{$('#loadText').textContent=`Preparant els habitants 2D… ${done}/${total}`;}}),animals=createAnimals(scene,world.obstacles);
+$('#loadText').textContent='Construint carrers i cases…';await new Promise(requestAnimationFrame);const world=createWorld(scene),population=createHistories(addFeaturedResidents(createPopulation(500),nodes,random)),social=createSocialSystem(population),clock=createVillageClock(),assemblies=createAssemblies(population,{obstacles:world.obstacles,social,initialHours:clock.hours}),work=createVillageWork(population,{initialHours:clock.hours,obstacles:world.obstacles}),workVisuals=createWorkVisuals(scene,population,work.sites),people=createPeople(scene,population,{pixelHeight:touch?(navigator.deviceMemory&&navigator.deviceMemory<=3?64:96):128,onProgress:(done,total)=>{$('#loadText').textContent=`Preparant els habitants 2D… ${done}/${total}`;}}),animals=createAnimals(scene,world.obstacles);
 $('#loadText').textContent='Preparant els habitants 2D…';await people.ready;
 const graphics=createGraphics(renderer,scene,camera);
 try{const saved=JSON.parse(localStorage.getItem('vallclara-social-v1')||'null');social.restore(saved);if(Number.isFinite(saved?.hours)&&saved.hours>=0&&saved.hours<1e7){clock.restoreHours(saved.hours);work.restore(saved.work,clock.hours);assemblies.restore(saved.assembly,clock.hours);}}catch{}

@@ -64,7 +64,7 @@ const roles=[
   ['visita de suport','visitaré els veïns que necessiten ajuda','vaig completar una visita de suport'],
   ['preparació de la reunió','prepararé la reunió de demà','vaig preparar la reunió de la vila']]]
 ];
-export const roleFor=p=>p.role==='priest'?13:p.age<16?12:mod(p.jobId||0,12);
+export const roleFor=p=>p.role==='priest'?13:p.age<16?12:p.workRole??mod(p.jobId||0,12);
 export function taskFor(p,day=0){
  const role=roleFor(p),[duration,inputs,outputs,variants]=roles[role],variant=mod(p.id+Math.floor(p.id/5)+day,variants.length),[label,future,past]=variants[variant];
  return {id:`${role}:${variant}`,role,variant,label,future,past,inputs,outputs,duration:duration+(p.id%7)*1.5+(p.age>=68?12:0)};

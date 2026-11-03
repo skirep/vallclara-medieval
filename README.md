@@ -1,5 +1,16 @@
 # Vallclara Medieval
 
+## Actualització del 3 de novembre de 2026: 24 personatges i escala coherent
+
+- **24 dissenys nous i 2.880 fotogrames nous**, amb caminar, repòs, salt, puny i conversa, sis fotogrames en quatre orientacions. Rei, reina, príncep, princesa, capitana, escuder, missatgera, falconer, notari, batllessa, recaptador, religiosa hospitalera, llevadora, apotecària, ferrador, mosso de quadra, carboner, bosquerola, pastora, formatger, apicultora, candeler, joglaressa i pelegrí.
+- **59 dissenys completats dels 104 planificats**. Els 500 veïns anteriors mantenen els IDs; les 24 identitats noves tenen els IDs 500–523. La partida inclou 524 habitants i 114 llars. Els vestits reials només es vinculen als membres de la seva família. La galeria permet filtrar «Els 24 nous».
+- **Alçada visible normalitzada** segons l’edat, amb adults més alts i infants diferenciats. La compensació mesura el dibuix visible i manté la relació d’aspecte: un braç estès o més marge transparent no fa encongir tot el cos. Bafarades i salt comparteixen les noves mesures. Els PNG originals no es deformen ni es recoloren.
+- Les cinc animacions dels nous dissenys tenen rectangles, torsos i peus mesurats; la importació identifica figures completes en comptes de dividir només l’alçada total del full. Textures empaquetades en diverses resolucions i alternativa als originals. Els originals i prompts són a `assets/resident-*.png` i `assets/featured-residents-prompts.md`.
+- Els nous habitants participen en les converses, la feina compartida i la reunió de les dotze. Encara utilitzen les receptes i estacions dels 14 sistemes de feina existents: no hi ha animacions exclusives d’eines per a cada ofici. Salt i puny són consultables a la galeria i disponibles al controlador; no es disparen aleatòriament a tots els veïns ni incorporen combat.
+- Verificació de fotogrames diferents, límits, alineació, escala visible i identitats. Revisió visual dels retalls i comprovació de l’arribada dels 524 habitants a la reunió amb els obstacles reals. La revisió interactiva WebGL completa continua pendent.
+
+Els apartats següents documenten les tandes anteriors; les xifres antigues de dissenys i població corresponen a aquelles versions.
+
 Poble medieval explorable de Dejoco Arts, construït amb Three.js r180. Primera versió funcional d'observació ambientada lliurement al segle XIV.
 
 ## Actualització: fotogrames, riu, pont i interiors
