@@ -12,10 +12,10 @@ test('complete town geometry merges, citizen/animal animation matrices remain fi
   for(const time of [0,1,10]){people.animate(time,new T.Vector3(0,1.7,10));animals.animate(.03,time);}
   scene.traverse(o=>{if(o.isMesh){for(const n of o.geometry.attributes.position.array)assert.ok(Number.isFinite(n),'nonfinite vertex');if(o.isInstancedMesh)for(const n of o.instanceMatrix.array)assert.ok(Number.isFinite(n),'nonfinite actor transform');}});
   assert.equal(animals.count,74);
-  assert.equal(world.interiors.length,32);
-  for(const house of world.interiors)for(let z=house.z-house.d/2-.8;z<house.z+house.d/2+.8;z+=.1)assert.equal(blocked(house.x,z,world.obstacles),false,`inaccessible house at ${house.x}, ${house.z}`);
+  assert.equal(world.interiors.length,27);
+  for(const house of world.interiors.filter(b=>b.kind==='house'))for(let z=house.z-house.d/2-.8;z<house.z+house.d/2+.8;z+=.1)assert.equal(blocked(house.x,z,world.obstacles),false,`inaccessible house at ${house.x}, ${house.z}`);
   assert.ok(world.riverside.river.isMesh);
-  assert.ok(world.heightAt(126,0)>0);
+  assert.ok(world.heightAt(9,0)>0);
 
   for(const a of nodes)for(const j of a.links){const b=nodes[j];for(const offset of [-2.2,0,2.2])for(let step=0;step<=20;step++){const t=step/20,x=a.x+(b.x-a.x)*t+offset,z=a.z+(b.z-a.z)*t+offset;assert.equal(blocked(x,z,world.obstacles,.2),false,`street obstructed at ${x}, ${z}`);}}
 });

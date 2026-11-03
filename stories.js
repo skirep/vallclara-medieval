@@ -8,14 +8,15 @@ const keepsakes=['una cullera de boix','un tros de cinta tenyida','un petit flab
 const temperaments=['prudent','curiós','rialler','reservat','pacient','obstinat','generós','somniador'];
 const worries=['la humitat del magatzem','el preu del gra','la falta de fusta seca','el mal estat del camí','una promesa que encara no ha complert','la salut d’un veí','les eines massa gastades','l’aigua escassa de l’hort'];
 export function createHistories(population){
-  for(const p of population){
+  for(const [index,p] of population.entries()){
     const rng=random(134800+p.id*97),choose=a=>a[Math.floor(rng()*a.length)];
     p.name=p.character?.name??(firstNames[p.id%firstNames.length]+' '+p.surname);
-    p.story={origin:choose(origins),past:choose(pasts),wish:choose(wishes),keepsake:choose(keepsakes),temperament:choose(temperaments),worry:choose(worries),year:1348-Math.min(p.age-3,4+Math.floor(rng()*23)),friendId:(p.id+17)%population.length,kinId:p.parentIds[0]??p.partnerId??p.childIds[0]??p.id,household:p.family.household};
+    p.story={origin:choose(origins),past:choose(pasts),wish:choose(wishes),keepsake:choose(keepsakes),temperament:choose(temperaments),worry:choose(worries),year:1348-Math.min(p.age-3,4+Math.floor(rng()*23)),friendId:population[(index+17)%population.length].id,kinId:p.parentIds[0]??p.partnerId??p.childIds[0]??p.id,household:p.family.household};
     if(p.age<16){p.story.past=choose(['va aprendre a fer nusos amb la gent de casa','va trobar un niu vora el torrent','va ajudar a plantar un arbre a l’hort','va participar en la festa de la vila']);p.story.wish=choose(['aprendre a tocar el flabiol','jugar a la plaça amb els amics','aprendre a llegir','cuidar una cabreta','construir un petit carro de fusta']);p.story.worry=choose(['un amic que avui no ha sortit a jugar','la pluja que pot espatllar la festa','una joguina que ha perdut']);}
     p.social={cooldown:rng()*14,conversation:null,met:{},meetings:0};
   }
-  for(const p of population){const f=population[p.story.friendId],k=population[p.story.kinId];p.story.biography=`${p.name}, de ${p.age} anys, ${p.age<16?'és '+p.job:'treballa de '+p.job} i viu a la casa ${p.story.household}. Ve ${('de '+p.story.origin).replace(/^de el /,'del ')}. L’any ${p.story.year}, ${p.story.past}. Conserva ${p.story.keepsake} d’aquella etapa. Forma part de la família ${p.surname}, on és ${p.familyRole}. Manté una amistat amb ${f.name} i un vincle familiar amb ${k.name}. Té un tarannà ${p.story.temperament}; ara vol ${p.story.wish}, i té una preocupació: ${p.story.worry}.`;}
+  const byId=new Map(population.map(p=>[p.id,p]));
+  for(const p of population){const f=byId.get(p.story.friendId),k=byId.get(p.story.kinId);p.story.biography=`${p.name}, de ${p.age} anys, ${p.age<16?'és '+p.job:'treballa de '+p.job} i viu a la casa ${p.story.household}. Ve ${('de '+p.story.origin).replace(/^de el /,'del ')}. L’any ${p.story.year}, ${p.story.past}. Conserva ${p.story.keepsake} d’aquella etapa. Forma part de la família ${p.surname}, on és ${p.familyRole}. Manté una amistat amb ${f.name} i un vincle familiar amb ${k.name}. Té un tarannà ${p.story.temperament}; ara vol ${p.story.wish}, i té una preocupació: ${p.story.worry}.`;}
   attachNarrative(population);
   return population;
 }

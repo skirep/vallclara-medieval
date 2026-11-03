@@ -6,7 +6,7 @@ export function groupFamilies(population,nodes){
     const id=families.length,members=population.slice(start,start+5);
     const surname=surnames[id%surnames.length]+' '+surnames[(Math.floor(id/surnames.length)+11)%surnames.length];
     const home=(id*13+4)%nodes.length,parentIds=members.slice(2,4).map(p=>p.id),childIds=members.slice(0,2).map(p=>p.id);
-    const cluster=Math.floor(id/nodes.length),homeOffsetX=nodes[home].x>=78?(cluster-2)*4:nodes[home].x<=-78?cluster*4:(cluster-1)*4;
+    const cluster=Math.floor(id/nodes.length),homeOffsetX=(cluster-1)*.45;
     const family={id,surname,household:id+1,home,homeX:nodes[home].x+homeOffsetX,homeZ:nodes[home].z,memberIds:members.map(p=>p.id)};families.push(family);
     for(let slot=0;slot<members.length;slot++){
       const p=members[slot];p.familyId=id;p.surname=surname;p.family=family;
@@ -19,6 +19,7 @@ export function groupFamilies(population,nodes){
       p.x=family.homeX+p.lane;p.z=nodes[home].z+(slot%2?1:-1)*.65;
       if(slot<2){p.height=.53+(p.age-7)*.025;p.job=p.sex?'nena · aprenenta':'nen · aprenent';}
       if(slot===4)p.speed*=.82;
+      if(members.length===1){p.age=42;p.familyRole='veïna';p.parentIds=[];p.childIds=[];p.job='artesana';p.height=.95;}
     }
   }
   return families;

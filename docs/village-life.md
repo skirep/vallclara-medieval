@@ -6,11 +6,11 @@ Tardor de 1348. Un aiguat descobreix sota el pont una fita amb dues mans. Fa tre
 
 El conflicte no té un únic malvat: algunes aportacions de feina es van escriure al costat dels préstecs, hi ha records contradictoris i les cases tenen por de perdre l’accés al molí. Mossèn Guillem recorda haver separat papers humits entre llibres. Arnau reconeix el signe de la pedra; Agnès guarda una cinta semblant; Bernat reconeix una reparació al pany, que no demostra cap robatori. Les altres cases aporten rebuts, mesures i testimonis.
 
-Hi ha catorze veus principals amb pistes i motius propis, connectades als habitants existents. Els altres veïns també tenen família, amistat, un desacord, un testimoni i una postura sobre el pacte. La xarxa d’amistats inclou els 500 habitants.
+Hi ha catorze veus principals amb pistes i motius propis, connectades als habitants existents. Els altres veïns també tenen família, amistat, un desacord, un testimoni i una postura sobre el pacte. La xarxa d’amistats inclou els 200 habitants.
 
 Les quatre etapes són **La fita sota el fang**, **Els comptes de l’absència**, **Un pont que no sigui de ningú** i **La festa de les dues ribes**. La còpia contrastada reconeix el pas compartit i les obligacions de manteniment. Les cases poden tornar a seure juntes sense haver resolt tots els desacords.
 
-Els setze fils inclouen pont, aigua, molí, pa, deutes, arca, rumors, fusta, eines, roba, ramat, infants, aprenents, cures, mercat i festa. Cada fil té quatre situacions evolutives i vuit rèpliques: **512 entrades contextuals per habitant**, consultables a Cròniques. Són escenes escrites adaptades a les dades dels habitants, no 256.000 frases escrites individualment, ni una connexió a un servei d’IA.
+Els setze fils inclouen pont, aigua, molí, pa, deutes, arca, rumors, fusta, eines, roba, ramat, infants, aprenents, cures, mercat i festa. Cada fil té quatre situacions evolutives i vuit rèpliques: **512 entrades contextuals per habitant**, consultables a Cròniques. Són escenes escrites adaptades a les dades dels habitants, no 102.400 frases escrites individualment, ni una connexió a un servei d’IA.
 
 Les converses acabades contrasten testimonis i deixen memòria. Les retrobades acordades augmenten la confiança quan realment es produeixen. Les interrompudes no compten. Cada etapa necessita 24 intercanvis de parella/tema diferents, almenys dotze habitants i sis temes. Les converses començades en una etapa anterior no fan saltar la següent.
 
@@ -43,4 +43,6 @@ Es conserva una sola reunió al dia, a les **12:00**, amb tots els habitants pre
 
 El desament existent s’amplia amb el rellotge, els recursos, les tasques en curs, els ingredients reservats, les càrregues i la reunió acabada. Les memòries anteriors continuen carregant-se. No hi ha servidor compartit: el progrés és propi del navegador.
 
-Les proves recorren les 256.000 entrades, comproven identitats i relacions, simulen una jornada amb 500 habitants, validen costos i lliuraments, bloquejos, continuïtat després de desar, converses interrompudes, informes del dia anterior i rutes amb obstacles durant una reunió completa. La validació de geometria no substitueix una comprovació visual de WebGL.
+Les proves recorren les 102.400 entrades, comproven identitats i relacions, simulen una jornada amb 200 habitants, validen costos i lliuraments, bloquejos, continuïtat després de desar, converses interrompudes, informes del dia anterior i rutes amb obstacles durant una reunió completa. La validació de geometria no substitueix una comprovació visual de WebGL.
+
+La vila compacta inclou 176 veïns ordinaris i 24 identitats noves. El rei i la reina segueixen una rutina de cort pròpia i assisteixen a la reunió; no produeixen els béns dels oficis ordinaris. El castell, la parròquia i el pont són accessibles des del menú de llocs de la vila.

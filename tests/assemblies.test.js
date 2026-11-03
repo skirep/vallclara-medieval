@@ -39,7 +39,7 @@ test('500 villagers gather without teleporting, listen together, disperse and re
   if(assembly.phase==='daily'&&previousPhase!=='daily'){
    heard.push(clock.hours);rounds.push(new Set());assert.equal(assembly.attending,500);
    assert.equal(new Set(people.map(p=>`${p.x.toFixed(5)}:${p.z.toFixed(5)}`)).size,500);
-   for(const p of people){assert.ok(Math.abs(p.x)<20&&Math.abs(p.z)<20);assert.equal(blocked(p.x,p.z,world.obstacles,.34),false);}
+   for(const p of people){assert.ok(p.x>=-29&&p.x<=1.5&&Math.abs(p.z)<20);assert.equal(blocked(p.x,p.z,world.obstacles,.34),false);}
    assert.equal(assembly.bubbles()[0].person,assembly.priest);assert.ok(assembly.bubbles()[0].text.length>10);
    assert.equal(social.begin(people[0],people[1],clock.hour),false);
   }
@@ -91,7 +91,7 @@ test('animation phase follows time speed while render smoothing stays independen
 
 
 test('residents sharing a departure point choose different safe streets without excessive detours',()=>{
- const nav=createAssemblyNavigation(world.obstacles),from={x:-78,z:-78},to={x:0,z:0};
+ const nav=createAssemblyNavigation(world.obstacles),from={x:-54,z:-54},to={x:0,z:0};
  const length=points=>points.reduce((sum,p,i)=>sum+Math.hypot(p.x-(i?points[i-1]:from).x,p.z-(i?points[i-1]:from).z),0);
  const shortest=length(nav.path(from,to,{diversity:false,recordTraffic:false}));
  const street=value=>lanes.reduce((best,lane)=>Math.abs(value-lane)<Math.abs(value-best)?lane:best,lanes[0]);

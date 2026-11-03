@@ -46,7 +46,7 @@ test('directional source PNG with transparency is packaged and sprite shader mat
  const scene=new T.Scene(),people=createPeople(scene,createPopulation());
  people.parts.sprites.material.onBeforeCompile(shader);
  assert.match(shader.vertexShader,/residentFrame/);assert.match(shader.vertexShader,/vMapUv = vec2/);
- assert.equal(shader.fragmentShader,originalFragment,'painted skin and clothing must pass through without recoloring');
+ assert.equal(shader.fragmentShader.replace('\nvarying float vSeated; varying float vBodyY;','').replace('if(vSeated>.5 && vBodyY<.447) discard;\n',''),originalFragment,'seated clipping must preserve every other painted color operation');
  assert.equal(people.parts.sprites.geometry.getAttribute('residentDye'),undefined);
  people.animate(1,new T.Vector3(0,1.7,0),65);
  for(const n of people.parts.sprites.instanceMatrix.array)assert.ok(Number.isFinite(n));

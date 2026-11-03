@@ -14,13 +14,17 @@ export function createGraphics(renderer,scene,camera){
     try{scene.environment=pmrem.fromEquirectangular(texture).texture;hdriReady=true;}finally{texture.dispose();pmrem.dispose();}
   },undefined,()=>pmrem.dispose());
   const size=new T.Vector2();
-  function resize(){if(!composer)return;renderer.getSize(size);composer.setPixelRatio(renderer.getPixelRatio());composer.setSize(size.x,size.y);const d=renderer.getPixelRatio();fxaa.material.uniforms.resolution.value.set(1/(size.x*d),1/(size.y*d));}
+  function resize(){if(!composer)return;renderer.getSize(size);composer.setPixelRatio(Math.min(renderer.getPixelRatio(),1.25));composer.setSize(size.x,size.y);const d=Math.min(renderer.getPixelRatio(),1.25);fxaa.material.uniforms.resolution.value.set(1/(size.x*d),1/(size.y*d));}
   function quality(level){
     if(level==='high'&&!composer){
       renderer.getSize(size);
       composer=new EffectComposer(renderer);
       composer.addPass(new RenderPass(scene,camera));
-      ao=new SSAOPass(scene,camera,size.x,size.y,16);
+      ao=new SSAOPass(scene,camera,Math.ceil(size.x*.5),Math.ceil(size.y*.5),12);
+      // Keep architectural occlusion at half resolution so detailed interiors do
+      // not multiply the full-screen sampling cost on high-DPI displays.
+      const resizeAO=ao.setSize.bind(ao);
+      ao.setSize=(w,h)=>resizeAO(Math.max(1,Math.ceil(w*.5)),Math.max(1,Math.ceil(h*.5)));
       // A normal override material ignores a sprite's cutout and would create
       // rectangular AO ghosts. Keep billboards out of the normal/depth prepass;
       // they are already present in RenderPass with proper alpha and occlusion.

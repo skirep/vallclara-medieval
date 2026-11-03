@@ -26,13 +26,13 @@ export const FEATURED_RESIDENTS=[
  ['pilgrim-mateu','Mateu del Camí',68,0,'Camí · pelegrinatge','pelegrí',13]
 ].map(([id,name,age,sex,household,job,workRole])=>({id,name,age,sex,household,job,workRole,category:age<16?(sex?'girl':'boy'):`${age>=60?'elder':'adult'}-${sex?'female':'male'}`,featured:true}));
 
-// Existing 500 identities and saves retain their IDs. New residents start at 500.
+// Named identities retain IDs 500–523 even when the ordinary population shrinks.
 export function addFeaturedResidents(population,nodes,random){
- const start=population.reduce((max,p)=>Math.max(max,p.id+1),0),homes=new Map();
+ const start=Math.max(500,population.reduce((max,p)=>Math.max(max,p.id+1),0)),homes=new Map();
  const familyStart=population.reduce((max,p)=>Math.max(max,p.familyId+1),0);
  for(const [i,c] of FEATURED_RESIDENTS.entries()){
   let family=homes.get(c.household);
-  if(!family){const id=familyStart+homes.size,home=(homes.size*3+4)%nodes.length;family={id,surname:c.household,household:id+1,home,homeX:nodes[home].x,homeZ:nodes[home].z,memberIds:[]};homes.set(c.household,family);}
+  if(!family){const id=familyStart+homes.size,home=c.household==='Rocafort'?5:(homes.size*3+4)%nodes.length;family={id,surname:c.household,household:id+1,home,homeX:nodes[home].x,homeZ:nodes[home].z,memberIds:[]};homes.set(c.household,family);}
   const id=start+i,rng=random(721300+id),slot=family.memberIds.length,home=family.home;
   family.memberIds.push(id);
   population.push({id,name:c.name,character:c,spriteId:c.id,job:c.job,jobId:c.workRole,workRole:c.workRole,home,work:home,node:home,path:[],x:family.homeX+(slot-1.5)*.7,z:family.homeZ+1.3,lane:(slot-1.5)*.4,speed:.7+rng()*.35,phase:rng()*Math.PI*2,height:1,sex:c.sex,age:c.age,state:'resting',wait:rng()*15,heading:rng()*Math.PI*2,walk:0,rng,familyId:family.id,surname:family.surname,family,familyRole:'membre de la casa',parentIds:[],childIds:[],partnerId:null});

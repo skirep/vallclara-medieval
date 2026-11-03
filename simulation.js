@@ -2,8 +2,10 @@ import {waterBlocked} from './terrain.js';
 import {groupFamilies,familyTime} from './families.js';
 // Deterministic town state; independent of the renderer and frame rate.
 export function random(seed=1348){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
-export const lanes=[-78,-52,-28,0,28,52,78];
+export const lanes=[-54,-36,-18,0,18,36,54];
 export const nodes=lanes.flatMap((z,j)=>lanes.map((x,i)=>({x,z,index:j*7+i,links:[i>0?j*7+i-1:-1,i<6?j*7+i+1:-1,j>0?(j-1)*7+i:-1,j<6?(j+1)*7+i:-1].filter(n=>n>=0)})));
+// Only the central stone bridge joins the two banks.
+for(const n of nodes)n.links=n.links.filter(i=>{const b=nodes[i];return !(Math.min(n.x,b.x)<9&&Math.max(n.x,b.x)>9&&Math.abs(n.z)>3);});
 export function route(from,to){const q=[from],previous=new Map([[from,-1]]);for(let k=0;k<q.length;k++){const n=q[k];if(n===to)break;for(const next of nodes[n].links)if(!previous.has(next)){previous.set(next,n);q.push(next);}}let n=to,p=[];while(n!==from){p.push(n);n=previous.get(n);if(n===undefined)throw Error('Unreachable route');}return p.reverse();}
 const jobs=['pagès','fornera','ferrer','teixidora','traginer','venedora','fuster','bugadera','pastor','guàrdia','terrissaire','músic'];
 const names=['Arnau','Elisenda','Bernat','Agnès','Guillem','Sança','Pere','Blanca','Ramon','Eulàlia','Ferrer','Joana','Berenguer','Margarida','Jaume','Isabel'];

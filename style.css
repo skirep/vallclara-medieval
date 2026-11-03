@@ -23,3 +23,5 @@
 .dialogue-catalogue li{margin:.75rem 0;overflow-wrap:anywhere}
 .resident-duty progress{width:100%;accent-color:#c9ad76}
 .work-roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.1rem 1rem}
+
+.landmark-buttons{display:flex;flex-wrap:wrap;gap:.5rem;margin:1.2rem 0}.landmark-buttons button{flex:1 1 9rem;font-size:.8rem;padding:.75rem;border:1px solid #9b957255;background:#283f34;color:#f2e8cd;cursor:pointer}

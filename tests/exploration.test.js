@@ -15,13 +15,13 @@ test('all house sizes have a clear continuous doorway/aisle and solid side walls
  }
 });
 test('bridge is continuously traversable; river and parapets prevent accidental entry into water',()=>{
- const obstacles=[{kind:'river'},...[-1,1].map(s=>({x:126,z:s*3.45,w:36,d:.48}))];
- for(let x=94;x<=160;x+=.1)assert.equal(blocked(x,0,obstacles,.4,165),false);
+ const obstacles=[{kind:'river'},...[-1,1].map(s=>({x:RIVER.x,z:s*(BRIDGE.halfWidth+.28),w:BRIDGE.end-BRIDGE.start,d:.48}))];
+ for(let x=-3;x<=21;x+=.1)assert.equal(blocked(x,0,obstacles,.4,165),false);
  for(const z of [-80,-20,10,70])assert.equal(blocked(riverCenter(z),z,obstacles,.4,165),true);
- for(const z of [-3.45,3.45])assert.ok(blocked(126,z,obstacles,.4,165));
+ for(const z of [-(BRIDGE.halfWidth+.28),BRIDGE.halfWidth+.28])assert.ok(blocked(RIVER.x,z,obstacles,.4,165));
  let previous=bridgeHeight(BRIDGE.start);
- for(let x=BRIDGE.start;x<=BRIDGE.end;x+=.1){const y=bridgeHeight(x);assert.ok(Math.abs(y-previous)<.02);assert.ok(y>RIVER.waterY+.5);previous=y;}
- assert.equal(groundHeight(126,0),bridgeHeight(126));assert.ok(landscapeHeight(126,0)<RIVER.waterY);assert.equal(blocked(166,0,[],.4,165),true);
+ for(let x=BRIDGE.start;x<=BRIDGE.end;x+=.1){const y=bridgeHeight(x);assert.ok(Math.abs(y-previous)<.025);assert.ok(y>RIVER.waterY+.5);previous=y;}
+ assert.equal(groundHeight(RIVER.x,0),bridgeHeight(RIVER.x));assert.ok(landscapeHeight(RIVER.x,0)<RIVER.waterY);assert.equal(blocked(166,0,[],.4,165),true);
 });
 test('8 transparent walking sheets contain 192 measured, different frame regions and frame selection cycles',()=>{
  assert.equal(WALK_TYPES.length*WALK_FRAMES*4,192);

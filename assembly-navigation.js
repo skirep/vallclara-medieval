@@ -14,9 +14,10 @@ export function createAssemblyNavigation(obstacles){
  const isClear=(x,z)=>!blocked(x,z,obstacles,.34,91);
  const segmentClear=(a,b)=>{const steps=Math.max(1,Math.ceil(Math.hypot(a.x-b.x,a.z-b.z)/.25));for(let i=0;i<=steps;i++)if(!isClear(a.x+(b.x-a.x)*i/steps,a.z+(b.z-a.z)*i/steps))return false;return true;};
  for(let id=0;id<total;id++){
-  const p=point(id),inSquare=Math.abs(p.x)<=20.9&&Math.abs(p.z)<=20.9;
+  const p=point(id),inSquare=Math.abs(p.x+12)<=20.9&&Math.abs(p.z)<=20.9;
   const inStreet=lanes.some(l=>Math.abs(p.x-l)<=2.2||Math.abs(p.z-l)<=2.2);
-  free[id]=(inSquare||inStreet)&&isClear(p.x,p.z)?1:0;
+  const inCastle=p.x>21&&p.x<51&&p.z> -86&&p.z< -58;
+  free[id]=(inSquare||inStreet||inCastle)&&isClear(p.x,p.z)?1:0;
  }
  // Validate each undirected edge once; every resident reuses this collision graph.
  for(let id=0;id<total;id++)if(free[id]){
@@ -52,7 +53,7 @@ export function createAssemblyNavigation(obstacles){
    const p=point(id);
    for(let d=0;d<4;d++){
     const next=links[id*4+d];if(next<0)continue;
-    const q=point(next),horizontal=d<2,inSquare=Math.abs(q.x)<=20.9&&Math.abs(q.z)<=20.9;
+    const q=point(next),horizontal=d<2,inSquare=Math.abs(q.x+12)<=20.9&&Math.abs(q.z)<=20.9;
     // Coarse street preferences select different blocks; lateral preferences
     // spread people across street width rather than adding cell-by-cell noise.
     const road=horizontal?hash(seed,Math.floor((p.x+q.x)/52),Math.round(nearestLane(q.z))*2):hash(seed,Math.round(nearestLane(q.x))*2+1,Math.floor((p.z+q.z)/52));
@@ -69,8 +70,8 @@ export function createAssemblyNavigation(obstacles){
   const points=ids.filter((id,i)=>!i||i===ids.length-1||id-ids[i-1]!==ids[i+1]-id).map(point);
   if(segmentClear(points.at(-1),to))points.push({...to});return points;
  }
- const priest=point(nearest({x:0,z:-17.6}));
- const seats=Array.from(queue.slice(0,tail),id=>point(id)).filter(p=>Math.abs(p.x)<=18.7&&Math.abs(p.z)<=18.7&&!(Math.abs(p.x)<3.3&&p.z< -14.3));
+ const priest=point(nearest({x:-12,z:-17.6}));
+ const seats=Array.from(queue.slice(0,tail),id=>point(id)).filter(p=>p.x>=-29&&p.x<=1.5&&Math.abs(p.z)<=18.7&&!(Math.abs(p.x+12)<3.3&&p.z< -14.3));
  seats.sort((a,b)=>a.z-b.z||a.x-b.x);
  return {path,seats,priest,segmentClear,resetTraffic(){traffic.fill(0);}};
 }

@@ -5,14 +5,14 @@ import {createResidentShadows} from '../resident-shadows.js';
 import {groundHeight} from '../terrain.js';
 import {residentHeight} from '../resident-scale.js';
 
-const person={id:1,age:34,sex:0},motion={x:126,z:0};
+const person={id:1,age:34,sex:0},motion={x:9,z:0};
 const position=(mesh)=>{const m=new T.Matrix4();mesh.getMatrixAt(0,m);return new T.Vector3().setFromMatrixPosition(m);};
 test('resident contact shadow stays on the bridge deck and projection follows the sun, not the camera',()=>{
  const shadows=createResidentShadows(new T.Scene(),[person],groundHeight);
  shadows.setLight(new T.Vector3(-60,70,20),new T.Vector3(),1);
  shadows.update(0,person,motion,0,1);shadows.flush();
  const contact=position(shadows.contact),cast=position(shadows.projected);
- assert.ok(Math.abs(contact.y-groundHeight(126,0)-.012)<1e-6);
+ assert.ok(Math.abs(contact.y-groundHeight(9,0)-.012)<1e-6);
  assert.ok(cast.x>contact.x&&cast.z<contact.z);
  shadows.setLight(new T.Vector3(60,70,-20),new T.Vector3(),1);
  shadows.update(0,person,motion,0,1);
