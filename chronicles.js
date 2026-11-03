@@ -1,16 +1,17 @@
+import {residentThought} from './resident-thoughts.js';
 import {residentHeight} from './resident-scale.js';
 import {VILLAGE_LORE,THREADS} from './village-lore.js';
 import {dialoguePage,DIALOGUE_COUNT} from './dialogue-catalogue.js';
 import {ROLE_LABELS,RESOURCE_LABELS,phaseLabel} from './resident-tasks.js';
 import {familiesOf,relationLabel} from './families.js';
 import * as T from 'three';
-export function createChronicles(population,social,{work=null,onOpen,onClose,onFollow}){
+export function createChronicles(population,social,{work=null,onOpen,onClose,onFollow,thoughtContext=()=>({social})}){
   const $=s=>document.querySelector(s),dialog=$('#chronicles'),list=$('#resident-list'),bio=$('#biography'),byId=new Map(population.map(p=>[p.id,p])),projected=new T.Vector3(),bubbles=new Map();let selected=0,lastSpoken='',lastSpokenAt=0,lastPublicKey='';
   const text=(tag,value,className='')=>{const el=document.createElement(tag);el.textContent=value;if(className)el.className=className;return el;};
   const familyFilter=$('#familyFilter');
   for(const family of familiesOf(population)){const option=text('option',`${family.surname} · casa ${family.household}`);option.value=family.id;familyFilter.append(option);}
   familyFilter.onchange=()=>renderPeople();
-  function showBio(id){selected=id;const p=byId.get(id);bio.replaceChildren(text('span',p.job.toUpperCase(),'eyebrow'),text('h3',p.name),text('p',p.story.biography));const dl=document.createElement('dl');for(const [label,value]of [['Objectiu',p.story.wish],['Preocupació',p.story.worry],['Record estimat',p.story.keepsake],['Amistat',byId.get(p.story.friendId).name],['Vincle familiar',byId.get(p.story.kinId).name],['Trobades',String(p.social.meetings)],['Davant del pacte',p.story.narrative.stance],['Desacord amb',byId.get(p.story.narrative.rivalId).name],['Paper al poble',p.story.narrative.role||'Veu de la família'],['Pista personal',p.story.narrative.secret],['Repertori',`${DIALOGUE_COUNT} línies contextuals`]]){dl.append(text('dt',label),text('dd',value));}bio.append(dl);
+  function showBio(id){selected=id;const p=byId.get(id);bio.replaceChildren(text('span',p.job.toUpperCase(),'eyebrow'),text('h3',p.name),text('p',p.story.biography));const thought=residentThought(p,thoughtContext());bio.append(text('p',`${thought.icon} ${thought.label} · ${thought.text}`,'resident-thought'));const dl=document.createElement('dl');for(const [label,value]of [['Objectiu',p.story.wish],['Preocupació',p.story.worry],['Record estimat',p.story.keepsake],['Amistat',byId.get(p.story.friendId).name],['Vincle familiar',byId.get(p.story.kinId).name],['Trobades',String(p.social.meetings)],['Davant del pacte',p.story.narrative.stance],['Desacord amb',byId.get(p.story.narrative.rivalId).name],['Paper al poble',p.story.narrative.role||'Veu de la família'],['Pista personal',p.story.narrative.secret],['Repertori',`${DIALOGUE_COUNT} línies contextuals`]]){dl.append(text('dt',label),text('dd',value));}bio.append(dl);
     if(onFollow){const follow=text('button','Seguir amb la càmera','follow-resident');follow.type='button';follow.onclick=()=>{dialog.close();onFollow(p);};bio.insertBefore(follow,dl);}
 
     if(p.duty){const d=p.duty,job=document.createElement('section');job.className='resident-duty';job.append(text('h4',`Funció · ${ROLE_LABELS[d.role]}`),text('p',`Avui ${d.plan}.`),text('p',phaseLabel(d)),text('p',`Tasques lliurades avui: ${d.today.completed}. Lloc: ${work?.sites[d.station]?.name||ROLE_LABELS[d.role]}.`));if(d.phase==='working'){const progress=document.createElement('progress');progress.max=d.task.duration;progress.value=d.elapsed;progress.setAttribute('aria-label','Progrés de la feina');job.append(progress);}if(d.lastCompleted)job.append(text('p',`Darrera tasca: ${d.lastCompleted.label}.`));bio.append(job);}
@@ -38,7 +39,7 @@ export function createChronicles(population,social,{work=null,onOpen,onClose,onF
     const panel=$('#workPanel');panel.replaceChildren(text('h3','Les mans que fan viure Vallclara'));
     if(!work){panel.append(text('p','El registre de feines encara no està disponible.'));return;}
     const state=work.summary();panel.append(text('p',`${population.length} habitants amb funció · ${state.working} treballant · ${state.blocked} esperant material · ${state.delivered} tasques lliurades.`),text('p','Els veïns caminen fins al seu lloc, treballen i porten el resultat al punt de lliurament. Les pauses, les converses i la reunió aturen la feina. Si falta material, esperen que arribi un subministrament.'),text('h4','Rebost i serveis completats'));
-    const dl=document.createElement('dl');for(const [key,value]of Object.entries(state.stock))dl.append(text('dt',RESOURCE_LABELS[key]),text('dd',String(value)));panel.append(dl);
+    const thought=residentThought(p,thoughtContext());bio.append(text('p',`${thought.icon} ${thought.label} · ${thought.text}`,'resident-thought'));const dl=document.createElement('dl');for(const [key,value]of Object.entries(state.stock))dl.append(text('dt',RESOURCE_LABELS[key]),text('dd',String(value)));panel.append(dl);
     const roles=document.createElement('div');roles.className='work-roles';for(const [i,label]of ROLE_LABELS.entries())roles.append(text('p',`${label}: ${population.filter(p=>p.duty.role===i).length} habitants`));panel.append(roles,text('h4','Darrers lliuraments'));
     if(!state.journal.length)panel.append(text('p','Encara no ha arribat cap lliurament. Pots consultar la feina de cada habitant a la seva fitxa.'));
     for(const entry of state.journal.slice(0,25))panel.append(text('p',`${byId.get(entry.personId).name} · ${entry.label} · ${Object.entries(entry.outputs).map(([k,v])=>`${v} ${RESOURCE_LABELS[k]}`).join(', ')}`));

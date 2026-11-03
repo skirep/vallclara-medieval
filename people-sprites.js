@@ -55,7 +55,7 @@ export function createPeople(scene,population,{onProgress,pixelHeight=128,height
     const p=population[index],a=appearances[index],m=states[index],dx=camera.x-m.x,dz=camera.z-m.z,angle=Math.atan2(dx,dz);
     const logicalView=stableView(m,m.heading,angle),frame=drawnFrame(m),action=actionFrame(m,WALK_TYPES[type]),direction=spriteDirection(WALK_TYPES[type],logicalView,action?.action??(frame<6?'walk':'idle')),view=direction.view;group.frames.setXYZW(i,action?.frame??frame%6,action?8+action.row+view:view+(frame>=6?4:0),p.seated&&!p.assembly?1:0,direction.flip?1:0);
     const lift=p.seated?0:action?.action==='jump'?JUMP_LIFT[action.frame]*residentHeight(p):0,visible=dx*dx+dz*dz<range*range;
-    dummy.position.set(m.x,heightAt(m.x,m.z)+.015+lift+(p.seated&&!p.assembly ? .52 : 0),m.z);dummy.rotation.set(0,angle,0);const h=visible?residentRenderHeight(p,WALK_TYPES[type],view,frame,action?.action):0;
+    dummy.position.set(m.x,heightAt(m.x,m.z)+.015+lift+(p.seated&&!p.assembly ? .52 : 0),m.z);if(p.duelPose?.punchTime<.66){const lunge=Math.sin(p.duelPose.punchTime/.66*Math.PI)*.18;dummy.position.x+=Math.sin(p.heading)*lunge;dummy.position.z+=Math.cos(p.heading)*lunge;}dummy.rotation.set(0,angle,p.duelPose?.hitTime<.5?Math.sin(p.duelPose.hitTime/.5*Math.PI)*.13:0);const h=visible?residentRenderHeight(p,WALK_TYPES[type],view,frame,action?.action):0;
     dummy.scale.set(h*.875*a.width,h,1);dummy.updateMatrix();group.mesh.setMatrixAt(i,dummy.matrix);
     shadows.update(index,p,m,lift,visible?1:0);
    });group.frames.needsUpdate=true;group.mesh.instanceMatrix.needsUpdate=true;

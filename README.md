@@ -61,3 +61,13 @@ Toca un habitant visible o obre **Cròniques → fitxa → Seguir amb la càmera
 El drac és un sprite pla orientat cap a la càmera, amb sis dibuixos de vol per cadascuna de les quatre vistes. L’atles manté la transparència i no fa servir el model volumètric anterior. Previsualització: [drac 2D](drac.html).
 
 Els perfils dels tres artistes d’estiu i del drac s’adapten a l’ordre de cada atles: no comparteixen l’ordre esquerra/dreta de les figures anteriors. Les excepcions de repòs/conversa es corregeixen només en les animacions afectades. Als canvis de sentit, l’orientació de caminar no queda oposada al desplaçament visible.
+
+### Picabaralles, pensaments i mode joc
+
+Les topades noves entre habitants que es mouen desencadenen una breu conversa de disculpes. De tant en tant, dos adults propers que disposen de fotogrames de puny discuteixen per una invitació al ball: s’intercanvien insults originals, contrarèpliques i cops còmics. No hi ha ferides. La persona convidada conserva la seva decisió; el guanyador no obté una parella com a premi. Les disputes acabades queden al registre de converses i es desen amb les altres cròniques. Les converses, la feina pagada i els lliuraments continuen utilitzant les mateixes reserves. La reunió de les dotze interromp les baralles.
+
+A la portada, «Entrar en mode joc» activa el control lliure en primera persona. També es pot canviar entre Passeig i Joc des del HUD o les opcions. WASD/fletxes per caminar, Majús per córrer, Espai per saltar i E per reptar un adult proper que tingui animació de puny. Cal mirar-lo i tenir un camí visual lliure. Tria entre tres respostes amb 1–3 o amb els botons; dues respostes encertades guanyen el duel. Allunyar-se, la reunió diària o «Deixar el duel» alliberen el veí. Al mòbil hi ha joystick, salt i repte tàctils. Amb comandament, A salta, X repta i X/Y/A trien les respostes.
+
+Les icones dels caps mostren la feina actual, els materials pendents, les converses, els lliuraments, el repòs, la gelosia i les reaccions al drac. T llegeix el pensament del veí que mires; també es poden tocar les icones o consultar qualsevol habitant a Cròniques. Les icones es limiten als veïns visibles i propers, amb ocultació per murs i separació per evitar superposicions. Es poden desactivar a les opcions.
+
+El drac continua sent un sprite 2D i apareix dues vegades al dia, a les 10:00 i les 17:00. Cada aparició recorre tres voltes, amb entrada i sortida des de fora del poble. Les flames són cintes animades de fins a 19 metres en la direcció real del vol; tant el vol com els episodis de foc depenen del rellotge del joc i es congelen en pausar-lo.
