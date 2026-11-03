@@ -59,3 +59,5 @@ El drac 2D amb 24 fotogrames dibuixats passa cada dia del joc a les **10:00 i le
 Toca un habitant visible o obre **Cròniques → fitxa → Seguir amb la càmera**. La càmera el segueix, el ratolí permet orbitar i es comproven parets i mobles per reduir travessaments. **F**, el botó **Deixar de seguir** o començar a caminar recuperen el control a peu a prop del personatge. La marca daurada identifica el veí seguit.
 
 El drac és un sprite pla orientat cap a la càmera, amb sis dibuixos de vol per cadascuna de les quatre vistes. L’atles manté la transparència i no fa servir el model volumètric anterior. Previsualització: [drac 2D](drac.html).
+
+Els perfils dels tres artistes d’estiu i del drac s’adapten a l’ordre de cada atles: no comparteixen l’ordre esquerra/dreta de les figures anteriors. Les excepcions de repòs/conversa es corregeixen només en les animacions afectades. Als canvis de sentit, l’orientació de caminar no queda oposada al desplaçament visible.

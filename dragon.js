@@ -1,3 +1,4 @@
+import {spriteDirection} from './sprite-directions.js';
 import * as T from 'three';
 import {stableView} from './sprite-motion.js';
 export const DRAGON_ATLAS=new URL('./assets/dragon-flight-2d.webp',import.meta.url).href;
@@ -26,7 +27,7 @@ export function createDragon(scene,buildings=[],{textureLoader=new T.TextureLoad
   current=dragonFlight(hours);root.visible=!!current;if(!current)return;
   const t=current.progress,p=point(t),ahead=point(Math.min(1,t+.001)),behind=point(Math.max(0,t-.001)),direction=ahead.sub(behind);
   const heading=Math.atan2(direction.x,direction.z),angle=Math.atan2(observer.x-p.x,observer.z-p.z);
-  view=stableView(viewState,heading,angle);frame=Math.floor(t*DRAGON_DURATION*180*DRAGON_FPS)%DRAGON_FRAMES;
+  view=spriteDirection('dragon',stableView(viewState,heading,angle)).view;frame=Math.floor(t*DRAGON_DURATION*180*DRAGON_FPS)%DRAGON_FRAMES;
   root.position.copy(p);root.rotation.set(0,angle,0);
   if(texture)texture.offset.set((frame*256+.5)/1536,((3-view)*256+.5)/1024);
  }

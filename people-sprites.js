@@ -1,3 +1,4 @@
+import {spriteDirection} from './sprite-directions.js';
 import * as T from 'three';
 import {appearanceFor} from './appearance.js';
 import {residentRenderHeight,residentHeight} from './resident-scale.js';
@@ -23,13 +24,13 @@ export function createPeople(scene,population,{onProgress,pixelHeight=128,height
   const material=new T.MeshBasicMaterial({map:texture,alphaTest:.45,side:T.DoubleSide,fog:true});
   material.onBeforeCompile=shader=>{
    shader.vertexShader=shader.vertexShader.replace('#include <common>',`#include <common>\nattribute vec4 residentFrame; varying float vSeated; varying float vBodyY;`);
-   shader.vertexShader=shader.vertexShader.replace('#include <uv_vertex>',`#include <uv_vertex>\nvMapUv = vec2((uv.x+residentFrame.x)/6.0,(uv.y+${rows-1}.0-residentFrame.y)/${rows}.0);`);
+   shader.vertexShader=shader.vertexShader.replace('#include <uv_vertex>',`#include <uv_vertex>\nvMapUv = vec2((mix(uv.x,1.0-uv.x,residentFrame.w)+residentFrame.x)/6.0,(uv.y+${rows-1}.0-residentFrame.y)/${rows}.0);`);
    shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>\nvSeated=residentFrame.z; vBodyY=uv.y; transformed.y=mix(transformed.y,max(0.0,transformed.y-.40),residentFrame.z);`);
    shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying float vSeated; varying float vBodyY;');
    shader.fragmentShader=shader.fragmentShader.replace('#include <alphatest_fragment>','if(vSeated>.5 && vBodyY<.447) discard;\n#include <alphatest_fragment>');
    // Painted skin and clothes remain intact; only seated lower legs are clipped.
   };
-  material.customProgramCacheKey=()=> 'vallclara-seated-v7-'+rows;
+  material.customProgramCacheKey=()=> 'vallclara-directions-v8-'+rows;
   const mesh=new T.InstancedMesh(g,material,n);mesh.name='Habitants amb fotogrames · '+WALK_TYPES[type];mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);mesh.frustumCulled=false;mesh.userData.spriteBillboard=true;mesh.userData.residentIndices=indices;scene.add(mesh);
   groups.push({indices,frames,texture,mesh,extended});
  }
@@ -52,7 +53,7 @@ export function createPeople(scene,population,{onProgress,pixelHeight=128,height
   for(const [type,group] of groups.entries()){
    group.indices.forEach((index,i)=>{
     const p=population[index],a=appearances[index],m=states[index],dx=camera.x-m.x,dz=camera.z-m.z,angle=Math.atan2(dx,dz);
-    const view=stableView(m,m.heading,angle),frame=drawnFrame(m),action=actionFrame(m,WALK_TYPES[type]);group.frames.setXYZW(i,action?.frame??frame%6,action?8+action.row+view:view+(frame>=6?4:0),p.seated&&!p.assembly?1:0,0);
+    const logicalView=stableView(m,m.heading,angle),frame=drawnFrame(m),action=actionFrame(m,WALK_TYPES[type]),direction=spriteDirection(WALK_TYPES[type],logicalView,action?.action??(frame<6?'walk':'idle')),view=direction.view;group.frames.setXYZW(i,action?.frame??frame%6,action?8+action.row+view:view+(frame>=6?4:0),p.seated&&!p.assembly?1:0,direction.flip?1:0);
     const lift=p.seated?0:action?.action==='jump'?JUMP_LIFT[action.frame]*residentHeight(p):0,visible=dx*dx+dz*dz<range*range;
     dummy.position.set(m.x,heightAt(m.x,m.z)+.015+lift+(p.seated&&!p.assembly ? .52 : 0),m.z);dummy.rotation.set(0,angle,0);const h=visible?residentRenderHeight(p,WALK_TYPES[type],view,frame,action?.action):0;
     dummy.scale.set(h*.875*a.width,h,1);dummy.updateMatrix();group.mesh.setMatrixAt(i,dummy.matrix);

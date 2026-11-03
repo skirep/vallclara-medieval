@@ -6,8 +6,13 @@ export function createMotion(p){return{x:p.x,z:p.z,heading:p.heading,walk:0,talk
 export function updateMotion(m,p,dt,simulationRate=1,speaking=p.state==='talking'){
   dt=Math.max(0,Math.min(dt,.1));
   const follow=1-Math.exp(-24*dt),blend=1-Math.exp(-9*dt);
+  const previousX=m.x,previousZ=m.z;
   m.x+=(p.x-m.x)*follow;m.z+=(p.z-m.z)*follow;
   m.heading+=angleDelta(m.heading,p.heading)*(1-Math.exp(-10*dt));
+  const dx=m.x-previousX,dz=m.z-previousZ;
+  // A U-turn must never leave a walking sprite facing against its visible
+  // displacement while the render heading catches up with the simulation.
+  if(p.state==='walking'&&Math.hypot(dx,dz)>1e-5&&Math.sin(m.heading)*dx+Math.cos(m.heading)*dz< -1e-7)m.heading=Math.atan2(dx,dz);
   m.walk+=((p.state==='walking'?1:0)-m.walk)*blend;
   m.talk+=((speaking?1:0)-m.talk)*blend;
   m.work+=((p.state==='working'?1:0)-m.work)*blend;
