@@ -28,7 +28,7 @@ jobs:
       - name: Prepare clean static artifact
         run: |
           mkdir _site
-          cp index.html personatges.html style.css main.js world.js interiors.js scenery.js terrain.js actors.js people-sprites.js resident-assets.js resident-roster.js featured-residents.js featured-layouts.js resident-scale.js resident-actions.js action-layouts.js sprite-atlas.js animation-frames.js resident-layouts.js walk-layouts.js appearance.js sprite-motion.js families.js simulation.js village-clock.js assembly-navigation.js assemblies.js daily-reports.js materials.js graphics.js nature.js stories.js social.js chronicles.js village-lore.js village-narrative.js dialogue-catalogue.js resident-tasks.js resident-work.js work-visuals.js _site/
+          cp index.html personatges.html style.css main.js world.js interiors.js scenery.js terrain.js actors.js people-sprites.js resident-shadows.js resident-assets.js resident-roster.js featured-residents.js featured-layouts.js resident-scale.js resident-actions.js action-layouts.js sprite-atlas.js animation-frames.js resident-layouts.js walk-layouts.js appearance.js sprite-motion.js families.js simulation.js village-clock.js assembly-navigation.js assemblies.js daily-reports.js materials.js graphics.js nature.js stories.js social.js chronicles.js village-lore.js village-narrative.js dialogue-catalogue.js resident-tasks.js resident-work.js work-visuals.js _site/
           cp -r vendor assets _site/
           touch _site/.nojekyll
       - uses: actions/configure-pages@v5

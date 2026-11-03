@@ -5,12 +5,15 @@ import {createMotion,updateMotion,stableView} from './sprite-motion.js';
 import {drawnFrame,WALK_TYPES} from './animation-frames.js';
 import {loadPackedResident} from './resident-assets.js';
 import {packWalkAtlas} from './sprite-atlas.js';
+import {groundHeight} from './terrain.js';
+import {createResidentShadows} from './resident-shadows.js';
 import {hasResidentActions,actionFrame,startResidentAction,JUMP_LIFT,loadActionAtlas,combineResidentAtlases} from './resident-actions.js';
 export const ATLAS_URL=new URL('./assets/residents-directions-v1.png',import.meta.url).href;
 export const FAMILY_ATLAS_URL=new URL('./assets/residents-families-v2.png',import.meta.url).href;
 const load=url=>new Promise((resolve,reject)=>new T.ImageLoader().load(url,resolve,undefined,()=>reject(new Error('No s’ha pogut carregar l’animació dels habitants. Torna a carregar la pàgina.'))));
-export function createPeople(scene,population,{onProgress,pixelHeight=128}={}){
+export function createPeople(scene,population,{onProgress,pixelHeight=128,heightAt=groundHeight}={}){
  const appearances=population.map(appearanceFor),states=population.map(createMotion),groups=[],dummy=new T.Object3D();
+ const shadows=createResidentShadows(scene,population,heightAt);
  const geometry=new T.PlaneGeometry(1,1);geometry.translate(0,.5-12/256,0);
  for(let type=0;type<WALK_TYPES.length;type++){
   const extended=hasResidentActions(WALK_TYPES[type]),rows=extended?20:8;
@@ -47,11 +50,20 @@ export function createPeople(scene,population,{onProgress,pixelHeight=128}={}){
    group.indices.forEach((index,i)=>{
     const p=population[index],a=appearances[index],m=states[index],dx=camera.x-m.x,dz=camera.z-m.z,angle=Math.atan2(dx,dz);
     const view=stableView(m,m.heading,angle),frame=drawnFrame(m),action=actionFrame(m,WALK_TYPES[type]);group.frames.setXYZW(i,action?.frame??frame%6,action?8+action.row+view:view+(frame>=6?4:0),0,0);
-    dummy.position.set(m.x,.015+(action?.action==='jump'?JUMP_LIFT[action.frame]*residentHeight(p):0),m.z);dummy.rotation.set(0,angle,0);const h=dx*dx+dz*dz<range*range?residentRenderHeight(p,WALK_TYPES[type],view,frame,action?.action):0;
+    const lift=action?.action==='jump'?JUMP_LIFT[action.frame]*residentHeight(p):0,visible=dx*dx+dz*dz<range*range;
+    dummy.position.set(m.x,heightAt(m.x,m.z)+.015+lift,m.z);dummy.rotation.set(0,angle,0);const h=visible?residentRenderHeight(p,WALK_TYPES[type],view,frame,action?.action):0;
     dummy.scale.set(h*.875*a.width,h,1);dummy.updateMatrix();group.mesh.setMatrixAt(i,dummy.matrix);
+    shadows.update(index,p,m,lift,visible?1:0);
    });group.frames.needsUpdate=true;group.mesh.instanceMatrix.needsUpdate=true;
   }
+  shadows.flush();
+ }
+ function setLighting(sun,target,daylight){
+  shadows.setLight(sun,target,daylight);
+  const light=T.MathUtils.clamp(daylight,0,1);
+  // A restrained, uniform ambient tint preserves painted clothing and skin.
+  for(const group of groups)group.mesh.material.color.setRGB(.78+.20*light,.77+.20*light,.75+.19*light);
  }
  function playAction(id,action){const index=population.findIndex(p=>p.id===id);return index>=0&&hasResidentActions(WALK_TYPES[appearances[index].row],action)&&startResidentAction(states[index],action);}
- return {animate,ready,playAction,pixelHeight,parts:Object.fromEntries(groups.map((g,i)=>[i===0?'sprites':WALK_TYPES[i],g.mesh])),appearances,states};
+ return {animate,ready,playAction,setLighting,shadows,pixelHeight,parts:Object.fromEntries(groups.map((g,i)=>[i===0?'sprites':WALK_TYPES[i],g.mesh])),appearances,states};
 }
