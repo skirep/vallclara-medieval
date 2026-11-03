@@ -1,6 +1,7 @@
 import * as T from 'three';
 import {residentHeight} from './resident-scale.js';
 export function residentThought(p,{social,dragon,hour=9}={}){
+ if(p.dragonEmergency){const role=p.dragonEmergency.role;return{icon:role==='defender'?'🥊':role==='returning'?'😮‍💨':'😱',label:role==='defender'?'Plantant cara al drac':role==='returning'?'Tornant després de l’atac':'Fugint del foc',text:role==='defender'?'He de distreure el drac perquè la gent pugui escapar.':role==='returning'?'El drac ja s’ha enlairat. Tornaré amb calma al que estava fent.':'El drac ha baixat a la plaça! Corro a refugiar-me lluny de les flames.',priority:10};}
  if(p.playerDuel)return{icon:'🥊',label:'Duel',text:'A veure si el visitant té una rèplica millor que la meva.',priority:8};
  if(p.assembly)return{icon:p.state==='talking'?'📣':'👂',label:p.state==='talking'?'Prenent la paraula':'Escoltant',text:p.state==='talking'?'Ara em toca explicar la feina feta i els plans d’avui.':'Escolto qui té el torn a la reunió.',priority:4};
  if(p.dramaMood)return{...p.dramaMood,priority:7};

@@ -70,4 +70,13 @@ A la portada, «Entrar en mode joc» activa el control lliure en primera persona
 
 Les icones dels caps mostren la feina actual, els materials pendents, les converses, els lliuraments, el repòs, la gelosia i les reaccions al drac. T llegeix el pensament del veí que mires; també es poden tocar les icones o consultar qualsevol habitant a Cròniques. Les icones es limiten als veïns visibles i propers, amb ocultació per murs i separació per evitar superposicions. Es poden desactivar a les opcions.
 
-El drac continua sent un sprite 2D i apareix dues vegades al dia, a les 10:00 i les 17:00. Cada aparició recorre tres voltes, amb entrada i sortida des de fora del poble. Les flames són cintes animades de fins a 19 metres en la direcció real del vol; tant el vol com els episodis de foc depenen del rellotge del joc i es congelen en pausar-lo.
+El drac continua sent un sprite 2D i apareix dues vegades al dia, a les 10:00 i les 17:00. Cada aparició inclou voltes, un descens a la plaça, uns 31 segons de baixa alçada, l’ascens i la sortida de la vila. Les flames són cintes animades de fins a 19 metres: a la plaça apunten cap als habitants i s’aturen a terra; tant el vol com els episodis de foc depenen del rellotge del joc i es congelen en pausar-lo.
+
+
+### Alarma del drac
+
+Durant el descens del drac, s’interrompen els diàlegs i els duels. Els 197 veïns que no són forçuts corren cap a refugis repartits pels carrers, mantenint-se a la seva riba quan és possible. Els tres acròbates musculats (`summer-athlete`) van fins a posicions accessibles al voltant del drac i el desafien amb crits i cops de puny mentre la resta s’allunya. Les rutes fan servir el mateix graf segur de la reunió diària; no hi ha teletransports, passos a través de murs ni travesses del riu fora del pont.
+
+El drac intenta dirigir les flames cap als veïns propers; quan la gent ja és lluny, apunta cap als forçuts. La plaça queda sota l’alarma durant el descens, l’estada i l’ascens. Les bafarades d’alarma i les icones de pànic es mostren també si s’han desactivat les converses ordinàries; els pensaments conserven el seu propi interruptor. Els crits s’escolten amb el so o les veus activats. El HUD mostra els refugiats, els forçuts arribats i el temps de retirada.
+
+Quan s’enlaira, tothom torna caminant al lloc on era i reprèn l’activitat. Les reserves de treball, els materials pagats i els lliuraments pendents es conserven. Desar durant l’alarma manté les posicions i les rutes de feina prèvies, de manera que recarregar a mitja emergència no desquadra les tasques. El rellotge i la pausa també controlen la fugida, els crits i les accions dels defensors.

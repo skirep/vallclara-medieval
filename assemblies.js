@@ -79,7 +79,7 @@ export function createAssemblies(population,{obstacles=[],social,initialHours=9}
  function bubbles(){const turn=turns[turnIndex];return phase==='daily'&&turn?[{id:`daily-${meetingDay}-${turnIndex}`,person:turn.person,text:turn.text,priority:1}]:[];}
  function serialize(){return{version:1,lastCompletedDay:Number.isFinite(lastCompletedDay)?lastCompletedDay:null};}
  function restore(data,hours){if(data?.version===1&&Number.isInteger(data.lastCompletedDay)&&data.lastCompletedDay>=0&&data.lastCompletedDay<=Math.floor(hours/24))lastCompletedDay=data.lastCompletedDay;reports.observe(0,hours);nextAt=Math.max(nextAssemblyTime(hours),(lastCompletedDay+1)*24+ASSEMBLY_HOUR);}
- return {update,seek,bubbles,priest,serialize,restore,advanceTurn:nextTurn,get phase(){return phase;},get nextAt(){return nextAt;},get completed(){return completed;},
+ return {navigation:nav,update,seek,bubbles,priest,serialize,restore,advanceTurn:nextTurn,get phase(){return phase;},get nextAt(){return nextAt;},get completed(){return completed;},
   get currentTurn(){return phase==='daily'?turns[turnIndex]:null;},get reportNumber(){return phase==='daily'&&turns[turnIndex]?.kind==='report'?turnIndex:0;},get totalReports(){return Math.min(DAILY_REPORT_LIMIT,population.length);},
   get clockLimit(){return nextAt;},
   get attending(){return phase==='gathering'||phase==='daily'?[...members.values()].filter(m=>m.arrived).length:0;},

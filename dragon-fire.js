@@ -10,9 +10,9 @@ export function createDragonFire(scene){
  // The ribbon is drawn in the world and faces the observer along its length.
  const mesh=new T.Mesh(geometry,material);mesh.name='Flamarada llarga del drac';mesh.visible=false;mesh.frustumCulled=false;scene.add(mesh);
  const light=new T.PointLight('#ff8b26',0,25,2);scene.add(light);const direction=new T.Vector3(),side=new T.Vector3(),toCamera=new T.Vector3(),center=new T.Vector3(),mouth=new T.Vector3();
- function update(position,heading,observer,time,strength){mesh.visible=strength>0;light.intensity=strength*16;if(!mesh.visible)return;
-  direction.set(Math.sin(heading),-.035,Math.cos(heading)).normalize();mouth.copy(position).addScaledVector(direction,3.4);mouth.y-=.55;toCamera.set(observer.x-mouth.x,(observer.y??mouth.y+2)-mouth.y,observer.z-mouth.z);side.crossVectors(direction,toCamera).normalize();if(side.lengthSq()<.01)side.set(0,1,0);
-  const pos=geometry.attributes.position,uv=geometry.attributes.uv,length=FLAME_LENGTH*(.65+.35*strength);for(let i=0;i<pos.count;i++){const t=uv.getX(i),width=(uv.getY(i)-.5)*3.4;center.copy(mouth).addScaledVector(direction,t*length).addScaledVector(side,width);pos.setXYZ(i,center.x,center.y,center.z);}pos.needsUpdate=true;geometry.computeBoundingSphere();material.uniforms.uTime.value=time;material.uniforms.uStrength.value=strength;light.position.copy(mouth).addScaledVector(direction,4);
+ function update(position,heading,observer,time,strength,{target=null}={}){mesh.visible=strength>0;light.intensity=strength*16;if(!mesh.visible)return;
+  if(target)direction.set(target.x-position.x,target.y-(position.y-.55),target.z-position.z).normalize();else direction.set(Math.sin(heading),-.035,Math.cos(heading)).normalize();mouth.copy(position).addScaledVector(direction,3.4);mouth.y-=.55;toCamera.set(observer.x-mouth.x,(observer.y??mouth.y+2)-mouth.y,observer.z-mouth.z);side.crossVectors(direction,toCamera).normalize();if(side.lengthSq()<.01)side.set(0,1,0);
+  const pos=geometry.attributes.position,uv=geometry.attributes.uv,length=Math.min(FLAME_LENGTH*(.65+.35*strength),direction.y<-.001?Math.max(.1,(mouth.y-.12)/-direction.y):Infinity);for(let i=0;i<pos.count;i++){const t=uv.getX(i),width=(uv.getY(i)-.5)*3.4;center.copy(mouth).addScaledVector(direction,t*length).addScaledVector(side,width);pos.setXYZ(i,center.x,center.y,center.z);}pos.needsUpdate=true;geometry.computeBoundingSphere();material.uniforms.uTime.value=time;material.uniforms.uStrength.value=strength;light.position.copy(mouth).addScaledVector(direction,4);
  }
  return{mesh,light,update};
 }

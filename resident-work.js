@@ -51,7 +51,7 @@ export function createVillageWork(population,{initialHours=9,obstacles=[]}={}){
  }
  function updateResident(p,dt,hour){
   const d=p.duty;
-  if(p.assembly||p.assemblyReleased||p.courtSeat||p.playerDuel)return;
+  if(p.assembly||p.assemblyReleased||p.courtSeat||p.playerDuel||p.dragonEmergency)return;
   if(p.social?.conversation!==null&&p.social?.conversation!==undefined){p.state='talking';return;}
   // Do not throw away paid work or carried output when the family goes home.
   const quota=p.age<16||p.age>=68?1:2+(p.id%2);
@@ -80,7 +80,7 @@ export function createVillageWork(population,{initialHours=9,obstacles=[]}={}){
   for(const p of population){if(roleFor(p)!==p.duty.role&&!p.duty.inputPaid&&!p.duty.cargo){const previous=p.duty;assign(p);p.duty.today=previous.today;p.duty.yesterday=previous.yesterday;}updateResident(p,dt,hour);}
  }
  function summary(){return{day,delivered,stock:{...stock},working:population.filter(p=>p.duty.phase==='working'&&!p.assembly&&p.state==='working').length,blocked:population.filter(p=>p.duty.phase==='blocked').length,journal:[...journal]};}
- function serialize(){return {version:1,day,delivered,stock:{...stock},residents:population.map(p=>({id:p.id,x:p.x,z:p.z,node:p.node,path:[...p.path],duty:{...p.duty,task:p.duty.task.id}})),journal:[...journal]};}
+ function serialize(){return {version:1,day,delivered,stock:{...stock},residents:population.map(p=>({id:p.id,x:p.dragonEmergency?.origin.x??p.x,z:p.dragonEmergency?.origin.z??p.z,node:p.node,path:[...p.path],duty:{...p.duty,task:p.duty.task.id}})),journal:[...journal]};}
  function cleanDay(value,expected){
   if(!value||value.day!==expected||!Number.isInteger(value.completed)||value.completed<0||value.completed>3)return blankDay(expected);
   return{day:expected,completed:value.completed,tasks:(Array.isArray(value.tasks)?value.tasks:[]).filter(t=>typeof t==='string'&&t.length<200).slice(-4)};
