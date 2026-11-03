@@ -10,7 +10,9 @@ import {createAssemblies} from '../assemblies.js';
 import {createVillageWork} from '../resident-work.js';
 import {createDragonEmergency} from '../dragon-emergency.js';
 import {blocked} from '../simulation.js';
-import {royalGuardSheet} from '../royal-guard-art.js';
+import {royalGuardSheetURL,ROYAL_GUARD_ART} from '../royal-guard-art.js';
+import {readFileSync} from 'node:fs';
+const layouts=JSON.parse(readFileSync(new URL('../royal-guard-layouts.json',import.meta.url)));
 const ctx={fillRect(){},strokeRect(){},beginPath(){},moveTo(){},bezierCurveTo(){},stroke(){}};
 globalThis.document={createElementNS(){return{addEventListener(){},removeEventListener(){},set src(v){}};},createElement(){return{getContext(){return ctx;}};}};
 const world=createWorld(new T.Scene()),nav=createAssemblyNavigation(world.obstacles);
@@ -31,10 +33,15 @@ test('soldiers mobilise across the bridge, attack with both weapon types and ret
  }
  assert.equal(attacks.size,12);assert.equal(raid.completed,2);
 });
-test('each weapon has a self-contained transparent vector sheet with distinct walk, idle and combat poses',()=>{
- const sword=royalGuardSheet('sword'),spear=royalGuardSheet('spear');assert.notEqual(sword,spear);
- for(const sheet of [sword,spear]){assert.match(sheet,/viewBox="0 0 840 3072"/);assert.equal((sheet.match(/stroke-linejoin="round"/g)||[]).length,72);assert.doesNotMatch(sheet,/https?:\/\/(?!www.w3.org)/);}
- assert.throws(()=>royalGuardSheet('unknown'));
+test('pixel-art sheets ship both weapons and all device resolutions with stable foot anchors',()=>{
+ assert.equal(ROYAL_GUARD_ART.rows,12);assert.equal(ROYAL_GUARD_ART.columns,6);
+ for(const weapon of ['sword','spear']){
+  const design=layouts.weapons[weapon];assert.equal(design.frames.length,72);
+  assert.equal(new Set(design.frames.filter(f=>f.source==='attack').map(f=>`${f.x}/${f.y}`)).size,24);
+  for(const frame of design.frames){assert.ok(frame.footY>frame.y);assert.ok(frame.anchorX>=frame.x&&frame.anchorX<=frame.x+frame.w);}
+  for(const height of [64,96,128]){const url=royalGuardSheetURL(weapon,height),data=readFileSync(new URL(url));assert.equal(data.subarray(0,4).toString(),'RIFF');assert.equal(data.subarray(8,12).toString(),'WEBP');}
+ }
+ assert.throws(()=>royalGuardSheetURL('unknown'));assert.throws(()=>royalGuardSheetURL('sword',32));
 });
 test('both guard render groups keep selectable identities and use the weapon attack rows',async()=>{
  const {createPeople}=await import('../people-sprites.js'),p=createHistories(createTownPopulation()),scene=new T.Scene(),people=createPeople(scene,p);

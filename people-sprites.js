@@ -1,4 +1,4 @@
-import {royalGuardSheetURL} from './royal-guard-art.js';
+import {royalGuardSheetURL,ROYAL_GUARD_ART} from './royal-guard-art.js';
 import {spriteDirection} from './sprite-directions.js';
 import * as T from 'three';
 import {appearanceFor} from './appearance.js';
@@ -43,7 +43,7 @@ export function createPeople(scene,population,{onProgress,pixelHeight=128,height
  const ready=Promise.all(Array.from({length:4},async()=>{
   while(next<groups.length){const type=next++,group=groups[type];
    const height=group.extended?Math.min(pixelHeight,96):pixelHeight;
-   let image=group.guardWeapon?await load(royalGuardSheetURL(group.guardWeapon)):await loadPackedResident(WALK_TYPES[type],height,load,
+   let image=group.guardWeapon?await load(royalGuardSheetURL(group.guardWeapon,height)):await loadPackedResident(WALK_TYPES[type],height,load,
     images=>packWalkAtlas(images,WALK_TYPES[type],document.createElement('canvas'),height));
    if(group.extended){const actions=await loadActionAtlas(WALK_TYPES[type],height,load,()=>document.createElement('canvas'));image=combineResidentAtlases(image,actions,document.createElement('canvas'),height);}
    group.texture.image=image;
@@ -57,8 +57,8 @@ export function createPeople(scene,population,{onProgress,pixelHeight=128,height
     const p=population[index],a=appearances[index],m=states[index],dx=camera.x-m.x,dz=camera.z-m.z,angle=Math.atan2(dx,dz);
     const logicalView=stableView(m,m.heading,angle),frame=drawnFrame(m),action=group.guardWeapon?(p.guardAttackTime===undefined?null:{action:'weapon',frame:Math.min(5,Math.floor(p.guardAttackTime/.8*6)),row:0}):actionFrame(m,WALK_TYPES[type]),direction=group.guardWeapon?{view:logicalView,flip:false}:spriteDirection(WALK_TYPES[type],logicalView,action?.action??(frame<6?'walk':'idle')),view=direction.view;group.frames.setXYZW(i,action?.frame??frame%6,action?8+action.row+view:view+(frame>=6?4:0),p.seated&&!p.assembly?1:0,direction.flip?1:0);
     const lift=p.seated?0:action?.action==='jump'?JUMP_LIFT[action.frame]*residentHeight(p):0,visible=dx*dx+dz*dz<range*range;
-    dummy.position.set(m.x,heightAt(m.x,m.z)+.015+lift+(p.seated&&!p.assembly ? .52 : 0),m.z);if(p.duelPose?.punchTime<.66){const lunge=Math.sin(p.duelPose.punchTime/.66*Math.PI)*.18;dummy.position.x+=Math.sin(p.heading)*lunge;dummy.position.z+=Math.cos(p.heading)*lunge;}dummy.rotation.set(0,angle,p.duelPose?.hitTime<.5?Math.sin(p.duelPose.hitTime/.5*Math.PI)*.13:0);const h=visible?(group.guardWeapon?residentHeight(p)/(219/256):residentRenderHeight(p,WALK_TYPES[type],view,frame,action?.action)):0;
-    dummy.scale.set(h*.875*a.width,h,1);dummy.updateMatrix();group.mesh.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(m.x,heightAt(m.x,m.z)+.015+lift+(p.seated&&!p.assembly ? .52 : 0),m.z);if(p.duelPose?.punchTime<.66){const lunge=Math.sin(p.duelPose.punchTime/.66*Math.PI)*.18;dummy.position.x+=Math.sin(p.heading)*lunge;dummy.position.z+=Math.cos(p.heading)*lunge;}dummy.rotation.set(0,angle,p.duelPose?.hitTime<.5?Math.sin(p.duelPose.hitTime/.5*Math.PI)*.13:0);const h=visible?(group.guardWeapon?residentHeight(p)/ROYAL_GUARD_ART.bodyFraction:residentRenderHeight(p,WALK_TYPES[type],view,frame,action?.action)):0;
+    dummy.scale.set(h*(group.guardWeapon?ROYAL_GUARD_ART.aspect:.875)*a.width,h,1);dummy.updateMatrix();group.mesh.setMatrixAt(i,dummy.matrix);
     shadows.update(index,p,m,lift,visible?1:0);
    });group.frames.needsUpdate=true;group.mesh.instanceMatrix.needsUpdate=true;
   }

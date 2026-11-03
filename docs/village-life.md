@@ -49,6 +49,8 @@ La vila compacta inclou 167 veïns ordinaris, 24 identitats amb nom propi i 9 ar
 
 ## Guàrdia reial
 
-La vila conserva els seus 200 habitants i afegeix 12 soldats amb identitats estables: sis amb espasa i escut i sis amb llança. Els seus fotogrames vectorials tenen quatre orientacions, sis poses per animació i tres estats: caminar, respirar mentre vigilen i atacar amb l’arma.
+La vila conserva els seus 200 habitants i afegeix 12 soldats amb identitats estables: sis amb espasa i escut i sis amb llança. Els seus fotogrames de píxel art modern amb proporcions realistes tenen quatre orientacions, sis poses per animació i tres estats: caminar, respirar mentre vigilen i atacar amb l’arma.
 
 Patrullen els accessos i el perímetre exterior del castell durant tot el dia. No abandonen la guàrdia per treballar als tallers, discutir amb els veïns o assistir a la reunió del migdia. Quan el drac comença a sobrevolar la vila, es mobilitzen per camins transitables i travessen el riu pel pont. A la plaça formen dues línies, ataquen amb les armes mentre els forçuts distreuen el drac i els veïns es refugien. Quan acaba l’alarma tornen caminant als seus llocs al castell. Els pensaments i els crits reflecteixen cada fase de la defensa.
+
+La versió visual 2 substitueix els soldats vectorials per armadures detallades, metall amb reflexos i roba amb textura. Espasa i escut mantenen els colors bordeus de la corona; els llancers porten blau. Les seqüències de combat es dibuixen en fulls separats amb espai per a tota l’arma, i es reempaqueten amb ancoratge als peus i escala constant. Hi ha textures lossless a 64, 96 i 128 píxels segons el dispositiu.
