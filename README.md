@@ -4,7 +4,7 @@ Exploració lliure en primera persona: https://skirep.github.io/vallclara-mediev
 
 ## Vila compacta · novembre de 2026
 
-- **200 habitants en total**: 167 veïns, els últims 24 personatges amb nom propi i 9 artistes adults (tres exemplars de cadascun dels tres nous dissenys). Es mantenen els 62 dissenys dibuixats, les famílies, les històries i les 512 entrades contextuals de diàleg per habitant.
+- **100 personatges en total**: 55 veïns, 24 personatges amb nom propi, 9 artistes adults i 12 soldats reials. Es mantenen els 62 dissenys dibuixats, les famílies, les històries i les 512 entrades contextuals de diàleg per habitant.
 - Els personatges nous mantenen els IDs 500–523. Les cerques d’identitat fan servir mapes, sense assumir que l’ID sigui una posició de l’array.
 - Àrea transitable limitada a ±90 m, 25 cases explorables, església i castell. Els carrers se separen en dues ribes; l’únic enllaç de navegació és el pont de pedra central.
 - **Castell de Rocafort**: sala del tron, biblioteca/cancelleria, cuines/rebost, armeria, cambra reial, menjador, capella i galeria. Portes, parets i mobiliari comparteixen coordenades amb les col·lisions.
@@ -29,7 +29,7 @@ npm run dev
 
 Three.js r180, recursos estàtics i GitHub Pages. Cada push a `main` executa les proves i publica el contingut amb GitHub Actions. La geometria estàtica es fusiona per material i els habitants fan servir InstancedMesh. No hi ha pisos superiors accessibles; els detalls del castell es distribueixen en una planta transitable. Els personatges són sprites dins d’un món 3D, no models humans volumètrics.
 
-Les proves cobreixen les 200 identitats, la conservació dels dissenys, les rutes entre ribes, els accessos a totes les estances i el cicle dels monarques (tron → reunió → tron), a més de les regressions de la simulació.
+Les proves cobreixen les 100 identitats, la conservació dels dissenys, les rutes entre ribes, els accessos a totes les estances i el cicle dels monarques (tron → reunió → tron), a més de les regressions de la simulació.
 
 ## Crèdits
 
@@ -75,7 +75,7 @@ El drac continua sent un sprite 2D i apareix dues vegades al dia, a les 10:00 i 
 
 ### Alarma del drac
 
-Durant el descens del drac, s’interrompen els diàlegs i els duels. Els 197 veïns que no són forçuts corren cap a refugis repartits pels carrers, mantenint-se a la seva riba quan és possible. Els tres acròbates musculats (`summer-athlete`) van fins a posicions accessibles al voltant del drac i el desafien amb crits i cops de puny mentre la resta s’allunya. Les rutes fan servir el mateix graf segur de la reunió diària; no hi ha teletransports, passos a través de murs ni travesses del riu fora del pont.
+Durant el descens del drac, s’interrompen els diàlegs i els duels. Els 85 veïns que no són forçuts corren cap a refugis repartits pels carrers, mantenint-se a la seva riba quan és possible. Els tres acròbates musculats (`summer-athlete`) van fins a posicions accessibles al voltant del drac i el desafien amb crits i cops de puny mentre la resta s’allunya. Les rutes fan servir el mateix graf segur de la reunió diària; no hi ha teletransports, passos a través de murs ni travesses del riu fora del pont.
 
 El drac intenta dirigir les flames cap als veïns propers; quan la gent ja és lluny, apunta cap als forçuts. La plaça queda sota l’alarma durant el descens, l’estada i l’ascens. Les bafarades d’alarma i les icones de pànic es mostren també si s’han desactivat les converses ordinàries; els pensaments conserven el seu propi interruptor. Els crits s’escolten amb el so o les veus activats. El HUD mostra els refugiats, els forçuts arribats i el temps de retirada.
 
@@ -96,3 +96,7 @@ Els adults també poden acceptar i resoldre les cinc missions. Després d’entr
 El jugador i els NPC comparteixen una única campanya. Les missions acceptades pel jugador queden reservades; el botó **Encarregar a un NPC** les pot delegar, inclosa una escorta començada. No hi ha recompenses ni conseqüències duplicades: si un veí derrota Berenguer, el rei mor per a tota la partida; si recupera l’ou, el pacte amb el drac també és compartit.
 
 El diari 📜 mostra el nom del responsable, l’objectiu actual i una crònica dels seus actes. **Seguir [nom]** permet observar-lo amb la càmera. Les icones de pensament i les bafarades expliquen què està fent. Durant les reunions i les emergències, els participants aturen la missió, compleixen la resposta del poble i després la reprenen. Al final tornen caminant al lloc on havien deixat la seva feina, conservant els materials i el progrés del seu ofici. El responsable de cada missió, les escortes i el retorn a la feina es desen amb la partida.
+
+## Arquitectura detallada
+
+Les 25 cases tenen més de 9.000 teules corbes modelades, entramats i ràfecs de fusta, marcs tallats, vidres emplomats, jardineres, ventilacions de les golfes, xemeneies amb dobles pots i detalls interiors. Rocafort incorpora més de 1.600 carreus en relleu, arxivoltes del portal, espitlleres, estendards, quatre cobertes de pissarra, arcs sota els sostres i columnes amb col·lisió. El drac respecta la nova alçada de les torres. La geometria està agrupada per material per contenir el nombre de crides de dibuix. Les partides amb missions d’un veí retirat conserven els objectius i passen la missió al jugador.

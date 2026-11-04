@@ -6,11 +6,11 @@ Tardor de 1348. Un aiguat descobreix sota el pont una fita amb dues mans. Fa tre
 
 El conflicte no té un únic malvat: algunes aportacions de feina es van escriure al costat dels préstecs, hi ha records contradictoris i les cases tenen por de perdre l’accés al molí. Mossèn Guillem recorda haver separat papers humits entre llibres. Arnau reconeix el signe de la pedra; Agnès guarda una cinta semblant; Bernat reconeix una reparació al pany, que no demostra cap robatori. Les altres cases aporten rebuts, mesures i testimonis.
 
-Hi ha catorze veus principals amb pistes i motius propis, connectades als habitants existents. Els altres veïns també tenen família, amistat, un desacord, un testimoni i una postura sobre el pacte. La xarxa d’amistats inclou els 200 habitants.
+Hi ha catorze veus principals amb pistes i motius propis, connectades als habitants existents. Els altres veïns també tenen família, amistat, un desacord, un testimoni i una postura sobre el pacte. La xarxa d’amistats inclou els 100 personatges.
 
 Les quatre etapes són **La fita sota el fang**, **Els comptes de l’absència**, **Un pont que no sigui de ningú** i **La festa de les dues ribes**. La còpia contrastada reconeix el pas compartit i les obligacions de manteniment. Les cases poden tornar a seure juntes sense haver resolt tots els desacords.
 
-Els setze fils inclouen pont, aigua, molí, pa, deutes, arca, rumors, fusta, eines, roba, ramat, infants, aprenents, cures, mercat i festa. Cada fil té quatre situacions evolutives i vuit rèpliques: **512 entrades contextuals per habitant**, consultables a Cròniques. Són escenes escrites adaptades a les dades dels habitants, no 102.400 frases escrites individualment, ni una connexió a un servei d’IA.
+Els setze fils inclouen pont, aigua, molí, pa, deutes, arca, rumors, fusta, eines, roba, ramat, infants, aprenents, cures, mercat i festa. Cada fil té quatre situacions evolutives i vuit rèpliques: **512 entrades contextuals per habitant**, consultables a Cròniques. Són escenes escrites adaptades a les dades dels habitants, no 51.200 frases escrites individualment, ni una connexió a un servei d’IA.
 
 Les converses acabades contrasten testimonis i deixen memòria. Les retrobades acordades augmenten la confiança quan realment es produeixen. Les interrompudes no compten. Cada etapa necessita 24 intercanvis de parella/tema diferents, almenys dotze habitants i sis temes. Les converses començades en una etapa anterior no fan saltar la següent.
 
@@ -43,14 +43,18 @@ Es conserva una sola reunió al dia, a les **12:00**, amb tots els habitants pre
 
 El desament existent s’amplia amb el rellotge, els recursos, les tasques en curs, els ingredients reservats, les càrregues i la reunió acabada. Les memòries anteriors continuen carregant-se. No hi ha servidor compartit: el progrés és propi del navegador.
 
-Les proves recorren les 102.400 entrades, comproven identitats i relacions, simulen una jornada amb 200 habitants, validen costos i lliuraments, bloquejos, continuïtat després de desar, converses interrompudes, informes del dia anterior i rutes amb obstacles durant una reunió completa. La validació de geometria no substitueix una comprovació visual de WebGL.
+Les proves recorren les 51.200 entrades, comproven identitats i relacions, simulen una jornada amb 100 personatges, validen costos i lliuraments, bloquejos, continuïtat després de desar, converses interrompudes, informes del dia anterior i rutes amb obstacles durant una reunió completa. La validació de geometria no substitueix una comprovació visual de WebGL.
 
-La vila compacta inclou 167 veïns ordinaris, 24 identitats amb nom propi i 9 artistes adults. El rei i la reina segueixen una rutina de cort pròpia i assisteixen a la reunió; no produeixen els béns dels oficis ordinaris. El castell, la parròquia i el pont són accessibles des del menú de llocs de la vila.
+La vila compacta inclou 55 veïns ordinaris, 24 identitats amb nom propi, 9 artistes adults i 12 soldats reials. El rei i la reina segueixen una rutina de cort pròpia i assisteixen a la reunió; no produeixen els béns dels oficis ordinaris. El castell, la parròquia i el pont són accessibles des del menú de llocs de la vila.
 
 ## Guàrdia reial
 
-La vila conserva els seus 200 habitants i afegeix 12 soldats amb identitats estables: sis amb espasa i escut i sis amb llança. Els seus fotogrames de píxel art modern amb proporcions realistes tenen quatre orientacions, sis poses per animació i tres estats: caminar, respirar mentre vigilen i atacar amb l’arma.
+La vila té 100 personatges en total, incloent-hi 12 soldats amb identitats estables: sis amb espasa i escut i sis amb llança. Els seus fotogrames de píxel art modern amb proporcions realistes tenen quatre orientacions, sis poses per animació i tres estats: caminar, respirar mentre vigilen i atacar amb l’arma.
 
 Patrullen els accessos i el perímetre exterior del castell durant tot el dia. No abandonen la guàrdia per treballar als tallers, discutir amb els veïns o assistir a la reunió del migdia. Quan el drac comença a sobrevolar la vila, es mobilitzen per camins transitables i travessen el riu pel pont. A la plaça formen dues línies, ataquen amb les armes mentre els forçuts distreuen el drac i els veïns es refugien. Quan acaba l’alarma tornen caminant als seus llocs al castell. Els pensaments i els crits reflecteixen cada fase de la defensa.
 
 La versió visual 2 substitueix els soldats vectorials per armadures detallades, metall amb reflexos i roba amb textura. Espasa i escut mantenen els colors bordeus de la corona; els llancers porten blau. Les seqüències de combat es dibuixen en fulls separats amb espai per a tota l’arma, i es reempaqueten amb ancoratge als peus i escala constant. Hi ha textures lossless a 64, 96 i 128 píxels segons el dispositiu.
+
+## Arquitectura
+
+Les cases inclouen teules corbes superposades, fusteria de les golfes, motllures, porticons, vidres emplomats, jardineres, sòcols de pedra i dobles pots de xemeneia. Rocafort té quatre cobertes de pissarra amb remats, carreus en relleu, motllures al portal, escut reial, espitlleres, estendards i arcs interiors amb columnes sòlides. Tots els detalls estàtics s’agrupen per material i reutilitzen els mapes PBR. Les portes, les missions i les rutes dels habitants continuen fent servir la geometria de col·lisió compartida. El vol del drac considera la nova alçada de les torres.

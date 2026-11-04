@@ -17,10 +17,10 @@ import {RIVER,BRIDGE,waterBlocked} from '../terrain.js';
 const ctx={fillRect(){},strokeRect(){},beginPath(){},moveTo(){},bezierCurveTo(){},stroke(){}};
 globalThis.document={createElementNS(){return{addEventListener(){},removeEventListener(){},set src(v){}};},createElement(){return{getContext(){return ctx;}};}};
 const world=createWorld(new T.Scene());
-test('compact town has 200 original identities plus 12 royal soldiers and retains every completed design and the latest 24 named residents',()=>{
+test('compact town has exactly 100 identities including 12 royal soldiers and retains every completed design and the latest 24 named residents',()=>{
  const p=createHistories(createTownPopulation()),byId=new Map(p.map(p=>[p.id,p]));
- assert.equal(p.length,212);assert.equal(byId.size,212);
- assert.equal(p.filter(p=>!p.character).length,167);assert.deepEqual(p.filter(p=>p.character?.featured).map(p=>p.spriteId),FEATURED_RESIDENTS.map(c=>c.id));
+ assert.equal(p.length,100);assert.equal(byId.size,100);
+ assert.equal(p.filter(p=>!p.character).length,55);assert.deepEqual(p.filter(p=>p.character?.featured).map(p=>p.spriteId),FEATURED_RESIDENTS.map(c=>c.id));
  createAssemblies(p,{obstacles:world.obstacles});
  assert.equal(new Set(p.map(p=>RESIDENT_ROSTER[appearanceFor(p).row].id)).size,RESIDENT_ROSTER.length);
  for(const person of p){assert.equal(blocked(person.x,person.z,world.obstacles,.15),false,`unsafe spawn ${person.id} at ${person.x},${person.z}`);for(const id of [...person.parentIds,...person.childIds,person.story.friendId])assert.ok(byId.has(id));}
@@ -48,7 +48,7 @@ test('king and queen walk into their own thrones, stand for noon, then return wi
  for(const m of court.members){assert.equal(m.person.seated,true);assert.ok(Math.hypot(m.person.x-m.seat.x,m.person.z-m.seat.z)<.1);}
  assembly.update(0,0,12);court.update(.25,12);assert.ok(court.members.every(m=>!m.person.seated));
  for(let i=0;i<2000&&assembly.phase==='gathering';i++){assembly.update(.5,.5,12);court.update(.5,12);}
- assert.equal(assembly.phase,'daily');assert.equal(assembly.attending,200);
+ assert.equal(assembly.phase,'daily');assert.equal(assembly.attending,88);
  while(assembly.phase==='daily')assembly.advanceTurn();
  for(let i=0;i<2000&&assembly.active;i++){assembly.update(.5,.5,13);court.update(.5,13);}
  assert.equal(assembly.active,false);

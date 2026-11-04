@@ -1,3 +1,4 @@
+import {addHouseDetails,addCastleDetails} from './architecture-details.js';
 import {houseRoofPlan,gableGeometry} from './house-geometry.js';
 import {housePlan,wallPanels} from './interiors.js';
 import {addCastle} from './castle.js';
@@ -23,6 +24,7 @@ const box=new T.BoxGeometry(1,1,1),cyl=new T.CylinderGeometry(1,1,1,10),sphere=n
 function canvasTexture(type){const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d');x.fillStyle=type==='stone'?'#6d7166':type==='roof'?'#604b39':type==='wood'?'#65513b':type==='grass'?'#6d7549':'#c2b79c';x.fillRect(0,0,256,256);for(let i=0;i<6500;i++){const n=Math.floor(r(0,255));x.fillStyle=`rgba(${n},${n},${n},.11)`;x.fillRect(r(0,256),r(0,256),r(1,5),r(1,4));}if(type==='stone'){for(let y=0;y<256;y+=32)for(let col=-1;col<5;col++){const a=col*64+(y%64?32:0);x.strokeStyle='#333a31';x.lineWidth=2;x.strokeRect(a+2,y+2,60,28);}}if(type==='wood'){for(let i=0;i<256;i+=16){x.strokeStyle='#33291e88';x.beginPath();x.moveTo(i,0);x.bezierCurveTo(i+9,80,i-8,170,i,256);x.stroke();}}if(type==='roof'){for(let y=0;y<256;y+=24)for(let k=-1;k<9;k++){x.strokeStyle='#352b2355';x.lineWidth=3;x.strokeRect(k*32+(y%48?16:0),y,30,22);}}const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.wrapS=t.wrapT=T.RepeatWrapping;t.anisotropy=4;return t;}
 const stoneTex=canvasTexture('stone'),plasterTex=canvasTexture('plaster'),woodTex=canvasTexture('wood'),roofTex=canvasTexture('roof'),grassTex=canvasTexture('grass');
 function mat(color,map,roughness=1){return new T.MeshStandardMaterial({color,...(map?{map,bumpMap:map,bumpScale:.055}:{}),roughness});}
+const architecture={houses:0,tiles:0,windows:0,castle:null};
 const mats={stone:mat('#afa58d',stoneTex),plaster:mat('#e1d3b4',plasterTex),wood:mat('#77604a',woodTex),darkwood:mat('#54422e',woodTex),roof:mat('#82634b',roofTex),roof2:mat('#786e58',roofTex),grass:mat('#8c985f',grassTex),road:mat('#a9a592',stoneTex),black:mat('#282b20'),leaf:mat('#66753b'),leaf2:mat('#8b8c44'),leaf3:mat('#9b8040'),iron:mat('#46473c'),red:mat('#91594a'),linen:mat('#e4d7b4'),gold:mat('#bd9850'),hay:mat('#b6a16b'),water:mat('#608c82')};
 // Photographic, metre-scaled PBR surfaces, including dedicated road/roof/ground maps.
 for(const [key,asset,meters,tint,strength] of [
@@ -34,6 +36,10 @@ for(const [key,asset,meters,tint,strength] of [
 ])applyPBR(mats[key],asset,{meters,tint,strength});
 mats.bark=applyPBR(mat('#ffffff'), 'bark_brown_02',{meters:2,tint:'#a99c82',strength:.9});
 mats.glass=new T.MeshPhysicalMaterial({color:'#1d261e',roughness:.24,metalness:0,clearcoat:.4,envMapIntensity:1});
+mats.carved=mats.stone.clone();mats.carved.color.set('#d5cbb5');mats.carved.roughness=.88;
+mats.slate=applyPBR(mat('#78848a'),'clay_roof_tiles',{meters:1.5,tint:'#7e8b94',strength:.6});
+mats.iron.metalness=.55;mats.iron.roughness=.55;mats.gold.metalness=.65;mats.gold.roughness=.42;
+mats.red.side=T.DoubleSide;
 mats.moss=mat('#535b3c');mats.dirt=mat('#75674e');mats.ember=new T.MeshStandardMaterial({color:'#d16c28',emissive:'#ff5313',emissiveIntensity:1.8,roughness:1});
 function add(g,m,x,y,z,sx=1,sy=1,sz=1,rx=0,ry=0,rz=0){const o=new T.Mesh(g,m);o.position.set(x,y,z);o.scale.set(sx,sy,sz);o.rotation.set(rx,ry,rz);o.updateMatrix();const geo=(g.index?g.toNonIndexed():g.clone()).applyMatrix4(o.matrix);if(m.userData.textureMeters)worldUV(geo,m.userData.textureMeters);if(!batches.has(m))batches.set(m,[]);batches.get(m).push(geo);return o;}
 function B(m,x,y,z,w,h,d,ry=0,rz=0){return add(box,m,x,y,z,w,h,d,0,ry,rz);}function C(m,x,y,z,a,h,b=a,rx=0,rz=0){return add(cyl,m,x,y,z,a,h,b,rx,0,rz);}function S(m,x,y,z,a,b=a,c=a){return add(sphere,m,x,y,z,a,b,c);}
@@ -97,7 +103,7 @@ function house(x,z,w,d,h,variant){
  // Small spaced ridge tiles, chimney cap and patched plaster add real depth.
  for(let zz=-d/2;zz<=d/2;zz+=.42)C(mats.roof,x,h+roofHeight+.16,z+zz,.16,.32,.16,Math.PI/2);
  B(mats.stone,x+w*.27,h+roofHeight*.65+1.23,z-d*.2,.95,.12,1.02);
- B(mats.stone,x+w*.27,h+roofHeight*.65,z-d*.2,.75,2.4,.8);smoke.push(new T.Vector3(x+w*.27,h+roofHeight*.65+1.2,z-d*.2));
+ B(mats.stone,x+w*.27,h+roofHeight*.65,z-d*.2,.75,2.4,.8);smoke.push(new T.Vector3(x+w*.27,h+roofHeight*.65+1.75,z-d*.2));
  for(const item of plan.furniture){
   const {x:fx,z:fz,w:fw,d:fd,h:fh,kind}=item;
   if(kind==='table'||kind==='bench'){
@@ -121,6 +127,7 @@ function house(x,z,w,d,h,variant){
  const light=new T.PointLight('#ffc786',16,11,2);light.position.set(x+w*.29,2.1,z+d*.22);light.visible=false;scene.add(light);lights.push(light);
  C(mats.red,x+w*.38,.3,z+d/2+.65,.26,.6);for(let j=0;j<5;j++)S(mats.leaf,x+w*.38+r(-.2,.2),.65+r(0,.2),z+d/2+.65+r(-.2,.2),.16);
  barrel(x-w*.38,z+d/2+.65);
+ const detail=addHouseDetails(plan,{B,C,S,add,mats});architecture.houses++;architecture.tiles+=detail.tiles;architecture.windows+=detail.windows;
 }
 function barrel(x,z){C(mats.wood,x,.5,z,.43,1);for(const h of [.13,.48,.86])C(mats.iron,x,h,z,.45,.055);}
 const centers=[-45,-27,-9,9,27,45];
@@ -130,6 +137,7 @@ for(const x of centers)for(const z of centers){
 }
 const church=addChurch({B,C,S,add,mats,obstacles,buildings,interiors,T});
 const castle=addCastle(scene,{B,C,S,add,mats,obstacles,buildings,interiors,lights,T});
+architecture.castle=addCastleDetails(castle,{B,C,S,add,mats,obstacles});castle.skyHeight=13;
 // Low stone walls, gate posts, fields and livestock enclosures.
 for(const side of [-1,1])for(const v of [-33,33]){
  B(mats.stone,side*64,.6,v,1.2,1.2,58);obstacles.push({x:side*64,z:v,w:1.2,d:58});
@@ -158,5 +166,5 @@ const riverside=addRiverAndBridge(scene,{B,C,S,add,mats,obstacles,waterMeshes,ra
 // Bake all static architectural pieces by material, keeping draw calls bounded.
 for(const[m,gs]of batches){const geo=mergeGeometries(gs,false);if(!geo)throw Error('Static geometry merge failed');const mesh=new T.Mesh(geo,m);mesh.castShadow=m!==mats.road&&m!==mats.grass;mesh.receiveShadow=true;scene.add(mesh);gs.forEach(g=>g.dispose());}box.dispose();cyl.dispose();sphere.dispose();cone.dispose();
 function updateLights(position){const nearest=lights.map(l=>({l,d:l.position.distanceToSquared(position)})).sort((a,b)=>a.d-b.d).slice(0,3);for(const l of lights)l.visible=false;for(const {l,d}of nearest)l.visible=d<225;}
-return{obstacles,buildings,smoke,waterMeshes,windThings,mats,interiors,riverside,castle,church,boundary:VILLAGE_BOUNDARY,heightAt:(x,z)=>groundHeight(x,z,buildings),updateLights};
+return{architecture,obstacles,buildings,smoke,waterMeshes,windThings,mats,interiors,riverside,castle,church,boundary:VILLAGE_BOUNDARY,heightAt:(x,z)=>groundHeight(x,z,buildings),updateLights};
 }

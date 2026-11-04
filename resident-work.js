@@ -89,7 +89,7 @@ export function createVillageWork(population,{initialHours=9,obstacles=[]}={}){
   if(!data||data.version!==1||!Number.isInteger(data.day)||data.day<0||data.day!==Math.floor(hours/24)||!data.stock||!Object.keys(INITIAL_STOCK).every(k=>finite(data.stock[k],0,MAX_STOCK)))return false;
   day=data.day;Object.assign(stock,Object.fromEntries(Object.keys(INITIAL_STOCK).map(k=>[k,Math.floor(data.stock[k])])));delivered=Number.isSafeInteger(data.delivered)&&data.delivered>=0?data.delivered:0;
   const restored=new Set();
-  for(const entry of (Array.isArray(data.residents)?data.residents:[]).slice(0,population.length)){
+  for(const entry of (Array.isArray(data.residents)?data.residents:[]).slice(0,1000)){
    const p=byId.get(entry?.id),saved=entry?.duty;
    if(!p||restored.has(p.id)||!saved||!nodeOK(entry.node)||!finite(entry.x,-90,90)||!finite(entry.z,-90,90)||blocked(entry.x,entry.z,obstacles,.1)||!nodeOK(saved.destination))continue;
    if(!Number.isInteger(saved.taskDay)||saved.taskDay<0||saved.taskDay>day)continue;

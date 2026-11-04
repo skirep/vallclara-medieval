@@ -21,7 +21,7 @@ export function createDragon(scene,buildings=[],{textureLoader=new T.TextureLoad
  for(let i=0;i<=48;i++){const a=Math.PI+i/16*Math.PI*2;waypoints.push(new T.Vector3(48*Math.cos(a),22+Math.sin(a*2)*3,-19+53*Math.sin(a)));}
  waypoints.push(new T.Vector3(-105,38,55));
  const route=new T.CatmullRomCurve3(waypoints);
- function clearRoofs(p,outer=14){for(const b of buildings){const d=Math.hypot(Math.max(0,Math.abs(p.x-b.x)-b.w/2),Math.max(0,Math.abs(p.z-b.z)-b.d/2)),roof=b.kind==='church'?19:b.kind==='castle'?10:b.h+b.w*.4;const influence=1-T.MathUtils.smoothstep(d,3,outer);p.y=Math.max(p.y,T.MathUtils.lerp(p.y,roof+6,influence));}return p;}
+ function clearRoofs(p,outer=14){for(const b of buildings){const d=Math.hypot(Math.max(0,Math.abs(p.x-b.x)-b.w/2),Math.max(0,Math.abs(p.z-b.z)-b.d/2)),roof=b.kind==='church'?19:b.kind==='castle'?(b.skyHeight??10):b.h+b.w*.4;const influence=1-T.MathUtils.smoothstep(d,3,outer);p.y=Math.max(p.y,T.MathUtils.lerp(p.y,roof+6,influence));}return p;}
  function orbitPoint(t){return clearRoofs(route.getPoint(T.MathUtils.clamp(t,0,1)));}
  const plaza=new T.Vector3(DRAGON_PLAZA.x,DRAGON_PLAZA.y,DRAGON_PLAZA.z);
  function point(t){t=T.MathUtils.clamp(t,0,1);const r=DRAGON_RAID;
