@@ -19,6 +19,7 @@ test('high-detail architecture is real geometry batched into a bounded render bu
  const meshes=scene.children.filter(o=>o.isMesh),triangles=meshes.reduce((n,o)=>n+(o.geometry.index?.count??o.geometry.attributes.position.count)/3,0);
  assert.ok(meshes.length<=45,`${meshes.length} meshes`);assert.ok(triangles<850000,`${triangles} triangles`);
  assert.equal(world.mats.carved.map,world.mats.stone.map,'carved stone reuses the existing PBR atlas');
+ assert.ok(world.castle.columns.some(c=>c.h>5),'throne-room columns must reach the higher vault ribs');
  for(const column of world.castle.columns)assert.equal(blocked(column.x,column.z,world.obstacles,.15),true);
  for(const house of world.buildings.filter(b=>b.kind==='house'))for(const entry of house.entrances)assert.equal(blocked(entry.x,entry.z,world.obstacles,.4),false);
 });

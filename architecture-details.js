@@ -135,7 +135,7 @@ export function addCastleDetails(plan,{B,C,S,add,mats,obstacles}){
  for(const room of plan.rooms){const royal=room.name==='Sala del tron',rx=room.w/2-.45,ry=royal?2.1:1.3,base=royal?5.45:4.05;
   const rib=archGeometry(rx,ry,.10,.16);
   for(const side of [-1,1]){add(rib,mats.carved,room.x,base,room.z+side*(room.d/2-.6));stats.arches++;
-   for(const wing of [-1,1]){const xx=room.x+wing*rx,zz=room.z+side*(room.d/2-.6);const column={x:xx,z:zz,w:.48,d:.48};plan.columns.push(column);obstacles?.push(column);C(mats.carved,xx,2.08,zz,.13,4.1);C(mats.carved,xx,.18,zz,.23,.26);C(mats.carved,xx,4.05,zz,.24,.20);}
+   for(const wing of [-1,1]){const xx=room.x+wing*rx,zz=room.z+side*(room.d/2-.6);const column={x:xx,z:zz,w:.48,d:.48,h:base};plan.columns.push(column);obstacles?.push(column);C(mats.carved,xx,base/2,zz,.13,base);C(mats.carved,xx,.18,zz,.23,.26);C(mats.carved,xx,base,zz,.24,.20);}
   }rib.dispose();
  }
  // Runner border, floor inlays and carved throne finials make the audience hall a landmark.
