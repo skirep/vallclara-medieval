@@ -1,16 +1,26 @@
+import {createNPCMissions} from './npc-missions.js';
 import * as T from 'three';
 import {MISSIONS,createMissions} from './missions.js';
-export function createMissionUI({scene,population,health,heightAt,navigation,onOpen,onClose,onPlay,onSave=()=>{}}){
+export function createMissionUI({scene,population,health,heightAt,navigation,onOpen,onClose,onPlay,onFollow=()=>{},onSave=()=>{},npcData=null}){
  const $=s=>document.querySelector(s),dialog=$('#missions'),list=$('#missionList'),tracker=$('#missionTracker'),title=$('#missionTitle'),objective=$('#missionObjective'),message=$('#missionMessage'),action=$('#missionInteract'),choices=$('#missionChoices'),battle=$('#missionBattle');
- const engine=createMissions({population,onEnemyHit(c){if(fighter)health.damage(fighter,fighter.maxHealth/c.maxHp);},onChange(data){try{localStorage.setItem('vallclara-missions-v1',JSON.stringify(data));}catch{}onSave();renderList();},onComplete(m){for(const p of population)if(!p.missionDead)p.dramaMood={icon:m.icon,label:m.title,text:m.ending,remaining:90};}});
+ const completed=m=>{for(const p of population)if(!p.missionDead)p.dramaMood={icon:m.icon,label:m.title,text:m.ending,remaining:90};};
+ const engine=createMissions({population,onEnemyHit(c){if(fighter)health.damage(fighter,fighter.maxHealth/c.maxHp);},onChange(data){try{localStorage.setItem('vallclara-missions-v1',JSON.stringify(data));}catch{}onSave();renderList();},onComplete:completed});
  try{engine.restore(JSON.parse(localStorage.getItem('vallclara-missions-v1')||'null'));}catch{}
+ const npcs=createNPCMissions(population,{campaign:engine,navigation,health,onComplete:completed,initialData:npcData});
  const marker=new T.Group(),ring=new T.Mesh(new T.TorusGeometry(.65,.06,6,24),new T.MeshBasicMaterial({color:'#ffd477',depthTest:true}));ring.rotation.x=-Math.PI/2;marker.add(ring);const beacon=new T.Mesh(new T.ConeGeometry(.2,.6,4),new T.MeshBasicMaterial({color:'#ffd477'}));beacon.position.y=2.8;marker.add(beacon);marker.visible=false;scene.add(marker);
  let context=null,choiceKey='',escortKey=null,escortPath=[],escortStep=0,fighter=null,previousCombat=null;
  function open(){onOpen();renderList();dialog.showModal();}
  function close(){dialog.close();}
  $('#missionsBtn').onclick=open;$('#closeMissions').onclick=close;
  dialog.addEventListener('close',onClose);
- function renderList(){list.replaceChildren();for(const m of MISSIONS){const r=engine.progress[m.id],card=document.createElement('article'),h=document.createElement('h3'),p=document.createElement('p'),small=document.createElement('small'),button=document.createElement('button');h.textContent=`${m.icon} ${m.title}`;p.textContent=m.intro;small.textContent=`${r.stage}/${m.steps.length} objectius · ${r.stage===m.steps.length?'Completada':r.accepted?'En curs':'Disponible'} · ${m.reward}`;button.type='button';button.textContent=r.stage===m.steps.length?'Llegir el desenllaç':r.accepted?'Continuar la missió':'Acceptar la missió';button.disabled=!!engine.combat||!!engine.escort&&m.id!=='child';button.onclick=()=>{if(engine.accept(m.id)){close();onPlay();}};card.append(h,p,small,button);if(r.stage===m.steps.length){const ending=document.createElement('p');ending.textContent=m.ending;card.append(ending);}list.append(card);}}
+ function renderList(){list.replaceChildren();for(const m of MISSIONS){const r=engine.progress[m.id],npc=npcs.status(m.id),card=document.createElement('article'),h=document.createElement('h3'),p=document.createElement('p'),small=document.createElement('small'),button=document.createElement('button');h.textContent=`${m.icon} ${m.title}`;p.textContent=m.intro;small.textContent=`${r.stage}/${m.steps.length} objectius · ${r.stage===m.steps.length?'Completada':r.accepted?'En curs':'Disponible'}${npc?` · ${npc.completed?'Completada per':'NPC'}: ${npc.person.name}${npc.job?` · ${npc.person.missionJob?.objective??'De camí'}`:''}`:''} · ${m.reward}`;button.type='button';
+   if(npc){button.textContent=`Seguir ${npc.person.name}`;button.disabled=!!engine.combat||npc.person.missionDead;button.onclick=()=>{close();onFollow(npc.person);};}
+   else{button.textContent=r.stage===m.steps.length?'Llegir el desenllaç':r.accepted?'Continuar la missió':'Acceptar la missió';button.disabled=!!engine.combat||!!engine.escort&&m.id!=='child';button.onclick=()=>{if(engine.accept(m.id)){close();onPlay();}};}
+   card.append(h,p,small,button);
+   if(r.stage<m.steps.length&&!npc){const delegate=document.createElement('button');delegate.type='button';delegate.textContent='Encarregar a un NPC';delegate.disabled=!!engine.combat||npcs.jobs.length>=2||!!engine.escort&&m.id!=='child';delegate.onclick=()=>{if(!npcs.assign(m.id)){delegate.textContent='Ara no hi ha cap adult disponible';return;}renderList();};card.append(delegate);}
+   if(r.stage===m.steps.length){const ending=document.createElement('p');ending.textContent=m.ending;card.append(ending);}list.append(card);}
+  if(npcs.journal.length){const log=document.createElement('section'),h=document.createElement('h3');h.textContent='Crònica de les missions dels veïns';log.append(h);for(const entry of npcs.journal.slice(0,12)){const p=document.createElement('p');p.textContent=`${population.find(p=>p.id===entry.personId)?.name??'Un veí'} · ${MISSIONS.find(m=>m.id===entry.missionId)?.title}: ${entry.text}`;log.append(p);}list.append(log);}}
+
  function interact(choice=null){if(!context?.playing||!context.gameMode||context.following)return false;const before=engine.combat;const result=engine.interact(context.player,{busy:context.busy,choice});if(result&&!before&&engine.combat&&document.pointerLockElement)document.exitPointerLock();return result;}
  action.onclick=()=>interact();
  battle.querySelectorAll('[data-mission-action]').forEach(b=>b.onclick=()=>engine.act(b.dataset.missionAction));
@@ -25,5 +35,5 @@ export function createMissionUI({scene,population,health,heightAt,navigation,onO
   $('#missionModeNote').hidden=enabled;$('#missionModeNote').textContent=following?'Deixa de seguir el personatge per continuar.':'Activa el mode joc per fer els objectius.';
  }
  function key(code){if(code==='KeyQ'&&!dialog.open){open();return true;}if(code==='KeyR')return interact();if(engine.combat&&context?.playing){const a={KeyJ:'attack',KeyK:'block',KeyL:'dodge'}[code];if(a)return engine.act(a);}return false;}
- return{engine,update,key,open,marker,get modal(){return dialog.open;}};
+ return{engine,npcs,update,key,open,marker,get modal(){return dialog.open;}};
 }

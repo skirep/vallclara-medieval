@@ -15,14 +15,14 @@ export function loveDuelPlan(a,b,crush,seed=0){
 export function bumpPlan(a,b,count=0){const lines=[['Ep! Mira per on vas, que portava el dia ben dret.','Perdona! Els meus peus anaven més de pressa que el cap.'],['Aquest carrer és estret, però hi cabem tots dos!','Tens raó. Passa tu, que jo tinc la pressa mal posada.'],['Ui! Un altre pas i compartim les sabates.','Les sabates no, però et dec una disculpa!']][count%3];return{kind:'bump',topic:0,chapter:0,outcome:'Una topada, dues rèpliques i cadascú reprèn el seu camí.',turns:lines.map((text,i)=>({speakerId:(i?b:a).id,text,duration:2.5}))};}
 export function createVillageDrama(population,social,{canPunch=()=>true,onDamage=()=>{}}={}){
  let elapsed=0,scan=0,nextDuel=20,count=0;const previous=new Map(population.map(p=>[p.id,{x:p.x,z:p.z}])),contacts=new Set(),byId=new Map(population.map(p=>[p.id,p]));
- const free=p=>!p.royalGuard&&!p.assembly&&!p.courtSeat&&!p.playerDuel&&p.social.conversation===null&&p.social.cooldown<=0;
+ const free=p=>!p.missionJob&&!p.royalGuard&&!p.assembly&&!p.courtSeat&&!p.playerDuel&&p.social.conversation===null&&p.social.cooldown<=0;
  function crushFor(a,b){const candidates=population.filter(p=>p.age>=18&&p.id!==a.id&&p.id!==b.id&&p.familyId!==a.familyId&&p.familyId!==b.familyId);return candidates[(a.id+b.id)%candidates.length];}
  function beginDuel(a,b,hour){if(!free(a)||!free(b)||a.age<18||b.age<18||a.familyId===b.familyId||!canPunch(a)||!canPunch(b))return false;const crush=crushFor(a,b);if(!crush)return false;
   if(!social.begin(a,b,hour,loveDuelPlan(a,b,crush,count++)))return false;
   a.dramaCrushId=b.dramaCrushId=crush.id;a.dramaRivalId=b.id;b.dramaRivalId=a.id;nextDuel=elapsed+75;return true;}
  function update(dt,hour,{allowNew=true}={}){
   elapsed+=dt;scan+=dt;
-  for(const p of population){if(p.dramaMood){p.dramaMood.remaining-=dt;if(p.dramaMood.remaining<=0)delete p.dramaMood;}if(!p.playerDuel)delete p.duelPose;}
+  for(const p of population){if(p.dramaMood){p.dramaMood.remaining-=dt;if(p.dramaMood.remaining<=0)delete p.dramaMood;}if(!p.playerDuel&&!p.missionCombat)delete p.duelPose;}
   for(const c of social.active){if(c.kind!=='love-duel')continue;const turn=c.turns[c.index],a=byId.get(c.a),b=byId.get(c.b);for(const [p,other]of [[a,b],[b,a]]){p.heading=Math.atan2(other.x-p.x,other.z-p.z);p.dramaMood={icon:'💢',label:'Gelosia',text:`Estic discutint amb ${other.name} per la invitació al ball de ${byId.get(c.crushId)?.name??'la plaça'}.`,remaining:7};}
    if(turn.action==='punch'&&c.damageTurn!==c.index){c.damageTurn=c.index;const victim=turn.speakerId===a.id?b:a;onDamage(victim,8);}
    if(turn.action==='punch'){const actor=byId.get(turn.speakerId),other=actor===a?b:a;actor.duelPose={punchTime:c.turnElapsed};other.duelPose={hitTime:c.turnElapsed};}

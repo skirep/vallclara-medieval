@@ -51,7 +51,7 @@ export function createVillageWork(population,{initialHours=9,obstacles=[]}={}){
  }
  function updateResident(p,dt,hour){
   const d=p.duty;
-  if(p.health===0||p.missionCombat||p.missionDead||p.missionEscort||p.royalGuard||p.assembly||p.assemblyReleased||p.courtSeat||p.playerDuel||p.dragonEmergency)return;
+  if(p.missionJob||p.health===0||p.missionCombat||p.missionDead||p.missionEscort||p.royalGuard||p.assembly||p.assemblyReleased||p.courtSeat||p.playerDuel||p.dragonEmergency)return;
   if(p.social?.conversation!==null&&p.social?.conversation!==undefined){p.state='talking';return;}
   // Do not throw away paid work or carried output when the family goes home.
   const quota=p.age<16||p.age>=68?1:2+(p.id%2);
