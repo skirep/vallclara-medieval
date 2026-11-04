@@ -5,7 +5,7 @@ export function createSocialSystem(population){
   const active=[],journal=[];let elapsed=0,scan=0,nextId=0,scanCursor=0;
   const byId=new Map(population.map(p=>[p.id,p]));
   function begin(a,b,hour,override=null){
-    if(a.missionJob||b.missionJob||a.health===0||b.health===0||a.missionCombat||b.missionCombat||a.missionDead||b.missionDead||a.missionEscort||b.missionEscort||active.length>=18||a===b||a.royalGuard||b.royalGuard||a.dragonEmergency||b.dragonEmergency||a.playerDuel||b.playerDuel||a.assembly||b.assembly||a.social.conversation!==null||b.social.conversation!==null||a.social.cooldown>0||b.social.cooldown>0)return false;
+    if(a.lifeActivity||b.lifeActivity||a.missionJob||b.missionJob||a.health===0||b.health===0||a.missionCombat||b.missionCombat||a.missionDead||b.missionDead||a.missionEscort||b.missionEscort||active.length>=18||a===b||a.royalGuard||b.royalGuard||a.dragonEmergency||b.dragonEmergency||a.playerDuel||b.playerDuel||a.assembly||b.assembly||a.social.conversation!==null||b.social.conversation!==null||a.social.cooldown>0||b.social.cooldown>0)return false;
     const id=nextId++,plan=override??narrative.plan(a,b,hour),turns=plan.turns;
     const conversation={...plan,id,a:a.id,b:b.id,turnElapsed:0,topic:plan.topic,chapter:plan.chapter,romantic:plan.romantic===true,turns,index:0,remaining:turns[0].duration??Math.min(8,2.2+turns[0].text.length*.028),time:elapsed};
     active.push(conversation);a.social.conversation=b.social.conversation=id;a.state=b.state='talking';
@@ -41,7 +41,12 @@ export function createSocialSystem(population){
     scanCursor=(scanCursor+37)%population.length;
   }
   function bubbles(){return active.map(c=>{const turn=c.turns[c.index],p=byId.get(turn.speakerId);return{id:c.id,person:p,text:turn.text};});}
+  function recordEvent({kind,a,b,turns,outcome}){
+    if(!byId.has(a)||!byId.has(b)||!Array.isArray(turns)||!turns.every(t=>byId.has(t.speakerId)))return false;
+    const ids=[...new Set(turns.map(t=>t.speakerId))];for(const id of ids){const p=byId.get(id);p.social.meetings++;for(const other of ids)if(other!==id)p.social.met[other]=(p.social.met[other]||0)+1;}
+    journal.unshift({id:nextId++,time:elapsed,a,b,kind,turns,outcome});journal.length=Math.min(journal.length,80);return true;
+  }
   function serialize(){return{version:1,journal,nextId,narrative:narrative.serialize(),memories:population.map(p=>({id:p.id,meetings:p.social.meetings,met:p.social.met}))};}
   function restore(data){if(!data||data.version!==1)return;narrative.restore(data.narrative);const memories=Array.isArray(data.memories)?data.memories:[];for(const m of memories){const p=byId.get(m?.id);if(!p||!Number.isFinite(m.meetings))continue;p.social.meetings=Math.min(1e6,Math.max(0,m.meetings));p.social.met={};for(const [id,count]of Object.entries(m.met||{}).slice(0,16))if(byId.has(Number(id))&&Number.isFinite(count)&&count>0)p.social.met[id]=Math.min(count,1e6);}if(Array.isArray(data.journal))for(const c of data.journal.slice(0,80))if(c&&byId.has(c.a)&&byId.has(c.b)&&Array.isArray(c.turns)&&c.turns.length<=8&&c.turns.every(t=>t&&byId.has(t.speakerId)&&typeof t.text==='string'&&t.text.length<1000))journal.push(c);nextId=Number.isInteger(data.nextId)?Math.max(0,data.nextId):0;}
-  return{populationById:byId,update,bubbles,journal,active,begin,interruptAll,serialize,restore,narrative};
+  return{recordEvent,populationById:byId,update,bubbles,journal,active,begin,interruptAll,serialize,restore,narrative};
 }

@@ -58,3 +58,9 @@ La versió visual 2 substitueix els soldats vectorials per armadures detallades,
 ## Arquitectura
 
 Les cases inclouen teules corbes superposades, fusteria de les golfes, motllures, porticons, vidres emplomats, jardineres, sòcols de pedra i dobles pots de xemeneia. Rocafort té quatre cobertes de pissarra amb remats, carreus en relleu, motllures al portal, escut reial, espitlleres, estendards i arcs interiors amb columnes sòlides. Tots els detalls estàtics s’agrupen per material i reutilitzen els mapes PBR. Les portes, les missions i les rutes dels habitants continuen fent servir la geometria de col·lisió compartida. El vol del drac considera la nova alçada de les torres.
+
+## Trobades autònomes
+
+El sistema de vida social programa onze tipus d’escena: tocar i parar, fet i amagar, pilota, cites, trobades discretes, discussions, gelosia, disculpes, balls, safareig i compartir una estona entre amics. Els participants utilitzen el graf de navegació existent i conserven el punt d’origen, els camins de feina i els recursos pagats. Les alarmes i reunions els interrompen; després retornen abans de reprendre la rutina. Els participants en una escena no es poden assignar alhora a una missió o a una altra conversa.
+
+El registre conserva fins a 40 escenes recents i els vincles guarden afecte, confiança i nombre de trobades. Les trobades discretes poden programar retrets de la parella, i els conflictes poden desembocar en disculpes. L’afecte influeix en la tria de futures trobades. Els jocs són només per a infants; les cites i els afers són només entre adults sense parentiu, excepte les parelles ja establertes. El primer infant del rescat queda reservat per a la missió d’escorta. No cal cap servei d’IA extern.

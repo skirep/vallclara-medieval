@@ -5,7 +5,7 @@ import {dialoguePage,DIALOGUE_COUNT} from './dialogue-catalogue.js';
 import {ROLE_LABELS,RESOURCE_LABELS,phaseLabel} from './resident-tasks.js';
 import {familiesOf,relationLabel} from './families.js';
 import * as T from 'three';
-export function createChronicles(population,social,{work=null,onOpen,onClose,onFollow,thoughtContext=()=>({social})}){
+export function createChronicles(population,social,{work=null,life=null,onOpen,onClose,onFollow,thoughtContext=()=>({social})}){
   const $=s=>document.querySelector(s),dialog=$('#chronicles'),list=$('#resident-list'),bio=$('#biography'),byId=new Map(population.map(p=>[p.id,p])),projected=new T.Vector3(),bubbles=new Map();let selected=0,lastSpoken='',lastSpokenAt=0,lastPublicKey='';
   const text=(tag,value,className='')=>{const el=document.createElement(tag);el.textContent=value;if(className)el.className=className;return el;};
   const familyFilter=$('#familyFilter');
@@ -18,6 +18,8 @@ export function createChronicles(population,social,{work=null,onOpen,onClose,onF
 
     if(p.duty){const d=p.duty,job=document.createElement('section');job.className='resident-duty';job.append(text('h4',`Funció · ${ROLE_LABELS[d.role]}`),text('p',`Avui ${d.plan}.`),text('p',phaseLabel(d)),text('p',`Tasques lliurades avui: ${d.today.completed}. Lloc: ${work?.sites[d.station]?.name||ROLE_LABELS[d.role]}.`));if(d.phase==='working'){const progress=document.createElement('progress');progress.max=d.task.duration;progress.value=d.elapsed;progress.setAttribute('aria-label','Progrés de la feina');job.append(progress);}if(d.lastCompleted)job.append(text('p',`Darrera tasca: ${d.lastCompleted.label}.`));bio.append(job);}
 
+    const links=life?.relationships(p.id)??[];
+    if(links.length){const relations=document.createElement('section');relations.className='life-relations';relations.append(text('h4','Relacions que han anat canviant'));for(const bond of links){const button=text('button',`${bond.person.name} · ${bond.affinity>=15?'Complicitat':bond.affinity<0?'Relació tensa':'Es van coneixent'} · ${bond.trust<40?'Confiança tocada':bond.trust>=65?'Confiança creixent':'Confiança prudent'}`);button.type='button';button.onclick=()=>showBio(bond.person.id);relations.append(button);}bio.append(relations);}
     const familyBox=document.createElement('section');familyBox.className='family-members';familyBox.append(text('h4',`Família ${p.surname} · casa ${p.family.household}`));
     for(const memberId of p.family.memberIds){const member=byId.get(memberId);if(member===p)continue;const button=text('button',`${member.name} · ${relationLabel(p,member)} · ${member.age} anys`);button.type='button';button.onclick=()=>showBio(memberId);familyBox.append(button);}bio.append(familyBox);renderCatalogue(p);
     list.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.id)===id)));}
@@ -41,10 +43,20 @@ export function createChronicles(population,social,{work=null,onOpen,onClose,onF
     const panel=$('#workPanel');panel.replaceChildren(text('h3','Les mans que fan viure Vallclara'));
     if(!work){panel.append(text('p','El registre de feines encara no està disponible.'));return;}
     const state=work.summary();panel.append(text('p',`${population.length} habitants amb funció · ${state.working} treballant · ${state.blocked} esperant material · ${state.delivered} tasques lliurades.`),text('p','Els veïns caminen fins al seu lloc, treballen i porten el resultat al punt de lliurament. Les pauses, les converses i la reunió aturen la feina. Si falta material, esperen que arribi un subministrament.'),text('h4','Rebost i serveis completats'));
-    const thought=residentThought(p,thoughtContext());bio.append(text('p',`${thought.icon} ${thought.label} · ${thought.text}`,'resident-thought'));const dl=document.createElement('dl');for(const [key,value]of Object.entries(state.stock))dl.append(text('dt',RESOURCE_LABELS[key]),text('dd',String(value)));panel.append(dl);
+    const dl=document.createElement('dl');for(const [key,value]of Object.entries(state.stock))dl.append(text('dt',RESOURCE_LABELS[key]),text('dd',String(value)));panel.append(dl);
     const roles=document.createElement('div');roles.className='work-roles';for(const [i,label]of ROLE_LABELS.entries())roles.append(text('p',`${label}: ${population.filter(p=>p.duty.role===i).length} habitants`));panel.append(roles,text('h4','Darrers lliuraments'));
     if(!state.journal.length)panel.append(text('p','Encara no ha arribat cap lliurament. Pots consultar la feina de cada habitant a la seva fitxa.'));
     for(const entry of state.journal.slice(0,25))panel.append(text('p',`${byId.get(entry.personId).name} · ${entry.label} · ${Object.entries(entry.outputs).map(([k,v])=>`${v} ${RESOURCE_LABELS[k]}`).join(', ')}`));
+  }
+  function renderLife(){
+    const panel=$('#lifePanel');panel.replaceChildren(text('h3','La vida entre els veïns'));
+    if(!life){panel.append(text('p','Encara no hi ha cap escena al registre.'));return;}
+    const state=life.summary();panel.append(text('p',`${state.active} trobades en marxa · ${state.completed} escenes acabades · ${state.bonds} relacions amb records compartits.`),text('p','Els veïns es busquen per quedar, ballar, discutir, fer les paus o jugar. Les missions, la reunió i les alarmes tenen prioritat. Les trobades acabades es recorden en aquesta partida.'));
+    for(const group of life.activities){const card=document.createElement('article');card.className='life-event';card.append(text('h4',`${group.def.icon} ${group.def.title}`),text('p',group.phase==='travelling'?'Van a trobar-se.':group.phase==='returning'?'Tornen a les seves activitats.':'La trobada està passant ara.'));
+      for(const member of group.members){const button=text('button',`Seguir ${member.p.name}`);button.type='button';button.onclick=()=>{dialog.close();onFollow?.(member.p);};card.append(button);}panel.append(card);}
+    panel.append(text('h4','El que ha passat darrerament'));
+    if(!life.journal.length)panel.append(text('p','Passeja una estona: les primeres trobades ja s’estan preparant.'));
+    for(const event of life.journal.slice(0,20))panel.append(text('p',event.text,'life-journal'));
   }
   function renderPeople(){
     const query=$('#searchPerson').value.toLocaleLowerCase('ca');list.replaceChildren();
@@ -58,8 +70,9 @@ export function createChronicles(population,social,{work=null,onOpen,onClose,onF
     if(!visible.length)list.append(text('p','No s’ha trobat cap habitant.'));
   }
   function renderLog(){const el=$('#conversation-log');el.replaceChildren();if(!social.journal.length){el.append(text('p','Els veïns encara no han acabat cap conversa. Passeja una estona per la plaça.'));return;}for(const c of social.journal){const card=document.createElement('article');card.append(text('h3',`${byId.get(c.a).name} i ${byId.get(c.b).name}`));for(const turn of c.turns){const line=document.createElement('p');line.append(text('strong',byId.get(turn.speakerId).name+': '),document.createTextNode(turn.text));card.append(line);}if(c.outcome)card.append(text('small',c.outcome));el.append(card);}}
-  $('#chroniclesBtn').onclick=()=>{onOpen();renderPeople();showBio(selected);renderLog();renderStory();renderWork();dialog.showModal();window.speechSynthesis?.cancel();};$('#closeChronicles').onclick=()=>dialog.close();dialog.addEventListener('close',onClose);$('#searchPerson').oninput=renderPeople;
-  function tab(which){$('#storyPanel').hidden=which!=='story';$('#workPanel').hidden=which!=='work';$('#storyTab').setAttribute('aria-pressed',String(which==='story'));$('#workTab').setAttribute('aria-pressed',String(which==='work'));if(which==='story')renderStory();if(which==='work')renderWork();$('#peoplePanel').hidden=which!=='people';$('#talkPanel').hidden=which!=='talk';$('#peopleTab').setAttribute('aria-pressed',String(which==='people'));$('#talkTab').setAttribute('aria-pressed',String(which==='talk'));if(which==='talk')renderLog();}
+  $('#chroniclesBtn').onclick=()=>{onOpen();renderPeople();showBio(selected);renderLog();renderStory();renderWork();renderLife();dialog.showModal();window.speechSynthesis?.cancel();};$('#closeChronicles').onclick=()=>dialog.close();dialog.addEventListener('close',onClose);$('#searchPerson').oninput=renderPeople;
+  function tab(which){$('#lifePanel').hidden=which!=='life';$('#lifeTab').setAttribute('aria-pressed',String(which==='life'));if(which==='life')renderLife();$('#storyPanel').hidden=which!=='story';$('#workPanel').hidden=which!=='work';$('#storyTab').setAttribute('aria-pressed',String(which==='story'));$('#workTab').setAttribute('aria-pressed',String(which==='work'));if(which==='story')renderStory();if(which==='work')renderWork();$('#peoplePanel').hidden=which!=='people';$('#talkPanel').hidden=which!=='talk';$('#peopleTab').setAttribute('aria-pressed',String(which==='people'));$('#talkTab').setAttribute('aria-pressed',String(which==='talk'));if(which==='talk')renderLog();}
+  $('#lifeTab').onclick=()=>tab('life');
   $('#storyTab').onclick=()=>tab('story');$('#workTab').onclick=()=>tab('work');$('#peopleTab').onclick=()=>tab('people');$('#talkTab').onclick=()=>tab('talk');
   function updateBubbles(camera,enabled,voices,publicBubbles=[]){
     const publicKey=enabled&&voices?(publicBubbles[0]?.kind==='alarm'?'dragon-panic':publicBubbles[0]?.id||''):'';

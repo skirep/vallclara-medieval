@@ -100,3 +100,11 @@ El diari 📜 mostra el nom del responsable, l’objectiu actual i una crònica 
 ## Arquitectura detallada
 
 Les 25 cases tenen més de 9.000 teules corbes modelades, entramats i ràfecs de fusta, marcs tallats, vidres emplomats, jardineres, ventilacions de les golfes, xemeneies amb dobles pots i detalls interiors. Rocafort incorpora més de 1.600 carreus en relleu, arxivoltes del portal, espitlleres, estendards, quatre cobertes de pissarra, arcs sota els sostres i columnes amb col·lisió. El drac respecta la nova alçada de les torres. La geometria està agrupada per material per contenir el nombre de crides de dibuix. Les partides amb missions d’un veí retirat conserven els objectius i passen la missió al jugador.
+
+## Vida i relacions
+
+Els veïns es busquen activament per participar en cites, trobades discretes, discussions, gelosia, reconciliacions, balls, safareig i estones entre amics. Els infants juguen a tocar i parar, a fet i amagar i a pilota; les pilotes es veuen a l’escena. Hi pot haver fins a quatre grups alhora, repartits per les dues ribes. Tothom arriba caminant i torna al seu lloc amb les rutes de col·lisió compartides.
+
+Les relacions adultes queden separades dels jocs dels infants; els familiars no formen parelles romàntiques llevat que ja siguin parella. Una trobada discreta pot provocar una conversa de gelosia amb la parella, i una discussió pot portar a una disculpa posterior. Afecte, confiança i records de trobades es desen al navegador. Les Cròniques inclouen «Vida i relacions», seguiment de protagonistes i relacions a cada fitxa.
+
+Les escenes aturen temporalment els oficis sense consumir feina ja pagada ni perdre la càrrega. Reunions, missions i alarmes tenen prioritat: una escena interrompuda no compta com a acabada. Les posicions d’origen dels participants es desen perquè una recàrrega no reprengui la feina des del mig d’un joc. Les baralles socials són còmiques, amb cops i dany limitat; les discussions de gelosia fan servir diàleg.

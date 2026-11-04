@@ -19,7 +19,7 @@ export function updateMotion(m,p,dt,simulationRate=1,speaking=p.state==='talking
   // Continuous phase survives state switches; faster/shorter child steps and
   // slower elderly gait, with no quantisation to the simulation tick.
   const stride=p.age<16?.48:p.age>60?.69:.77;
-  m.phase=(m.phase+dt*(p.emergencySpeed??p.speed)/stride*tau*m.walk*simulationRate)%tau;
+  m.phase=(m.phase+dt*(p.emergencySpeed??p.lifeSpeed??p.speed)/stride*tau*m.walk*simulationRate)%tau;
   m.idleTime+=dt*simulationRate*(.88+(p.id%11)*.025+m.talk*.55+m.work*.18);
   const forcedPunchTime=p.dragonPunchTime??p.duelPose?.punchTime;
   if(m.forcedPunch&&forcedPunchTime===undefined){m.action=null;m.actionTime=0;}
@@ -32,6 +32,9 @@ export function updateMotion(m,p,dt,simulationRate=1,speaking=p.state==='talking
       if(m.practiceTime>=10+p.id%6){startResidentAction(m,m.practiceCount++%2?'punch':'jump');m.practiceTime=0;}
     }
   }
+  if(m.forcedLife&&!p.lifeAction){m.action=null;m.actionTime=0;}
+  m.forcedLife=!!p.lifeAction;
+  if(p.lifeAction&&forcedPunchTime===undefined){m.action=p.lifeAction.action;m.actionTime=p.lifeAction.time;}
   if(forcedPunchTime!==undefined){m.action=forcedPunchTime<ACTION_DURATIONS.punch?'punch':null;m.actionTime=forcedPunchTime;}
   m.talkTime=m.talk>.05?m.talkTime+dt*simulationRate:0;
   return m;

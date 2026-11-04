@@ -6,7 +6,7 @@ const finitePoint=p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.z)&&Math.abs(p.x
 // follows the same collision graph as gatherings, including the sole bridge.
 export function createNPCMissions(population,{campaign,navigation,health,onComplete=()=>{},onEvent=()=>{},initialData=null,maxActive=2}={}){
  const jobs=new Map(),byId=new Map(population.map(p=>[p.id,p])),journal=[];let elapsed=0,nextStart=35,serial=0;
- const available=p=>p.age>=18&&p.age<68&&!p.royalGuard&&!p.courtSeat&&p.role!=='priest'&&!p.missionDead&&!p.missionJob&&!p.missionEscort&&!p.assembly&&!p.dragonEmergency&&!p.playerDuel&&!p.missionCombat&&p.health>p.maxHealth*.6&&p.social?.conversation==null;
+ const available=p=>!p.lifeActivity&&p.age>=18&&p.age<68&&!p.royalGuard&&!p.courtSeat&&p.role!=='priest'&&!p.missionDead&&!p.missionJob&&!p.missionEscort&&!p.assembly&&!p.dragonEmergency&&!p.playerDuel&&!p.missionCombat&&p.health>p.maxHealth*.6&&p.social?.conversation==null;
  const nameFor=id=>MISSIONS.find(m=>m.id===id);
  const snapshot=p=>({id:p.id,origin:{x:p.x,z:p.z},node:p.node,path:[...(p.path??[])]});
  const validSnapshot=s=>s&&byId.has(s.id)&&finitePoint(s.origin)&&navigation.segmentClear(s.origin,s.origin)&&Number.isInteger(s.node)&&s.node>=0&&s.node<nodes.length&&Array.isArray(s.path)&&s.path.length<=nodes.length&&s.path.every(n=>Number.isInteger(n)&&n>=0&&n<nodes.length);
