@@ -18,6 +18,7 @@ export function createAssemblies(population,{obstacles=[],social,initialHours=9}
  let phase='idle',nextAt=nextAssemblyTime(initialHours),turns=[],turnIndex=0,turnTime=0,completed=0,lastCompletedDay=-Infinity,meetingDay=0;
  function setPath(p,target){const member=members.get(p.id);member.path=nav.path(p,target,{seed:Math.imul(p.id+1,2654435761)^Math.floor(nextAt/24)^(phase==='dispersing'?0x51ed270b:0)});member.index=0;member.arrived=false;p.assembly=true;}
  function gather(){
+  if(!population.length){nextAt+=24;return;}
   social?.interruptAll();members.clear();nav.resetTraffic();let seat=0;
   for(const p of population){members.set(p.id,{returnTo:{x:p.x,z:p.z},path:[],index:0,arrived:false});setPath(p,p===priest?nav.priest:nav.seats[seat++]);}
   phase='gathering';turns=[];turnIndex=0;turnTime=0;
@@ -35,11 +36,12 @@ export function createAssemblies(population,{obstacles=[],social,initialHours=9}
   turns=[{kind:'opening',person:priest,text:`Bon migdia, vila. ${social?.narrative?`El pacte és a l’etapa «${social.narrative.summary().title}». `:''}Avui escoltarem ${order.length} habitants: què van fer ahir i què faran avui. Els torns roten cada dia; la resta escolta i ajuda a coordinar la feina.`},
    ...order.map(person=>({kind:'report',person,...reports.report(person)})),
    {kind:'closing',person:priest,text:'Gràcies a tothom. Ja hem compartit la feina feta i els plans d’avui. Ajudeu qui ho necessiti i tornem a les nostres activitats. Ens retrobem demà a les dotze.'}];
+  turns=turns.filter(t=>!t.person.missionDead);
   orientAudience();
  }
  function nextTurn(){
   if(phase!=='daily')return false;
-  turnTime=0;turnIndex++;
+  turnTime=0;do{turnIndex++;}while(turnIndex<turns.length&&turns[turnIndex].person.missionDead);
   if(turnIndex>=turns.length){completed++;lastCompletedDay=meetingDay;nextAt=(meetingDay+1)*24+ASSEMBLY_HOUR;disperse();}
   else orientAudience();
   return true;
@@ -65,6 +67,7 @@ export function createAssemblies(population,{obstacles=[],social,initialHours=9}
   if(phase==='idle'&&hours>=nextAt)gather();
   if(phase==='idle')return;
   if(phase==='daily'){
+   if(!turns[turnIndex]||turns[turnIndex].person.missionDead){nextTurn();return;}
    // Simulation time, rather than wall time, makes the existing speed/pause control apply to every turn.
    turnTime+=Math.max(0,dt);const duration=Math.max(4,Math.min(12,2+turns[turnIndex].text.length*.045));
    if(turnTime>=duration)nextTurn();
@@ -78,7 +81,7 @@ export function createAssemblies(population,{obstacles=[],social,initialHours=9}
   reports.observe(0,hours);nextAt=Math.max(nextAssemblyTime(hours),(lastCompletedDay+1)*24+ASSEMBLY_HOUR);turnTime=0;
   if(phase!=='idle'&&phase!=='dispersing')disperse();
  }
- function bubbles(){const turn=turns[turnIndex];return phase==='daily'&&turn?[{id:`daily-${meetingDay}-${turnIndex}`,person:turn.person,text:turn.text,priority:1}]:[];}
+ function bubbles(){const turn=turns[turnIndex];return phase==='daily'&&turn&&!turn.person.missionDead?[{id:`daily-${meetingDay}-${turnIndex}`,person:turn.person,text:turn.text,priority:1}]:[];}
  function serialize(){return{version:1,lastCompletedDay:Number.isFinite(lastCompletedDay)?lastCompletedDay:null};}
  function restore(data,hours){if(data?.version===1&&Number.isInteger(data.lastCompletedDay)&&data.lastCompletedDay>=0&&data.lastCompletedDay<=Math.floor(hours/24))lastCompletedDay=data.lastCompletedDay;reports.observe(0,hours);nextAt=Math.max(nextAssemblyTime(hours),(lastCompletedDay+1)*24+ASSEMBLY_HOUR);}
  return {navigation:nav,update,seek,bubbles,priest,serialize,restore,advanceTurn:nextTurn,get phase(){return phase;},get nextAt(){return nextAt;},get completed(){return completed;},

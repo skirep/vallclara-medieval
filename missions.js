@@ -1,3 +1,4 @@
+import {markResidentDead} from './health.js';
 // Story state is independent of Three.js and advances only through nearby actions.
 const step=(title,x,z,text,extra={})=>({title,x,z,text,...extra});
 export const MISSIONS=[
@@ -31,15 +32,17 @@ export function createMissions({population=[],sharedProgress=null,owner='player'
  let selected=null,combat=null,notice='';
  const king=population.find(p=>p.spriteId==='king-berenguer'),child=population.find(p=>p.age<16&&!p.royalGuard);
  const mission=()=>MISSIONS.find(m=>m.id===selected),record=()=>progress[selected];
- const owns=r=>r?.owner===owner,escort=()=>progress.child.stage===2&&owns(progress.child)?child:null;
+ const owns=r=>r?.owner===owner,escort=()=>progress.child.stage===2&&owns(progress.child)&&!child?.missionDead?child:null;
  const validOwner=value=>value==='player'||typeof value==='string'&&population.some(p=>`npc:${p.id}`===value&&p.age>=18&&!p.ninja&&!p.royalGuard&&!p.courtSeat);
  function changed(){onChange(serialize());}
- function effects(){if(king){king.missionDead=progress.crown.stage===MISSIONS[0].steps.length;if(king.missionDead){king.seated=false;king.health=0;king.path=[];}}if(child)child.missionEscort=progress.child.stage===2;}
+ function effects(){if(king){if(progress.crown.stage===MISSIONS[0].steps.length||king.dead||king.missionDead)markResidentDead(king);}if(child)child.missionEscort=!child.missionDead&&progress.child.stage===2;}
  function target(){const r=record(),s=mission()?.steps[r?.stage];if(!s||!owns(r))return null;const p=s.actor==='king'?king:s.actor==='child'?child:null;return {...s,x:p?.x??s.x,z:p?.z??s.z,person:p};}
  function advance(choice=null){const m=mission(),r=record();if(!owns(r)||r.stage>=m.steps.length)return false;r.stage++;if(choice)r.choice=choice;combat=null;notice=r.stage===m.steps.length?m.ending:m.steps[r.stage-1].text;effects();if(r.stage===m.steps.length)onComplete(m,r);changed();return true;}
  function accept(id,{silent=false}={}){if(combat||escort()&&id!=='child')return false;const m=MISSIONS.find(m=>m.id===id),r=progress[id];if(!m||r.owner&&!owns(r)&&r.stage<m.steps.length)return false;selected=id;r.accepted=true;r.owner??=owner;notice=r.stage===m.steps.length?m.ending:m.intro;if(!silent)changed();return true;}
  function transfer(id,to){const m=MISSIONS.find(m=>m.id===id),r=progress[id];if(!m||combat||!validOwner(to)||r.stage>=m.steps.length||r.owner&&!owns(r))return false;r.owner=to;r.accepted=true;if(selected===id)selected=null;effects();changed();return true;}
  function interact(position,{busy=false,choice=null}={}){const s=target();if(!s||busy||combat||!position||Math.hypot(s.x-position.x,s.z-position.z)>3.2)return false;
+  if((s.actor==='child'||s.requireEscort)&&child?.missionDead){notice='La missió no pot continuar: l’infant ha mort.';return false;}
+  if(s.actor==='king'&&king?.missionDead)return advance();
   if(s.requireEscort&&(!child||Math.hypot(child.x-s.x,child.z-s.z)>4)){notice='Espera l’infant: ha d’arribar amb tu fins a la porta.';return false;}
   if(s.choices){const c=s.choices.find(c=>c.value===choice);if(!c)return false;advance(choice);notice=c.text+' '+mission().ending;return true;}
   if(s.combat){combat={enemy:s.enemy,hp:s.hp,maxHp:s.hp,health:6,beat:0,elapsed:0,phase:'warning',defense:null,acted:false,origin:{x:s.x,z:s.z},heavy:false};notice=s.text;return true;}
@@ -52,7 +55,7 @@ export function createMissions({population=[],sharedProgress=null,owner='player'
   if(c.health<=0){combat=null;notice='Has perdut l’assalt. Pots tornar-ho a intentar; els objectius anteriors es conserven.';}
   else if(c.hp<=0)advance();return true;
  }
- function update(dt,position,{busy=false}={}){const c=combat;if(!c)return;if(!owns(record())||busy||Math.hypot(position.x-c.origin.x,position.z-c.origin.z)>6){combat=null;notice='Combat interromput. Torna a l’objectiu per reprendre l’assalt.';return;}c.elapsed+=Math.min(Math.max(dt,0),.1);
+ function update(dt,position,{busy=false}={}){const c=combat;if(!c)return;if(target()?.actor==='king'&&king?.missionDead){advance();return;}if(!owns(record())||busy||Math.hypot(position.x-c.origin.x,position.z-c.origin.z)>6){combat=null;notice='Combat interromput. Torna a l’objectiu per reprendre l’assalt.';return;}c.elapsed+=Math.min(Math.max(dt,0),.1);
   if(c.phase==='warning'&&c.elapsed>=1.8){const safe=c.defense===(c.heavy?'dodge':'block');if(!safe)hurt(c,2);c.phase='opening';c.elapsed=0;c.acted=false;notice=safe?'Defensa correcta! Ara tens una obertura per atacar.':'Has rebut el cop. Aprofita l’obertura per respondre.';if(c.health<=0){combat=null;notice='Has caigut. Reprèn l’assalt des d’aquest objectiu.';}}
   else if(c.phase==='opening'&&c.elapsed>=1.2){c.phase='warning';c.elapsed=0;c.beat++;c.heavy=c.beat%2===1;c.defense=null;c.acted=false;}
  }

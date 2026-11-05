@@ -60,7 +60,7 @@ export function createVillageLife(population,{navigation,social,canPunch=()=>fal
  function returnHome(g,reason=''){if(g.phase==='returning')return;g.phase='returning';g.ball=null;g.returnReason=reason;
   for(const m of g.members){m.path=[];m.index=0;m.needsReturn=true;delete m.p.duelPose;delete m.p.lifeAction;delete m.p.lifeSpeed;}
  }
- function release(m){delete m.p.lifeActivity;delete m.p.lifeSpeed;delete m.p.lifeAction;delete m.p.duelPose;m.p.state=m.p.path.length?'walking':'resting';cooldowns.set(m.p.id,elapsed+18+m.p.id%13);}
+ function release(m){delete m.p.lifeActivity;delete m.p.lifeSpeed;delete m.p.lifeAction;delete m.p.duelPose;m.p.state=m.p.missionDead?'dead':m.p.path.length?'walking':'resting';cooldowns.set(m.p.id,elapsed+18+m.p.id%13);}
  function complete(g){const def=g.def,names=g.members.map(m=>m.p.name),outcome=`${names.join(' i ')}: ${def.title.toLocaleLowerCase('ca')}. ${def.lines.at(-1)}`;
   completed++;const event={id:g.id,kind:g.kind,title:def.title,people:g.members.map(m=>m.p.id),text:outcome};journal.unshift(event);journal.length=Math.min(40,journal.length);
   for(let i=0;i<g.members.length;i++)for(let j=i+1;j<g.members.length;j++){
@@ -107,6 +107,7 @@ export function createVillageLife(population,{navigation,social,canPunch=()=>fal
   if(!Number.isFinite(dt)||dt<=0)return;dt=Math.min(dt,1);elapsed+=dt;lastHour=(hour%24+24)%24;
   for(const p of population)if(p.socialMemory?.until<=elapsed)delete p.socialMemory;
   for(const g of [...groups.values()]){
+   if(g.members.some(m=>m.p.missionDead)){for(const m of g.members)release(m);groups.delete(g.id);continue;}
    if(busy||g.members.some(m=>m.p.assembly||m.p.dragonEmergency||m.p.health===0||m.p.missionEscort||m.p.missionJob))returnHome(g,'La trobada s’ha aturat per atendre el que passa al poble.');
    if(g.phase==='returning'){
     for(const m of [...g.members]){const p=m.p;if(busy||p.assembly||p.assemblyReleased||p.dragonEmergency||p.health===0||p.missionEscort||p.missionJob)continue;

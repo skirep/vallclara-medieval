@@ -38,7 +38,8 @@ export function createNPCMissions(population,{campaign,navigation,health,onCompl
  function update(dt,{busy=false,active=true,hour=9}={}){if(!Number.isFinite(dt)||dt<=0||!active)return;dt=Math.min(dt,.1);elapsed+=dt;
   if(!busy&&hour>=7&&hour<21&&elapsed>=nextStart&&jobs.size<maxActive){nextStart=elapsed+30;const id=['child','water','letters','dragon','crown'].find(id=>!campaign.progress[id].accepted);if(id)assign(id);}
   for(const job of [...jobs.values()]){const p=job.person,q=job.engine,r=campaign.progress[job.id],m=nameFor(job.id);
-   if(p.missionDead){stopFight(job);delete p.missionJob;jobs.delete(job.id);continue;}
+   if(p.missionDead){stopFight(job);delete p.missionJob;jobs.delete(job.id);r.owner='player';campaign.notify();continue;}
+   if(job.id==='child'&&population.find(a=>a.age<16&&!a.royalGuard)?.missionDead){event(job,'La missió s’ha aturat: l’infant ha mort.');stopFight(job);delete p.missionJob;jobs.delete(job.id);r.owner='player';campaign.notify();continue;}
    if(busy||p.assembly||p.assemblyReleased||p.dragonEmergency||p.playerDuel){q.update(0,p,{busy:true});stopFight(job);job.key=null;job.escortRoute.key=null;job.childReturnRoute.key=null;p.missionJob.phase='paused';continue;}
    if(p.health<p.maxHealth*.35&&!q.combat){stopFight(job);p.state='resting';p.missionJob.phase='recovering';p.missionJob.objective='Recuperar forces abans de continuar';continue;}
    if(job.returning||r.stage===m.steps.length){job.returning=true;stopFight(job);p.missionJob.phase='returning';p.missionJob.objective='Tornar a la feina';const parentDone=route(p,job.origin,job,`return:${job.id}`)&&walk(p,job,dt);let childDone=true;
@@ -49,13 +50,14 @@ export function createNPCMissions(population,{campaign,navigation,health,onCompl
    if(!followChild(job,dt)){p.state='resting';p.missionJob.phase='waiting';continue;}
    if(distance(p,s)>(s.requireEscort?1:2.6)){p.missionJob.phase='travelling';const key=`${job.id}:${r.stage}:${Math.round(s.x/2)}:${Math.round(s.z/2)}`;if(route(p,s,job,key))walk(p,job,dt);else{job.key=null;p.missionJob.phase='blocked';}continue;}
    if(s.requireEscort&&distance(q.escort??p,s)>4){p.state='resting';p.missionJob.phase='waiting';continue;}
+   if(s.actor==='king'&&s.person?.missionDead){q.interact(p);continue;}
    if(s.combat&&!prepareFight(job,s,dt)){p.missionJob.phase='waiting';continue;}
    const stage=r.stage,choice=s.choices?.[(p.id+stage)%s.choices.length];if(s.escort&&s.person&&!job.childContext)job.childContext=snapshot(s.person);if(s.requireEscort&&q.escort)q.escort.missionJob={id:job.id,title:m.title,objective:'Tornar amb la família',phase:'returning'};if(q.interact(p,{choice:choice?.value})){event(job,choice?.text??s.text);job.key=null;if(q.combat){q.combat.health=Math.max(1,Math.ceil(p.health/p.maxHealth*6));if(job.fighter)q.combat.hp=Math.max(1,Math.ceil(job.fighter.health/job.fighter.maxHealth*q.combat.maxHp));}else{job.wait=4;if(r.stage===m.steps.length)event(job,`${p.name} ha completat «${m.title}». ${m.ending}`);}}
   }
  }
  function serialize(){return{version:1,elapsed,nextStart,serial,jobs:[...jobs.values()].map(j=>({id:j.id,personId:j.person.id,origin:{...j.origin},resume:j.resume,childContext:j.childContext,returning:j.returning})),journal:journal.map(e=>({...e}))};}
  function restore(data){if(data?.version===1){if(Number.isFinite(data.elapsed)&&data.elapsed>=0)elapsed=data.elapsed;if(Number.isFinite(data.nextStart)&&data.nextStart>=0)nextStart=data.nextStart;if(Number.isSafeInteger(data.serial)&&data.serial>=0)serial=data.serial;for(const e of (Array.isArray(data.journal)?data.journal:[]).slice(0,30))if(e&&byId.has(e.personId)&&nameFor(e.missionId)&&Number.isInteger(e.stage)&&e.stage>=0&&e.stage<=nameFor(e.missionId).steps.length&&typeof e.text==='string'&&e.text.length<1500)journal.push({...e});}
-  for(const m of MISSIONS){const r=campaign.progress[m.id];if(!r.owner?.startsWith('npc:'))continue;const p=byId.get(Number(r.owner.slice(4))),saved=data?.version===1&&Array.isArray(data.jobs)?data.jobs.find(j=>j.id===m.id&&j.personId===p?.id):null;if(!p||p.missionJob)continue;if(r.stage<m.steps.length||saved)makeJob(m.id,p,saved);}
+  for(const m of MISSIONS){const r=campaign.progress[m.id];if(!r.owner?.startsWith('npc:'))continue;const p=byId.get(Number(r.owner.slice(4))),saved=data?.version===1&&Array.isArray(data.jobs)?data.jobs.find(j=>j.id===m.id&&j.personId===p?.id):null;if(!p||p.missionDead||p.missionJob)continue;if(r.stage<m.steps.length||saved)makeJob(m.id,p,saved);}
  }
  restore(initialData);
  return{assign,update,serialize,journal,get jobs(){return [...jobs.values()];},status(id){const r=campaign.progress[id],person=r?.owner?.startsWith('npc:')?byId.get(Number(r.owner.slice(4))):null;return person?{person,job:jobs.get(id),completed:r.stage===nameFor(id).steps.length}:null;},bubbles(){return[...jobs.values()].filter(j=>j.speechUntil>elapsed&&!j.person.assembly&&!j.person.dragonEmergency&&!j.person.missionDead).map(j=>({id:`npc-mission-${j.id}-${serial}`,person:j.person,text:j.speech,priority:1}));}};

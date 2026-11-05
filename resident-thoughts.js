@@ -1,6 +1,7 @@
 import * as T from 'three';
 import {residentHeight} from './resident-scale.js';
 export function residentThought(p,{social,dragon,hour=9}={}){
+ if(p.missionDead)return{icon:'🪦',label:'Mort',text:'Aquest habitant ha mort.',priority:0};
  if(p.missionJob&&!p.dragonEmergency&&!p.assembly)return{icon:p.missionJob.phase==='fighting'?'⚔️':'📜',label:p.missionJob.title,text:p.missionJob.phase==='paused'?'He aturat la missió: primer he de respondre al que passa al poble.':p.missionJob.phase==='recovering'?'Necessito recuperar forces abans de continuar.':p.missionJob.objective,priority:8};
  if(p.missionEscort)return{icon:'🏮',label:'Tornant amb la família',text:'Segueixo el fanal fins a Santa Maria. Espera’m si em quedo enrere.',priority:9};
  if(p.royalGuard){const g=p.royalGuard,combat=p.dragonEmergency?.role==='defender',returning=p.dragonEmergency?.role==='returning';return {icon:g.weapon==='spear'?'🔱':'⚔️',label:combat?'Combatent el drac':returning?'Tornant al castell':g.phase==='mobilising'?'Alerta de drac':'Guàrdia reial',text:combat?'Mantindrem el drac lluny dels reis i dels veïns!':returning?'El perill ha passat. Tornem a protegir el castell.':g.phase==='mobilising'?'Un drac al cel! Preparem la defensa de la plaça.':'Vigilo els accessos del castell per protegir el rei i la reina.'};}

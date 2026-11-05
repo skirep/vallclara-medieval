@@ -28,7 +28,7 @@ export function createSocialSystem(population){
   function update(dt,hour,{allowNew=true}={}){
     elapsed+=dt;scan+=dt;
     for(const p of population)p.social.cooldown=Math.max(0,p.social.cooldown-dt);
-    for(let i=active.length-1;i>=0;i--){const c=active[i];c.remaining-=dt;c.turnElapsed+=dt;if(c.remaining<=0){c.index++;if(c.index>=c.turns.length){finish(c);active.splice(i,1);}else{c.turnElapsed=0;c.remaining=c.turns[c.index].duration??Math.min(8,2.2+c.turns[c.index].text.length*.028);}}}
+    for(let i=active.length-1;i>=0;i--){const c=active[i];if([c.a,c.b].some(id=>byId.get(id).missionDead)){for(const id of [c.a,c.b]){const p=byId.get(id);p.social.conversation=null;delete p.duelPose;if(!p.missionDead)p.state='resting';}active.splice(i,1);continue;}c.remaining-=dt;c.turnElapsed+=dt;if(c.remaining<=0){c.index++;if(c.index>=c.turns.length){finish(c);active.splice(i,1);}else{c.turnElapsed=0;c.remaining=c.turns[c.index].duration??Math.min(8,2.2+c.turns[c.index].text.length*.028);}}}
     if(!allowNew||scan<.8)return;scan=0;
     // Spatial hash keeps neighbour discovery local instead of comparing 250,000 pairs.
     const grid=new Map();for(const p of population){const key=`${Math.floor(p.x/4)},${Math.floor(p.z/4)}`;if(!grid.has(key))grid.set(key,[]);grid.get(key).push(p);}

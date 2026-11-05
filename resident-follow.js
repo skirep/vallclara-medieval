@@ -16,7 +16,7 @@ export function createResidentFollow(population,{obstacles=[],buildings=[],heigh
  function select(id){const p=byId.get(id);if(!p||p.missionDead)return false;target=p;initialized=false;return true;}
  function stop(){const p=target;target=null;initialized=false;return p;}
  function update(camera,dt,{yaw=0,pitch=0,position=target}={}){
-  if(!target)return false;const p=position??target,ground=heightAt(p.x,p.z),room=buildings.find(b=>Math.abs(p.x-b.x)<b.w/2&&Math.abs(p.z-b.z)<b.d/2);
+  if(!target)return false;if(target.missionDead){stop();return false;}const p=position??target,ground=heightAt(p.x,p.z),room=buildings.find(b=>Math.abs(p.x-b.x)<b.w/2&&Math.abs(p.z-b.z)<b.d/2);
   eye.set(p.x,ground+residentHeight(target)*.73-(target.seated ? .25 : 0),p.z);
   const distance=room?3.2:6.5,height=room?2.45:T.MathUtils.clamp(3.8-Math.sin(pitch)*3,1.7,6.2);
   desired.set(p.x+Math.sin(yaw)*distance,ground+height,p.z+Math.cos(yaw)*distance);next.copy(clip(eye,desired));

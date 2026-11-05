@@ -18,11 +18,11 @@ export function createWorkVisuals(scene,population,sites){
  function place(mesh,index,x,y,z,sx,sy,sz,ry=0,rz=0){dummy.position.set(x,y,z);dummy.rotation.set(0,ry,rz);dummy.scale.set(sx,sy,sz);dummy.updateMatrix();mesh.setMatrixAt(index,dummy.matrix);}
  function update(camera,quality='medium'){
   for(const [i,p]of population.entries()){
-   const d=p.duty,active=!p.courtSeat&&d?.phase==='working'&&p.state==='working'&&!p.assembly&&Math.hypot(camera.x-p.x,camera.z-p.z)<65;
+   const d=p.duty,active=!p.missionDead&&!p.courtSeat&&d?.phase==='working'&&p.state==='working'&&!p.assembly&&Math.hypot(camera.x-p.x,camera.z-p.z)<65;
    const swing=active?Math.sin(d.elapsed*5+p.id)*.45:0,dx=Math.cos(p.heading)*.33,dz=-Math.sin(p.heading)*.33;
    place(tools,i,p.x+dx,p.height*.98+swing*.08,p.z+dz,active?.055:0,active?.45:0,active?.055:0,p.heading,swing);
    place(heads,i,p.x+dx,p.height*1.18+swing*.08,p.z+dz,active?.18:0,active?.09:0,active?.12:0,p.heading,swing);
-   const carrying=!p.courtSeat&&!!d?.cargo&&!p.assembly&&Math.hypot(camera.x-p.x,camera.z-p.z)<65;
+   const carrying=!p.missionDead&&!p.courtSeat&&!!d?.cargo&&!p.assembly&&Math.hypot(camera.x-p.x,camera.z-p.z)<65;
    place(parcels,i,p.x+Math.sin(p.heading)*.25,p.height*.75,p.z+Math.cos(p.heading)*.25,carrying?.3:0,carrying?.3:0,carrying?.25:0,p.heading);
   }
   for(const m of [tools,heads,parcels]){m.instanceMatrix.needsUpdate=true;if(m.instanceColor)m.instanceColor.needsUpdate=true;}

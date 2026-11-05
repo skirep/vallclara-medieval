@@ -19,7 +19,7 @@ export function createDragonEmergency(population,{obstacles=[],navigation=null,s
   for(const p of population){const prior=members.get(p.id),origin=prior?.origin??(p.royalGuard?{...p.royalGuard.post}:{x:p.x,z:p.z}),defender=isDragonDefender(p),destination=defender?(p.royalGuard?guardCombatPost(p,nav):guardPost(p,guard++,defenders.length)):refuge(p,counts);const member={origin,defender,path:route(p,destination),step:0,arrived:false};members.set(p.id,member);p.dragonEmergency={origin,role:defender?'defender':'fleeing'};p.seated=false;p.emergencySpeed=defender?Math.max(3.8,p.speed*3.8):Math.max(2.5,p.speed*3.3);}
  }
  function startReturn(){phase='returning';target=null;nav.resetTraffic();for(const p of population){const m=members.get(p.id);if(!m)continue;m.path=route(p,m.origin);m.step=0;m.arrived=false;p.dragonEmergency.role='returning';p.emergencySpeed=Math.max(1.8,p.speed*1.7);delete p.dragonPunchTime;delete p.guardAttackTime;}}
- function release(p){delete p.dragonEmergency;delete p.emergencySpeed;delete p.dragonPunchTime;delete p.guardAttackTime;p.state=p.path.length?'walking':'resting';members.delete(p.id);}
+ function release(p){delete p.dragonEmergency;delete p.emergencySpeed;delete p.dragonPunchTime;delete p.guardAttackTime;p.state=p.missionDead?'dead':p.path.length?'walking':'resting';members.delete(p.id);}
  function move(p,m,dt){let budget=p.emergencySpeed*dt;while(m.step<m.path.length){const q=m.path[m.step],dx=q.x-p.x,dz=q.z-p.z,d=Math.hypot(dx,dz);if(d<1e-7){m.step++;continue;}if(budget<=0)break;const step=Math.min(budget,d);p.x+=dx/d*step;p.z+=dz/d*step;p.heading=Math.atan2(dx,dz);p.walk+=step*5;budget-=step;if(step===d)m.step++;}m.arrived=m.step===m.path.length;p.state=m.arrived?'resting':'walking';}
  function update(dt,hours,{peaceful=false}={}){if(!Number.isFinite(dt)||dt<=0)return;population=allResidents.filter(p=>!p.missionDead);for(const p of allResidents)if(p.missionDead&&members.has(p.id))release(p);const alarm=peaceful?null:dragonAlarm(hours);current=alarm;
   if(alarm&&(alarm.id!==flightId||phase==='idle'||phase==='returning'))begin(alarm);
@@ -28,6 +28,7 @@ export function createDragonEmergency(population,{obstacles=[],navigation=null,s
   for(const p of population){const m=members.get(p.id);if(!m)continue;move(p,m,dt);delete p.dragonPunchTime;delete p.guardAttackTime;
    if(phase==='returning'){if(m.arrived)release(p);continue;}
    if(phase==='alarm'&&current?.phase==='attacking'&&distance(p)<8){m.burnTime=(m.burnTime??0)+dt;if(m.burnTime>=3){onDamage(p,6);m.burnTime=0;}}
+   if(p.missionDead){release(p);continue;}
    if(m.defender&&m.arrived){p.heading=Math.atan2(DRAGON_PLAZA.x-p.x,DRAGON_PLAZA.z-p.z);const beat=(elapsed+p.id*.23)%2.1;if(current?.phase==='attacking'){if(p.royalGuard&&beat<.8)p.guardAttackTime=beat;else if(!p.royalGuard&&beat<.66)p.dragonPunchTime=beat;}}
   }
   if(phase==='returning'&&!members.size){phase='idle';completed++;}
