@@ -22,7 +22,7 @@ export function createVillageLife(population,{navigation,social,canPunch=()=>fal
  if(!navigation)throw Error('Village life requires safe navigation');
  const byId=new Map(population.map(p=>[p.id,p])),groups=new Map(),bonds=new Map(),cooldowns=new Map(),journal=[],pending=[];
  const escortChild=population.find(p=>p.age<16&&!p.royalGuard);let elapsed=0,nextStart=6,serial=0,cursor=0,lastHour=9,completed=0;
- const free=p=>!!p&&!p.lifeActivity&&!p.missionJob&&!p.missionEscort&&!p.missionCombat&&!p.playerDuel&&!p.dragonEmergency&&!p.assembly&&!p.assemblyReleased&&!p.courtSeat&&!p.royalGuard&&p.role!=='priest'&&!p.missionDead&&p.health!==0&&(p.maxHealth===undefined||p.health>p.maxHealth*.6)&&p.social?.conversation===null&&(cooldowns.get(p.id)??0)<=elapsed;
+ const free=p=>!!p&&!p.ninja&&!p.lifeActivity&&!p.missionJob&&!p.missionEscort&&!p.missionCombat&&!p.playerDuel&&!p.dragonEmergency&&!p.assembly&&!p.assemblyReleased&&!p.courtSeat&&!p.royalGuard&&p.role!=='priest'&&!p.missionDead&&p.health!==0&&(p.maxHealth===undefined||p.health>p.maxHealth*.6)&&p.social?.conversation===null&&(cooldowns.get(p.id)??0)<=elapsed;
  const key=(a,b)=>[Math.min(a,b),Math.max(a,b)].join(':');
  function relationship(a,b){const k=key(a,b);if(!bonds.has(k))bonds.set(k,{a:Math.min(a,b),b:Math.max(a,b),affinity:0,trust:50,meetings:0,lastKind:null});return bonds.get(k);}
  function relationships(id){return[...bonds.values()].filter(b=>b.a===id||b.b===id).map(b=>({...b,person:byId.get(b.a===id?b.b:b.a)})).filter(b=>b.person).sort((a,b)=>b.meetings-a.meetings).slice(0,6);}

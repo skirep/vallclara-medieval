@@ -45,7 +45,7 @@ El desament existent s’amplia amb el rellotge, els recursos, les tasques en cu
 
 Les proves recorren les 51.200 entrades, comproven identitats i relacions, simulen una jornada amb 100 personatges, validen costos i lliuraments, bloquejos, continuïtat després de desar, converses interrompudes, informes del dia anterior i rutes amb obstacles durant una reunió completa. La validació de geometria no substitueix una comprovació visual de WebGL.
 
-La vila compacta inclou 55 veïns ordinaris, 24 identitats amb nom propi, 9 artistes adults i 12 soldats reials. El rei i la reina segueixen una rutina de cort pròpia i assisteixen a la reunió; no produeixen els béns dels oficis ordinaris. El castell, la parròquia i el pont són accessibles des del menú de llocs de la vila.
+La vila compacta inclou 50 veïns ordinaris, 24 identitats amb nom propi, 9 artistes adults, 12 soldats reials i 5 ninjes. El rei i la reina segueixen una rutina de cort pròpia i assisteixen a la reunió; no produeixen els béns dels oficis ordinaris. El castell, la parròquia i el pont són accessibles des del menú de llocs de la vila.
 
 ## Guàrdia reial
 
@@ -64,3 +64,7 @@ Les cases inclouen teules corbes superposades, fusteria de les golfes, motllures
 El sistema de vida social programa onze tipus d’escena: tocar i parar, fet i amagar, pilota, cites, trobades discretes, discussions, gelosia, disculpes, balls, safareig i compartir una estona entre amics. Els participants utilitzen el graf de navegació existent i conserven el punt d’origen, els camins de feina i els recursos pagats. Les alarmes i reunions els interrompen; després retornen abans de reprendre la rutina. Els participants en una escena no es poden assignar alhora a una missió o a una altra conversa.
 
 El registre conserva fins a 40 escenes recents i els vincles guarden afecte, confiança i nombre de trobades. Les trobades discretes poden programar retrets de la parella, i els conflictes poden desembocar en disculpes. L’afecte influeix en la tria de futures trobades. Els jocs són només per a infants; les cites i els afers són només entre adults sense parentiu, excepte les parelles ja establertes. El primer infant del rescat queda reservat per a la missió d’escorta. No cal cap servei d’IA extern.
+
+## La Lluna Trencada
+
+La confraria arriba amb una caravana de seda i cerca el Segell de les Hores per controlar un mecanisme ocult al castell. Aki vol impedir-ho i deixa un missatge sota el pont. El jugador ja porta el prototip del rellotger, que explica l’arma anacrònica com a part de la fantasia del món. Ha de trobar Aki, recuperar el segell a la cancelleria, resistir l’emboscada de Raiga i tres infiltrats i retornar el segell al pou. Els ninjes tenen patrulles, persecució i seqüències d’atac en quatre direccions. Es rendeixen quan són derrotats, amb conseqüències persistents a la partida.

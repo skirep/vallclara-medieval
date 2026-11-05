@@ -4,7 +4,7 @@ import {RESIDENT_CHOICES,RESIDENT_ROSTER,categoryFor} from './resident-roster.js
 export function appearanceFor(p){
  const family=p.familyId??Math.floor(p.id/5);
  const choices=RESIDENT_CHOICES[categoryFor(p)];
- const named=p.spriteId?RESIDENT_ROSTER.findIndex(r=>r.id===(p.royalGuard?'captain-ermessenda':p.spriteId)):-1;
+ const named=p.spriteId?RESIDENT_ROSTER.findIndex(r=>r.id===(p.royalGuard?'captain-ermessenda':p.ninja?'tunic-man':p.spriteId)):-1;
  const row=named>=0?named:choices[(p.age>=60?Math.floor(family/2):family)%choices.length];
  return {row,width:.87+(p.id%13)*.021,signature:`${row}:${p.id}`};
 }

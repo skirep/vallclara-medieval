@@ -1,3 +1,4 @@
+import {NINJA_ART,ninjaSheetURL} from './ninja-art.js';
 import {royalGuardSheetURL,ROYAL_GUARD_ART} from './royal-guard-art.js';
 import {spriteDirection} from './sprite-directions.js';
 import * as T from 'three';
@@ -17,10 +18,12 @@ export function createPeople(scene,population,{onProgress,pixelHeight=128,height
  const appearances=population.map(appearanceFor),states=population.map(createMotion),groups=[],dummy=new T.Object3D();
  const shadows=createResidentShadows(scene,population,heightAt);
  const geometry=new T.PlaneGeometry(1,1,1,16);geometry.translate(0,.5-12/256,0);
- for(let type=0;type<WALK_TYPES.length+(population.some(p=>p.royalGuard)?2:0);type++){
-  const guardWeapon=type===WALK_TYPES.length?'sword':type===WALK_TYPES.length+1?'spear':null;
-  const extended=hasResidentActions(WALK_TYPES[type]),rows=guardWeapon?12:extended?20:8;
-  const indices=population.map((p,i)=>i).filter(i=>guardWeapon?population[i].royalGuard?.weapon===guardWeapon:!population[i].royalGuard&&appearances[i].row===type),g=geometry.clone(),n=indices.length;
+ const hasGuards=population.some(p=>p.royalGuard),hasNinjas=population.some(p=>p.ninja);
+ for(let type=0;type<WALK_TYPES.length+(hasGuards?2:0)+(hasNinjas?1:0);type++){
+  const ninja=hasNinjas&&type===WALK_TYPES.length+(hasGuards?2:0);
+  const guardWeapon=hasGuards?(type===WALK_TYPES.length?'sword':type===WALK_TYPES.length+1?'spear':null):null;
+  const extended=hasResidentActions(WALK_TYPES[type]),rows=guardWeapon||ninja?12:extended?20:8;
+  const indices=population.map((p,i)=>i).filter(i=>ninja?!!population[i].ninja:guardWeapon?population[i].royalGuard?.weapon===guardWeapon:!population[i].royalGuard&&!population[i].ninja&&appearances[i].row===type),g=geometry.clone(),n=indices.length;
   const frames=new T.InstancedBufferAttribute(new Float32Array(n*4),4);frames.setUsage(T.DynamicDrawUsage);g.setAttribute('residentFrame',frames);
   const texture=new T.Texture();texture.colorSpace=T.SRGBColorSpace;texture.magFilter=texture.minFilter=T.NearestFilter;texture.generateMipmaps=false;
   const material=new T.MeshBasicMaterial({map:texture,alphaTest:.45,side:T.DoubleSide,fog:true});
@@ -33,8 +36,8 @@ export function createPeople(scene,population,{onProgress,pixelHeight=128,height
    // Painted skin and clothes remain intact; only seated lower legs are clipped.
   };
   material.customProgramCacheKey=()=> 'vallclara-directions-v8-'+rows;
-  const mesh=new T.InstancedMesh(g,material,n);mesh.name='Habitants amb fotogrames · '+(guardWeapon?'royal-'+guardWeapon:WALK_TYPES[type]);mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);mesh.frustumCulled=false;mesh.userData.spriteBillboard=true;mesh.userData.residentIndices=indices;scene.add(mesh);
-  groups.push({indices,frames,texture,mesh,extended,guardWeapon});
+  const mesh=new T.InstancedMesh(g,material,n);mesh.name='Habitants amb fotogrames · '+(ninja?'ninja-shadow':guardWeapon?'royal-'+guardWeapon:WALK_TYPES[type]);mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);mesh.frustumCulled=false;mesh.userData.spriteBillboard=true;mesh.userData.residentIndices=indices;scene.add(mesh);
+  groups.push({indices,frames,texture,mesh,extended,guardWeapon,ninja});
  }
  geometry.dispose();
  // Four requests at a time. Normal startup decodes only the texture resolution
@@ -43,7 +46,7 @@ export function createPeople(scene,population,{onProgress,pixelHeight=128,height
  const ready=Promise.all(Array.from({length:4},async()=>{
   while(next<groups.length){const type=next++,group=groups[type];
    const height=group.extended?Math.min(pixelHeight,96):pixelHeight;
-   let image=group.guardWeapon?await load(royalGuardSheetURL(group.guardWeapon,height)):await loadPackedResident(WALK_TYPES[type],height,load,
+   let image=group.ninja?await load(ninjaSheetURL(height)):group.guardWeapon?await load(royalGuardSheetURL(group.guardWeapon,height)):await loadPackedResident(WALK_TYPES[type],height,load,
     images=>packWalkAtlas(images,WALK_TYPES[type],document.createElement('canvas'),height));
    if(group.extended){const actions=await loadActionAtlas(WALK_TYPES[type],height,load,()=>document.createElement('canvas'));image=combineResidentAtlases(image,actions,document.createElement('canvas'),height);}
    group.texture.image=image;
@@ -55,10 +58,10 @@ export function createPeople(scene,population,{onProgress,pixelHeight=128,height
   for(const [type,group] of groups.entries()){
    group.indices.forEach((index,i)=>{
     const p=population[index],a=appearances[index],m=states[index],dx=camera.x-m.x,dz=camera.z-m.z,angle=Math.atan2(dx,dz);
-    const logicalView=stableView(m,m.heading,angle),frame=drawnFrame(m),action=group.guardWeapon?(p.guardAttackTime===undefined?null:{action:'weapon',frame:Math.min(5,Math.floor(p.guardAttackTime/.8*6)),row:0}):actionFrame(m,WALK_TYPES[type]),direction=group.guardWeapon?{view:logicalView,flip:false}:spriteDirection(WALK_TYPES[type],logicalView,action?.action??(frame<6?'walk':'idle')),view=direction.view;group.frames.setXYZW(i,action?.frame??frame%6,action?8+action.row+view:view+(frame>=6?4:0),p.seated&&!p.assembly?1:0,direction.flip?1:0);
+    const logicalView=stableView(m,m.heading,angle),frame=drawnFrame(m),action=group.ninja?(p.ninjaAttackTime===undefined?null:{action:'weapon',frame:Math.min(5,Math.floor(p.ninjaAttackTime/.8*6)),row:0}):group.guardWeapon?(p.guardAttackTime===undefined?null:{action:'weapon',frame:Math.min(5,Math.floor(p.guardAttackTime/.8*6)),row:0}):actionFrame(m,WALK_TYPES[type]),direction=group.guardWeapon||group.ninja?{view:logicalView,flip:false}:spriteDirection(WALK_TYPES[type],logicalView,action?.action??(frame<6?'walk':'idle')),view=direction.view;group.frames.setXYZW(i,action?.frame??frame%6,action?8+action.row+view:view+(frame>=6?4:0),p.seated&&!p.assembly?1:0,direction.flip?1:0);
     const lift=p.seated?0:action?.action==='jump'?JUMP_LIFT[action.frame]*residentHeight(p):0,visible=!p.missionDead&&dx*dx+dz*dz<range*range;
-    dummy.position.set(m.x,heightAt(m.x,m.z)+.015+lift+(p.seated&&!p.assembly ? .52 : 0),m.z);if(p.duelPose?.punchTime<.66){const lunge=Math.sin(p.duelPose.punchTime/.66*Math.PI)*.18;dummy.position.x+=Math.sin(p.heading)*lunge;dummy.position.z+=Math.cos(p.heading)*lunge;}dummy.rotation.set(0,angle,p.duelPose?.hitTime<.5?Math.sin(p.duelPose.hitTime/.5*Math.PI)*.13:0);const h=visible?(group.guardWeapon?residentHeight(p)/ROYAL_GUARD_ART.bodyFraction:residentRenderHeight(p,WALK_TYPES[type],view,frame,action?.action)):0;
-    dummy.scale.set(h*(group.guardWeapon?ROYAL_GUARD_ART.aspect:.875)*a.width,h,1);dummy.updateMatrix();group.mesh.setMatrixAt(i,dummy.matrix);
+    dummy.position.set(m.x,heightAt(m.x,m.z)+.015+lift+(p.seated&&!p.assembly ? .52 : 0),m.z);if(p.duelPose?.punchTime<.66){const lunge=Math.sin(p.duelPose.punchTime/.66*Math.PI)*.18;dummy.position.x+=Math.sin(p.heading)*lunge;dummy.position.z+=Math.cos(p.heading)*lunge;}dummy.rotation.set(0,angle,p.duelPose?.hitTime<.5?Math.sin(p.duelPose.hitTime/.5*Math.PI)*.13:0);const h=visible?(group.ninja?residentHeight(p)/NINJA_ART.bodyFraction:group.guardWeapon?residentHeight(p)/ROYAL_GUARD_ART.bodyFraction:residentRenderHeight(p,WALK_TYPES[type],view,frame,action?.action)):0;
+    dummy.scale.set(h*(group.ninja?NINJA_ART.aspect:group.guardWeapon?ROYAL_GUARD_ART.aspect:.875)*a.width,h,1);dummy.updateMatrix();group.mesh.setMatrixAt(i,dummy.matrix);
     shadows.update(index,p,m,lift,visible?1:0);
    });group.frames.needsUpdate=true;group.mesh.instanceMatrix.needsUpdate=true;
   }
@@ -71,5 +74,5 @@ export function createPeople(scene,population,{onProgress,pixelHeight=128,height
   for(const group of groups)group.mesh.material.color.setRGB(.78+.20*light,.77+.20*light,.75+.19*light);
  }
  function playAction(id,action){const index=population.findIndex(p=>p.id===id);return index>=0&&hasResidentActions(WALK_TYPES[appearances[index].row],action)&&startResidentAction(states[index],action);}
- return {animate,ready,playAction,setLighting,shadows,pixelHeight,parts:Object.fromEntries(groups.map((g,i)=>[g.guardWeapon?'royal-'+g.guardWeapon:i===0?'sprites':WALK_TYPES[i],g.mesh])),appearances,states};
+ return {animate,ready,playAction,setLighting,shadows,pixelHeight,parts:Object.fromEntries(groups.map((g,i)=>[g.ninja?'ninjas':g.guardWeapon?'royal-'+g.guardWeapon:i===0?'sprites':WALK_TYPES[i],g.mesh])),appearances,states};
 }

@@ -15,7 +15,7 @@ export function loveDuelPlan(a,b,crush,seed=0){
 export function bumpPlan(a,b,count=0){const lines=[['Ep! Mira per on vas, que portava el dia ben dret.','Perdona! Els meus peus anaven més de pressa que el cap.'],['Aquest carrer és estret, però hi cabem tots dos!','Tens raó. Passa tu, que jo tinc la pressa mal posada.'],['Ui! Un altre pas i compartim les sabates.','Les sabates no, però et dec una disculpa!']][count%3];return{kind:'bump',topic:0,chapter:0,outcome:'Una topada, dues rèpliques i cadascú reprèn el seu camí.',turns:lines.map((text,i)=>({speakerId:(i?b:a).id,text,duration:2.5}))};}
 export function createVillageDrama(population,social,{canPunch=()=>true,onDamage=()=>{}}={}){
  let elapsed=0,scan=0,nextDuel=20,count=0;const previous=new Map(population.map(p=>[p.id,{x:p.x,z:p.z}])),contacts=new Set(),byId=new Map(population.map(p=>[p.id,p]));
- const free=p=>!p.lifeActivity&&!p.missionJob&&!p.royalGuard&&!p.assembly&&!p.courtSeat&&!p.playerDuel&&p.social.conversation===null&&p.social.cooldown<=0;
+ const free=p=>!p.ninja&&!p.lifeActivity&&!p.missionJob&&!p.royalGuard&&!p.assembly&&!p.courtSeat&&!p.playerDuel&&p.social.conversation===null&&p.social.cooldown<=0;
  function crushFor(a,b){const candidates=population.filter(p=>p.age>=18&&p.id!==a.id&&p.id!==b.id&&p.familyId!==a.familyId&&p.familyId!==b.familyId);return candidates[(a.id+b.id)%candidates.length];}
  function beginDuel(a,b,hour){if(!free(a)||!free(b)||a.age<18||b.age<18||a.familyId===b.familyId||!canPunch(a)||!canPunch(b))return false;const crush=crushFor(a,b);if(!crush)return false;
   if(!social.begin(a,b,hour,loveDuelPlan(a,b,crush,count++)))return false;

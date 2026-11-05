@@ -1,4 +1,4 @@
-export const maxResidentHealth=p=>p.spriteId==='king-berenguer'?200:p.royalGuard?140:p.age<16?60:p.dragonDefender?120:100;
+export const maxResidentHealth=p=>p.spriteId==='king-berenguer'?200:p.royalGuard?140:p.ninja?(p.ninja.captain?120:80):p.age<16?60:p.dragonDefender?120:100;
 export function createHealthSystem(population){
  const byId=new Map(population.map(p=>[p.id,p]));
  for(const p of population){p.maxHealth=maxResidentHealth(p);p.health=p.maxHealth;p.healthDelay=0;}

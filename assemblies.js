@@ -8,7 +8,7 @@ export function selectDailySpeakers(population,day){
  return Array.from({length:count},(_,i)=>ordered[(offset+i)%ordered.length]);
 }
 export function createAssemblies(population,{obstacles=[],social,initialHours=9}={}){
- const allResidents=population.filter(p=>!p.royalGuard);population=allResidents;
+ const allResidents=population.filter(p=>!p.royalGuard&&!p.ninja);population=allResidents;
  const nav=createAssemblyNavigation(obstacles),priest=population.find(p=>p.role==='priest')||population.find(p=>p.sex===0&&p.age>=60)||population[0];
  if(!priest)throw Error('Cal un habitant per fer de sacerdot');
  if(nav.seats.length<population.length-1)throw Error(`La plaça només té ${nav.seats.length} llocs segurs`);

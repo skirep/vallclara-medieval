@@ -19,7 +19,7 @@ export function updateMotion(m,p,dt,simulationRate=1,speaking=p.state==='talking
   // Continuous phase survives state switches; faster/shorter child steps and
   // slower elderly gait, with no quantisation to the simulation tick.
   const stride=p.age<16?.48:p.age>60?.69:.77;
-  m.phase=(m.phase+dt*(p.emergencySpeed??p.lifeSpeed??p.speed)/stride*tau*m.walk*simulationRate)%tau;
+  m.phase=(m.phase+dt*(p.emergencySpeed??p.lifeSpeed??p.ninjaSpeed??p.speed)/stride*tau*m.walk*simulationRate)%tau;
   m.idleTime+=dt*simulationRate*(.88+(p.id%11)*.025+m.talk*.55+m.work*.18);
   const forcedPunchTime=p.dragonPunchTime??p.duelPose?.punchTime;
   if(m.forcedPunch&&forcedPunchTime===undefined){m.action=null;m.actionTime=0;}

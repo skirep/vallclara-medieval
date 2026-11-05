@@ -4,7 +4,7 @@ Exploració lliure en primera persona: https://skirep.github.io/vallclara-mediev
 
 ## Vila compacta · novembre de 2026
 
-- **100 personatges en total**: 55 veïns, 24 personatges amb nom propi, 9 artistes adults i 12 soldats reials. Es mantenen els 62 dissenys dibuixats, les famílies, les històries i les 512 entrades contextuals de diàleg per habitant.
+- **100 personatges en total**: 50 veïns, 24 personatges amb nom propi, 9 artistes adults, 12 soldats reials i 5 ninjes. Es mantenen els 62 dissenys dibuixats, les famílies, les històries i les 512 entrades contextuals de diàleg per habitant.
 - Els personatges nous mantenen els IDs 500–523. Les cerques d’identitat fan servir mapes, sense assumir que l’ID sigui una posició de l’array.
 - Àrea transitable limitada a ±90 m, 25 cases explorables, església i castell. Els carrers se separen en dues ribes; l’únic enllaç de navegació és el pont de pedra central.
 - **Castell de Rocafort**: sala del tron, biblioteca/cancelleria, cuines/rebost, armeria, cambra reial, menjador, capella i galeria. Portes, parets i mobiliari comparteixen coordenades amb les col·lisions.
@@ -108,3 +108,13 @@ Els veïns es busquen activament per participar en cites, trobades discretes, di
 Les relacions adultes queden separades dels jocs dels infants; els familiars no formen parelles romàntiques llevat que ja siguin parella. Una trobada discreta pot provocar una conversa de gelosia amb la parella, i una discussió pot portar a una disculpa posterior. Afecte, confiança i records de trobades es desen al navegador. Les Cròniques inclouen «Vida i relacions», seguiment de protagonistes i relacions a cada fitxa.
 
 Les escenes aturen temporalment els oficis sense consumir feina ja pagada ni perdre la càrrega. Reunions, missions i alarmes tenen prioritat: una escena interrompuda no compta com a acabada. Les posicions d’origen dels participants es desen perquè una recàrrega no reprengui la feina des del mig d’un joc. Les baralles socials són còmiques, amb cops i dany limitat; les discussions de gelosia fan servir diàleg.
+
+## La Lluna Trencada i la pistola del rellotger
+
+Cinc ninjes en píxel art modern ocupen cinc places de la població existent: el total continua sent 100. Aki és una infiltrada aliada; Ren, Sora, Haku i el cap Raiga busquen el Segell de les Hores. El missatge del pont, la conversa amb Aki i la pista de la cancelleria desencadenen una emboscada. Els quatre infiltrats persegueixen el jugador amb rutes segures i ataquen a curta distància. Quan són derrotats es rendeixen. La trama acaba retornant el segell a Aki davant del pou.
+
+La pistola fantàstica del rellotger està disponible en mode joc. Clic o X dispara des de la mira; C recarrega; G guarda o treu l’arma; V interactua amb les pistes de la trama. En tàctil hi ha botons dedicats. Amb comandament: gallet dret per disparar i Y per recarregar. Guardar la pistola permet tornar a seleccionar habitants amb un toc a l’escena.
+
+La munició és de sis trets i trenta de reserva inicials. A l’armeria del castell, C reposa la munició. Els trets tenen cadència, recàrrega, retrocés visual, flaix, traç i impactes. Les col·lisions utilitzen cossos tridimensionals dels habitants, parets amb obertures reals de portes i finestres, sostres i terra; no hi ha autoapuntat. Els impactes redueixen la vida dels personatges i els ninjes poden fer mal al jugador. Si el jugador cau, torna a la plaça amb el progrés de la trama conservat. Trama, munició, vida i rendicions es desen localment.
+
+La història apareix al diari de missions (Q) i es manté separada de les cinc missions originals perquè no les substitueixi ni impedeixi que els NPC les completin. Els ninjes no s’assignen als oficis ordinaris, a les trobades amoroses ni a missions alienes; les emergències del drac continuen tenint prioritat.
