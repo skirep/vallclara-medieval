@@ -45,7 +45,7 @@ El desament existent s’amplia amb el rellotge, els recursos, les tasques en cu
 
 Les proves recorren les 51.200 entrades, comproven identitats i relacions, simulen una jornada amb 100 personatges, validen costos i lliuraments, bloquejos, continuïtat després de desar, converses interrompudes, informes del dia anterior i rutes amb obstacles durant una reunió completa. La validació de geometria no substitueix una comprovació visual de WebGL.
 
-La vila compacta inclou 50 veïns ordinaris, 24 identitats amb nom propi, 9 artistes adults, 12 soldats reials i 5 ninjes. El rei i la reina segueixen una rutina de cort pròpia i assisteixen a la reunió; no produeixen els béns dels oficis ordinaris. El castell, la parròquia i el pont són accessibles des del menú de llocs de la vila.
+La vila compacta inclou 35 veïns ordinaris, 24 identitats amb nom propi, 9 artistes adults, 12 soldats reials i 20 ninjes. El rei i la reina segueixen una rutina de cort pròpia i assisteixen a la reunió; no produeixen els béns dels oficis ordinaris. El castell, la parròquia i el pont són accessibles des del menú de llocs de la vila.
 
 ## Guàrdia reial
 
@@ -67,4 +67,6 @@ El registre conserva fins a 40 escenes recents i els vincles guarden afecte, con
 
 ## La Lluna Trencada
 
-La confraria arriba amb una caravana de seda i cerca el Segell de les Hores per controlar un mecanisme ocult al castell. Aki vol impedir-ho i deixa un missatge sota el pont. El jugador ja porta el prototip del rellotger, que explica l’arma anacrònica com a part de la fantasia del món. Ha de trobar Aki, recuperar el segell a la cancelleria, resistir l’emboscada de Raiga i tres infiltrats i retornar el segell al pou. Els ninjes tenen patrulles, persecució i seqüències d’atac en quatre direccions. Moren quan arriben a zero de vida i els cossos resten a terra. Les morts i la posició es conserven a la partida. Si mor l’Aki, es pot recuperar una nota i retornar igualment el segell al pou.
+La confraria arriba amb una caravana de seda i cerca el Segell de les Hores per controlar un mecanisme ocult al castell. Aki vol impedir-ho i deixa un missatge sota el pont. El jugador ja porta el prototip del rellotger, que explica l’arma anacrònica com a part de la fantasia del món. Ha de trobar Aki, recuperar el segell a la cancelleria, aturar Raiga i els 18 infiltrats hostils i retornar el segell al pou. Els ninjes tenen patrulles, persecució i seqüències d’atac en quatre direccions. Moren quan arriben a zero de vida i els cossos resten a terra. Les morts i la posició es conserven a la partida. Si mor l’Aki, es pot recuperar una nota i retornar igualment el segell al pou.
+
+Els assalts dels 19 ninjes hostils funcionen en passeig i en mode joc, després d’entrar a la vila. Aki és l’aliada número 20. Els atacants corren a 4,2 m/s, reparteixen els objectius entre habitants i monarques i responen als soldats propers. Els soldats defensen la vila amb persecució i dany real, amb un radi de resposta de 12 metres. Tots dos bàndols respecten les col·lisions, el pont, les morts persistents i les pauses per reunió o alarma de drac.

@@ -25,7 +25,7 @@ export function createNinjaUI({scene,camera,weapon,story,heightAt=()=>0,onPlay=(
   flashLeft=Math.max(0,flashLeft-dt);flash.hidden=flashLeft===0;tracer.visible=impact.visible=flashLeft>0&&playing;if(!flashLeft)$('#reticle').classList.remove('pistol-hit');
   const target=story.target(),distance=target?Math.hypot(target.x-ctx.player.x,target.z-ctx.player.z):0;
   tracker.hidden=!playing||story.completed;$('#ninjaTitle').textContent=`🌘 ${NINJA_STORY.title} · ${Math.min(story.stage+1,NINJA_STEPS.length)}/${NINJA_STEPS.length}`;
-  $('#ninjaObjective').textContent=target?`${target.title} · ${Math.ceil(distance)} m${target.combat?` · ${story.defeated}/4`:''}`:'Trama completada';$('#ninjaNotice').textContent=story.notice;
+  $('#ninjaObjective').textContent=target?`${target.title} · ${Math.ceil(distance)} m${target.combat?` · ${story.defeated}/${story.hostileCount}`:''}`:'Trama completada';$('#ninjaNotice').textContent=story.notice;
   const button=$('#ninjaInteract');button.hidden=!target||target.combat;button.disabled=!enabled()||distance>3.2;button.textContent='Interactuar · V';marker.visible=playing&&!!target;if(target)marker.position.set(target.x,heightAt(target.x,target.z)+.1,target.z);
   $('#ninjaStoryTitle').textContent=`🌘 ${NINJA_STORY.title}`;$('#ninjaStoryIntro').textContent=NINJA_STORY.intro;$('#ninjaStoryProgress').textContent=story.completed?NINJA_STORY.ending:target?.title??story.notice;
  }
